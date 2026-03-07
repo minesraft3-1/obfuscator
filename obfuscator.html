@@ -512,6 +512,171 @@
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
   }
+
+  /* ── Discord Profile Modal ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+
+  .dc-card {
+    width: 300px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #232428;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+    font-family: 'DM Sans', sans-serif;
+    position: relative;
+    animation: popIn 0.2s ease;
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+
+  .dc-banner {
+    height: 90px;
+    background: #3a3b3f;
+    position: relative;
+  }
+
+  .dc-avatar-wrap {
+    position: absolute;
+    bottom: -38px;
+    left: 16px;
+  }
+
+  .dc-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    border: 5px solid #232428;
+    object-fit: cover;
+    display: block;
+  }
+
+  .dc-status {
+    width: 16px;
+    height: 16px;
+    background: #23a55a;
+    border-radius: 50%;
+    border: 3px solid #232428;
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+  }
+
+  .dc-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    background: rgba(0,0,0,0.4);
+    border: none;
+    color: #fff;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .dc-body {
+    padding: 50px 16px 16px;
+  }
+
+  .dc-names {
+    margin-bottom: 12px;
+  }
+
+  .dc-display {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+
+  .dc-username {
+    font-size: 13px;
+    color: #b5bac1;
+    margin-top: 2px;
+  }
+
+  .dc-divider {
+    height: 1px;
+    background: #3a3b3f;
+    margin: 12px 0;
+  }
+
+  .dc-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #b5bac1;
+    margin-bottom: 8px;
+  }
+
+  .dc-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .dc-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    background: #2b2d31;
+    position: relative;
+    cursor: default;
+  }
+
+  .dc-badge:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 34px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111;
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .dc-about {
+    font-size: 13px;
+    color: #dbdee1;
+    line-height: 1.6;
+    white-space: pre-line;
+    text-align: center;
+  }
+
+  .dc-member-since {
+    font-size: 13px;
+    color: #dbdee1;
+  }
+
 </style>
 </head>
 <body>
@@ -549,7 +714,7 @@
 
     <div class="sidebar-section">
       <div class="sidebar-label">Info</div>
-      <div class="nav-item" style="cursor:default">
+      <div class="nav-item" style="cursor:pointer" onclick="showAbout()">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="8" cy="8" r="6"/>
           <path d="M8 7v4M8 5.5v.5"/>
@@ -787,7 +952,7 @@ return module`;
     document.getElementById('log-body').innerHTML = '';
   }
 
-  const API_KEY = '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';
+  const API_KEY = 'YOUR_KEY_HERE';
 
   async function runObfuscate() {
     let code = '';
@@ -799,7 +964,7 @@ return module`;
       code = await loadedFile.text();
     }
 
-    if (API_KEY === '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') {
+    if (API_KEY === 'YOUR_KEY_HERE') {
       log('error', 'No key configured. Open the HTML and replace YOUR_KEY_HERE.', 'err');
       return;
     }
@@ -899,5 +1064,49 @@ ${code}`;
     log('sys', 'Downloaded obfuscated.lua', 'ok');
   }
 </script>
+
+  <!-- Discord Profile Modal -->
+  <div class="modal-overlay" id="about-modal" onclick="closeAbout(event)">
+    <div class="dc-card">
+      <div class="dc-banner">
+        <div class="dc-avatar-wrap">
+          <img class="dc-avatar" src="https://cdn.discordapp.com/avatars/1452536108201279645/f47dee2867aa91d9c1f2406a989bbeeb.png?size=512" alt="avatar">
+          <div class="dc-status"></div>
+        </div>
+        <button class="dc-close" onclick="document.getElementById('about-modal').classList.remove('open')">✕</button>
+      </div>
+      <div class="dc-body">
+        <div class="dc-names">
+          <div class="dc-display">keoyooo</div>
+          <div class="dc-username">b9hj</div>
+        </div>
+        <div class="dc-divider"></div>
+        <div class="dc-section-label">Badges</div>
+        <div class="dc-badges">
+          <div class="dc-badge" data-tip="Bug Hunter">🐛</div>
+          <div class="dc-badge" data-tip="Active Developer">👨‍💻</div>
+          <div class="dc-badge" data-tip="Early Supporter">🏷️</div>
+          <div class="dc-badge" data-tip="Discord Admin">🛡️</div>
+        </div>
+        <div class="dc-divider"></div>
+        <div class="dc-section-label">About Me</div>
+        <div class="dc-about"> °.✽✦✽.◦✽✦✽.°
+ surely with hardship comes ease.
+ °.✽✦✽.◦✽✦✽.°</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showAbout() {
+      document.getElementById('about-modal').classList.add('open');
+    }
+    function closeAbout(e) {
+      if (e.target === document.getElementById('about-modal')) {
+        document.getElementById('about-modal').classList.remove('open');
+      }
+    }
+  </script>
+
 </body>
 </html>
