@@ -981,7 +981,7 @@ return module`;
       code = await loadedFile.text();
     }
 
-    if (API_KEY === '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') {
+    if (!API_KEY || API_KEY.trim() === '') {
       log('error', 'No key configured. Open the HTML and replace YOUR_KEY_HERE.', 'err');
       return;
     }
