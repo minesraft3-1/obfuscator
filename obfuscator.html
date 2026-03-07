@@ -605,6 +605,15 @@
     font-weight: 700;
     color: #fff;
     line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dc-nitro-crown {
+    font-size: 14px;
+    background: linear-gradient(135deg, #ff73fa, #7289da);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .dc-username {
@@ -643,9 +652,17 @@
     align-items: center;
     justify-content: center;
     font-size: 16px;
-    background: #2b2d31;
+    background: transparent;
     position: relative;
     cursor: default;
+    transition: transform 0.15s;
+  }
+  .dc-badge:hover { transform: scale(1.15); }
+  .dc-badge img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
   }
 
   .dc-badge:hover::after {
@@ -952,7 +969,7 @@ return module`;
     document.getElementById('log-body').innerHTML = '';
   }
 
-  const API_KEY = 'YOUR_KEY_HERE';
+  const API_KEY = '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';
 
   async function runObfuscate() {
     let code = '';
@@ -964,7 +981,7 @@ return module`;
       code = await loadedFile.text();
     }
 
-    if (API_KEY === 'YOUR_KEY_HERE') {
+    if (API_KEY === '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') {
       log('error', 'No key configured. Open the HTML and replace YOUR_KEY_HERE.', 'err');
       return;
     }
@@ -1077,16 +1094,17 @@ ${code}`;
       </div>
       <div class="dc-body">
         <div class="dc-names">
-          <div class="dc-display">keoyooo</div>
+          <div class="dc-display">keoyooo <span class="dc-nitro-crown">✦</span></div>
           <div class="dc-username">b9hj</div>
         </div>
         <div class="dc-divider"></div>
         <div class="dc-section-label">Badges</div>
         <div class="dc-badges">
-          <div class="dc-badge" data-tip="Bug Hunter">🐛</div>
-          <div class="dc-badge" data-tip="Active Developer">👨‍💻</div>
-          <div class="dc-badge" data-tip="Early Supporter">🏷️</div>
-          <div class="dc-badge" data-tip="Discord Admin">🛡️</div>
+          <div class="dc-badge" data-tip="Nitro"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/nitro.png" alt="Nitro"></div>
+          <div class="dc-badge" data-tip="Bug Hunter Level 2"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/bughunter_2.png" alt="Bug Hunter"></div>
+          <div class="dc-badge" data-tip="Active Developer"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/developer.png" alt="Active Developer"></div>
+          <div class="dc-badge" data-tip="Early Supporter"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/early_supporter.png" alt="Early Supporter"></div>
+          <div class="dc-badge" data-tip="Discord Staff"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/staff.png" alt="Discord Staff"></div>
         </div>
         <div class="dc-divider"></div>
         <div class="dc-section-label">About Me</div>
