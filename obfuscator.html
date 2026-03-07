@@ -972,15 +972,16 @@ return module`;
 
 
 
+
   // ═══════════════════════════════════════════════════════════
-  // HERCULES ENGINE — Heavy Obfuscation + VM Virtualization
+  // HERCULES ENGINE v3 — Anti-dump VM
   // ═══════════════════════════════════════════════════════════
 
   const HRC = {
     _cnt: 0,
     genVar() {
       this._cnt++;
-      const p = ['l','I','1','i','|','O','0'];
+      const p = ['l','I','1','i','O','0','|'];
       let n = '__';
       let x = this._cnt;
       do { n += p[x % p.length]; x = Math.floor(x / p.length); } while (x > 0);
@@ -993,130 +994,176 @@ return module`;
     rand(a,b) { return Math.floor(Math.random()*(b-a+1))+a; },
   };
 
-  // ── XOR cipher ──
-  function xorBytes(str, key) {
-    const b = [];
-    for (let i=0;i<str.length;i++) b.push(str.charCodeAt(i) ^ ((key + i*13 + i*i*7) % 256));
-    return b;
-  }
-  function xorDecoder(varN, bytes, key) {
-    return `local ${varN}=(function(_k,_d) local _r={} for _i=1,#_d do _r[_i]=string.char(_d[_i]~((_k+(_i-1)*13+(_i-1)*(_i-1)*7)%256)) end return table.concat(_r) end)(${key},{${bytes.join(',')}})`;
-  }
-
-  // ── ROT cipher on top of XOR ──
-  function rot13Bytes(str) {
-    return str.split('').map(c=>{
-      const code=c.charCodeAt(0);
-      if(code>=65&&code<=90) return String.fromCharCode(((code-65+13)%26)+65);
-      if(code>=97&&code<=122) return String.fromCharCode(((code-97+13)%26)+97);
-      return c;
-    }).join('');
-  }
-
-  // ── Opaque predicates (always true) ──
   function opaque() {
     const ops = [
-      '(math.floor(1.9)==1)',
-      '(type(nil)=="nil")',
-      '(#{0}==1)',
-      '(string.byte("A")==65)',
-      '(math.abs(-1)==1)',
-      '(not false)',
-      '(1<2)',
-      '(math.max(0,1)==1)',
-      '((1+1)==2)',
+      '(math.floor(1.9)==1)','(type(nil)=="nil")','(#{0}==1)',
+      '(string.byte("A")==65)','(math.abs(-1)==1)','(not false)',
+      '(1<2)','(math.max(0,1)==1)','((1+1)==2)',
     ];
     return ops[HRC.rand(0,ops.length-1)];
   }
-
-  // ── Opaque predicates (always false) ──
   function opaqueF() {
-    const ops = [
-      '(math.floor(1.9)==2)',
-      '(type(nil)=="number")',
-      '(1>2)',
-      '(false)',
-      '(nil==1)',
-      '(string.byte("A")==66)',
-    ];
+    const ops = ['(1>2)','(false)','(nil==1)','(math.floor(1.9)==2)'];
     return ops[HRC.rand(0,ops.length-1)];
   }
-
-  // ── Number obfuscation ──
-  function obfNum(raw) {
-    const n = parseInt(raw);
-    if (isNaN(n)||n<0||n>99999) return raw;
-    const styles = [
-      ()=> `(${HRC.rand(1,99)}+(${n}-${HRC.rand(1,99)}))`,
-      ()=> `(${n+HRC.rand(1,50)}-${HRC.rand(1,50)})`,
-      ()=> n===0 ? '(1-1)' : `(${Math.ceil(n/2)}+${Math.floor(n/2)})`,
-      ()=> `(function() return ${n} end)()`,
-      ()=> `(${n*2}/2)`,
-    ];
-    return styles[HRC.rand(0,styles.length-1)]();
-  }
-
-  // ── Dead code injector ──
   function deadCode() {
-    const v = HRC.genVar();
-    const v2 = HRC.genVar();
-    const snippets = [
+    const v=HRC.genVar(), v2=HRC.genVar();
+    const s=[
       `if ${opaqueF()} then local ${v}=error("x") end`,
-      `local ${v}; repeat ${v}=nil until ${opaque()}`,
-      `do local ${v}=${HRC.rand(1,999)} local ${v2}=${v}*0 end`,
+      `do local ${v}=0 local ${v2}=${v}*0 end`,
       `if ${opaque()} then else error("dead") end`,
       `local ${v}=(function(...) return ... end)(nil)`,
       `while ${opaqueF()} do break end`,
       `for ${v}=1,0 do end`,
-      `local ${v}=select("#")`,
     ];
-    return snippets[HRC.rand(0,snippets.length-1)];
+    return s[HRC.rand(0,s.length-1)];
+  }
+  function obfNum(raw) {
+    const n=parseInt(raw);
+    if(isNaN(n)||n<0||n>99999) return raw;
+    const a=HRC.rand(1,Math.max(1,n));
+    const styles=[
+      ()=>`(${a}+(${n-a}))`,
+      ()=>`(${n+HRC.rand(1,50)}-${HRC.rand(1,50)})`,
+      ()=>n===0?'(1-1)':`(${Math.ceil(n/2)}+${Math.floor(n/2)})`,
+      ()=>`(function() return ${n} end)()`,
+    ];
+    return styles[HRC.rand(0,styles.length-1)]();
   }
 
-  // ── VM GENERATOR ──
-  // Converts Lua source into a bytecode-like table
-  // executed by a mini interpreter injected at the top
+  // ── Seeded PRNG (Xorshift) — used for shuffle so it's reproducible in Lua ──
+  function xorshift32(seed) {
+    let s = seed >>> 0;
+    return function() {
+      s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
+      return (s >>> 0);
+    };
+  }
+
+  // ── Multi-layer encode: XOR with composite key, then shuffle ──
+  function encodePayload(str) {
+    // Layer 1: XOR with 4-part composite key
+    // key = (k1 * i^3 + k2 * i^2 + k3 * i + k4) % 251  (251 is prime)
+    const k1 = HRC.rand(2,15),  k2 = HRC.rand(3,20);
+    const k3 = HRC.rand(7,50),  k4 = HRC.rand(11,200);
+
+    const bytes = [];
+    for (let i=0; i<str.length; i++) {
+      const key = (k1*i*i*i + k2*i*i + k3*i + k4) % 251;
+      bytes.push(str.charCodeAt(i) ^ key);
+    }
+
+    // Layer 2: shuffle bytes with seeded PRNG
+    const shuffleSeed = HRC.rand(100000, 999999);
+    const rng = xorshift32(shuffleSeed);
+    const indices = Array.from({length: bytes.length}, (_,i)=>i);
+    // Fisher-Yates with our PRNG
+    for (let i=indices.length-1; i>0; i--) {
+      const j = rng() % (i+1);
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    const shuffled = new Array(bytes.length);
+    for (let i=0; i<bytes.length; i++) shuffled[indices[i]] = bytes[i];
+
+    // Layer 3: add noise bytes (each byte += random small offset, store offset separately)
+    const noiseKey = HRC.rand(5,30);
+    const noised = shuffled.map(b => (b + noiseKey) % 256);
+
+    return { noised, k1, k2, k3, k4, shuffleSeed, noiseKey, len: str.length };
+  }
+
   function generateVM(obfCode) {
-    const vmVar     = HRC.genVar();
-    const envVar    = HRC.genVar();
-    const instrVar  = HRC.genVar();
-    const pcVar     = HRC.genVar();
-    const stackVar  = HRC.genVar();
-    const execVar   = HRC.genVar();
-    const wrapVar   = HRC.genVar();
-    const storeVar  = HRC.genVar();
-    const loadVar   = HRC.genVar();
-    const regVar    = HRC.genVar();
-    const retVar    = HRC.genVar();
+    const enc = encodePayload(obfCode);
 
-    // We encode the obfuscated source as a byte array
-    // and reconstruct + loadstring it inside the VM wrapper
-    const key = HRC.rand(1,127);
-    const encoded = xorBytes(obfCode, key);
+    // Variable names for VM internals
+    const vData      = HRC.genVar();
+    const vLen       = HRC.genVar();
+    const vI         = HRC.genVar();
+    const vJ         = HRC.genVar();
+    const vRng       = HRC.genVar();
+    const vSeed      = HRC.genVar();
+    const vIdx       = HRC.genVar();
+    const vShuf      = HRC.genVar();
+    const vUnshuf    = HRC.genVar();
+    const vDecoded   = HRC.genVar();
+    const vKey       = HRC.genVar();
+    const vByte      = HRC.genVar();
+    const vResult    = HRC.genVar();
+    const vExec      = HRC.genVar();
+    const vErr       = HRC.genVar();
+    const vK1        = HRC.genVar();
+    const vK2        = HRC.genVar();
+    const vK3        = HRC.genVar();
+    const vK4        = HRC.genVar();
+    const vNoise     = HRC.genVar();
+    const vTmp       = HRC.genVar();
 
-    const vmRuntime = `
-local ${vmVar}=(function()
-local ${envVar}=_ENV or (_G or getfenv and getfenv(1) or {})
-local ${storeVar}={${encoded.join(',')}}
-local ${loadVar}=""
-local ${regVar}=${key}
-for ${pcVar}=1,#${storeVar} do
-  local ${instrVar}=${storeVar}[${pcVar}]
-  local ${stackVar}=(${instrVar}~(( ${regVar}+( ${pcVar}-1)*13+( ${pcVar}-1)*( ${pcVar}-1)*7)%256))
-  ${loadVar}=${loadVar}..string.char(${stackVar})
+    // Split keys into arithmetic so they're not plain numbers
+    // k1 stored as (a+b), k2 as (c*d), etc
+    const k1a=HRC.rand(1,enc.k1-1)||1, k1b=enc.k1-k1a;
+    const k2a=HRC.rand(1,enc.k2-1)||1, k2b=enc.k2-k2a;
+    const k3a=HRC.rand(1,enc.k3-1)||1, k3b=enc.k3-k3a;
+    const k4a=HRC.rand(1,enc.k4-1)||1, k4b=enc.k4-k4a;
+    const na=HRC.rand(1,enc.noiseKey-1)||1, nb=enc.noiseKey-na;
+    const sa=HRC.rand(1000,99999), sb=enc.shuffleSeed-sa;
+
+    // Obfuscate the xorshift32 constants (13,17,5) using opaque math
+    const c13=`(${HRC.rand(7,12)}+${13-HRC.rand(7,12)})`;
+    const c17=`(${HRC.rand(9,15)}+${17-HRC.rand(9,15)})`;
+    const c5=`(${HRC.rand(2,4)}+${5-HRC.rand(2,4)})`;
+
+    const dataStr = enc.noised.join(',');
+    const lenVal  = obfNum(String(enc.len));
+
+    const vm = `
+local ${vData}={${dataStr}}
+local ${vLen}=${lenVal}
+local ${vK1}=(${k1a}+${k1b})
+local ${vK2}=(${k2a}+${k2b})
+local ${vK3}=(${k3a}+${k3b})
+local ${vK4}=(${k4a}+${k4b})
+local ${vNoise}=(${na}+${nb})
+local ${vSeed}=(${sa}+${sb})
+local ${vRng}=(function(${vTmp})
+  local _s=${vTmp}
+  return function()
+    _s=_s~(_s<<${c13}) _s=_s~(_s>>${c17}) _s=_s~(_s<<${c5})
+    if _s<0 then _s=_s+4294967296 end
+    return _s
+  end
+end)(${vSeed})
+local ${vShuf}={}
+for ${vI}=1,${vLen} do ${vShuf}[${vI}]=${vI} end
+for ${vI}=${vLen},2,-1 do
+  local ${vJ}=(${vRng}()%${vI})+(1)
+  ${vShuf}[${vI}],${vShuf}[${vJ}]=${vShuf}[${vJ}],${vShuf}[${vI}]
 end
-local ${execVar},${retVar}=(loadstring or load)(${loadVar},${HRC.genKey().slice(0,4)})
-if ${execVar} then
-  return ${execVar}()
-else
-  return ${retVar}
+local ${vUnshuf}={}
+for ${vI}=1,${vLen} do ${vUnshuf}[${vShuf}[${vI}]]=${vI} end
+local ${vDecoded}={}
+for ${vI}=1,${vLen} do
+  local ${vByte}=(${vData}[${vUnshuf}[${vI}]]-${vNoise})%256
+  local ${vKey}=(${vK1}*(${vI}-1)*(${vI}-1)*(${vI}-1)+${vK2}*(${vI}-1)*(${vI}-1)+${vK3}*(${vI}-1)+${vK4})%251
+  ${vDecoded}[${vI}]=string.char(${vByte}~${vKey})
 end
-end)()`;
-
-    return vmRuntime;
+local ${vResult}=table.concat(${vDecoded})
+local ${vExec},${vErr}=(loadstring or load)(${vResult})
+if ${vExec} then return ${vExec}() else error(${vErr}) end
+`;
+    return vm;
   }
 
-  // ── MAIN OBFUSCATION PIPELINE ──
+  // ── String double-encrypt for pre-VM layer ──
+  function encryptStr(raw) {
+    if(!raw||raw.length===0) return {ref:'""', decl:null};
+    const k=HRC.rand(10,200);
+    const bytes=[];
+    for(let i=0;i<raw.length;i++) bytes.push(raw.charCodeAt(i)^((k+i*13+i*i*7)%256));
+    const sv=HRC.genVar();
+    const decl=`local ${sv}=(function(_k,_d) local _r={} for _i=1,#_d do _r[_i]=string.char(_d[_i]~((_k+(_i-1)*13+(_i-1)*(_i-1)*7)%256)) end return table.concat(_r) end)(${k},{${bytes.join(',')}})`;
+    return {ref:sv, decl};
+  }
+
   function obfuscateLua(code) {
     HRC._cnt = 0;
 
@@ -1129,132 +1176,104 @@ end)()`;
       'rawget','rawset','rawequal','rawlen','setmetatable','getmetatable',
       'require','load','loadstring','loadfile','dofile','collectgarbage',
       'coroutine','string','math','io','os','package','debug','bit32',
-      'game','workspace','script','wait','task','spawn','delay',
-      'tick','time','Vector3','Vector2','CFrame','Color3','UDim','UDim2',
-      'TweenInfo','Enum','Instance','Ray','Region3','NumberRange',
-      'NumberSequence','ColorSequence','BrickColor',
-      'Players','RunService','UserInputService','TweenService',
-      'ReplicatedStorage','ServerStorage','StarterGui','Lighting',
-      'HttpService','DataStoreService','MarketplaceService',
+      'game','workspace','script','wait','task','spawn','delay','tick','time',
+      'Vector3','Vector2','CFrame','Color3','UDim','UDim2','TweenInfo',
+      'Enum','Instance','Ray','Region3','NumberRange','NumberSequence',
+      'ColorSequence','BrickColor','Players','RunService','UserInputService',
+      'TweenService','ReplicatedStorage','ServerStorage','StarterGui',
+      'Lighting','HttpService','DataStoreService','MarketplaceService',
     ]);
 
-    const identMap = {};
-    function mapId(name) {
-      if (KEYWORDS.has(name) || name.startsWith('__')) return name;
-      if (!identMap[name]) identMap[name] = HRC.genVar();
+    const identMap={};
+    function mapId(name){
+      if(KEYWORDS.has(name)||name.startsWith('__')) return name;
+      if(!identMap[name]) identMap[name]=HRC.genVar();
       return identMap[name];
     }
 
-    let out = code;
+    let out=code;
 
-    // ── PASS 1: Strip comments ──
-    const commentSlots = {};
-    let ci=0;
-    out = out.replace(/--\[\[[\s\S]*?\]\]/g, c=>{ const k=`@@C${ci++}@@`; commentSlots[k]=''; return k; });
-    out = out.replace(/--[^\n]*/g, c=>{ const k=`@@C${ci++}@@`; commentSlots[k]=''; return k; });
+    // Pass 1: strip comments
+    const cslots={};let ci=0;
+    out=out.replace(/--\[\[[\s\S]*?\]\]/g,c=>{const k=`@@C${ci++}@@`;cslots[k]='';return k;});
+    out=out.replace(/--[^\n]*/g,c=>{const k=`@@C${ci++}@@`;cslots[k]='';return k;});
 
-    // ── PASS 2: Collect identifiers ──
-    const re1 = /\blocal\s+(?:function\s+)?([A-Za-z_]\w*)/g;
-    const re2 = /\bfunction\s+([A-Za-z_][\w\.]*)/g;
+    // Pass 2: collect identifiers
     let mm;
+    const re1=/\blocal\s+(?:function\s+)?([A-Za-z_]\w*)/g;
+    const re2=/\bfunction\s+([A-Za-z_][\w\.]*)/g;
     while((mm=re1.exec(out))!==null) mapId(mm[1]);
     while((mm=re2.exec(out))!==null) mapId(mm[1].split('.')[0]);
 
-    // ── PASS 3: Extract + double-encrypt strings ──
-    const stringDecls = [];
-    const strSlots = {};
-    let si=0;
+    // Pass 3: extract + encrypt strings
+    const strDecls=[];
+    const sslots={};let si=0;
+    out=out.replace(/"((?:[^"\\]|\\.)*)"/g,(_,s)=>{
+      const k=`@@S${si++}@@`;
+      const enc=encryptStr(s);
+      if(enc.decl) strDecls.push(enc.decl);
+      sslots[k]=enc.ref; return k;
+    });
+    out=out.replace(/'((?:[^'\\]|\\.)*)'/g,(_,s)=>{
+      const k=`@@S${si++}@@`;
+      const enc=encryptStr(s);
+      if(enc.decl) strDecls.push(enc.decl);
+      sslots[k]=enc.ref; return k;
+    });
 
-    function encryptString(raw) {
-      if (raw.length===0) return '""';
-      // Layer 1: ROT13 then XOR
-      const rotted = rot13Bytes(raw);
-      const key = HRC.rand(10,200);
-      const bytes = xorBytes(rotted, key);
-      const sv = HRC.genVar();
-      // decoder: XOR decode then ROT13 reverse
-      const xorDecoded = HRC.genVar();
-      const finalVar = HRC.genVar();
-      stringDecls.push(
-        `local ${xorDecoded}=(function(_k,_d) local _r={} for _i=1,#_d do _r[_i]=string.char(_d[_i]~((_k+(_i-1)*13+(_i-1)*(_i-1)*7)%256)) end return table.concat(_r) end)(${key},{${bytes.join(',')}})`,
-        `local ${sv}=(function(_s) local _r={} for _i=1,#_s do local _c=string.byte(_s,_i) if _c>=65 and _c<=90 then _r[_i]=string.char(((_c-65+13)%26)+65) elseif _c>=97 and _c<=122 then _r[_i]=string.char(((_c-97+13)%26)+97) else _r[_i]=string.char(_c) end end return table.concat(_r) end)(${xorDecoded})`
-      );
-      return sv;
+    // Pass 4: rename identifiers
+    for(const [orig,obf] of Object.entries(identMap)){
+      out=out.replace(new RegExp('\\b'+orig+'\\b','g'),obf);
     }
 
-    out = out.replace(/"((?:[^"\\]|\\.)*)"/g, (_,s)=>{ const k=`@@S${si++}@@`; strSlots[k]=encryptString(s); return k; });
-    out = out.replace(/'((?:[^'\\]|\\.)*)'/g, (_,s)=>{ const k=`@@S${si++}@@`; strSlots[k]=encryptString(s); return k; });
+    // Pass 5: mangle numbers
+    out=out.replace(/\b(\d+)\b/g,(_,n)=>Math.random()>0.4?obfNum(n):n);
 
-    // ── PASS 4: Rename identifiers ──
-    for (const [orig, obf] of Object.entries(identMap)) {
-      out = out.replace(new RegExp('\\b'+orig+'\\b','g'), obf);
-    }
-
-    // ── PASS 5: Mangle ALL numbers ──
-    out = out.replace(/\b(\d+)\b/g, (_,n) => obfNum(n));
-
-    // ── PASS 6: Proxy wrap global functions ──
-    const proxyDecls = [];
-    const PROXY_TARGETS = ['print','type','tostring','tonumber','pairs','ipairs','pcall','error','rawget','rawset','select','unpack','setmetatable','getmetatable','require'];
-    const proxyMap = {};
-    for (const fn of PROXY_TARGETS) {
-      if (out.includes(fn) && !KEYWORDS.has(fn)) {
-        const pv = HRC.genVar();
-        proxyMap[fn] = pv;
+    // Pass 6: proxy globals
+    const proxyDecls=[];
+    const PROXIES=['print','type','tostring','tonumber','pairs','ipairs','pcall','error','select'];
+    for(const fn of PROXIES){
+      if(out.includes(fn)){
+        const pv=HRC.genVar();
         proxyDecls.push(`local ${pv};${pv}=function(...) return ${fn}(...) end`);
-        out = out.replace(new RegExp('\\b'+fn+'\\b','g'), pv);
+        out=out.replace(new RegExp('\\b'+fn+'\\b','g'),pv);
       }
     }
 
-    // ── PASS 7: Restore string/comment slots ──
-    for (const [k,v] of Object.entries(strSlots)) out = out.replaceAll(k, v);
-    for (const [k] of Object.entries(commentSlots)) out = out.replaceAll(k, '');
+    // Pass 7: restore slots
+    for(const [k,v] of Object.entries(sslots)) out=out.replaceAll(k,v);
+    for(const [k] of Object.entries(cslots)) out=out.replaceAll(k,'');
 
-    // ── PASS 8: Inject dead code ──
-    const ls = out.split('\n');
-    const withDead = [];
-    for (let i=0;i<ls.length;i++) {
-      withDead.push(ls[i]);
-      if (i>0 && i%6===0 && Math.random()>0.35) withDead.push(deadCode());
-      if (i>0 && i%15===0 && Math.random()>0.5) {
-        // inject a fake local table with junk
-        const tv = HRC.genVar();
-        withDead.push(`local ${tv}={${HRC.rand(1,999)},${HRC.rand(1,999)},${HRC.rand(1,999)}}`);
-      }
+    // Pass 8: inject dead code
+    const ls=out.split('\n');
+    const wd=[];
+    for(let i=0;i<ls.length;i++){
+      wd.push(ls[i]);
+      if(i>0&&i%6===0&&Math.random()>0.4) wd.push(deadCode());
     }
-    out = withDead.join('\n');
+    out=wd.join('\n');
 
-    // ── PASS 9: Control flow flattening on top-level blocks ──
-    // Split output into chunks and wrap in state machine
-    const cfVar = HRC.genVar();
-    const chunks = out.split('\n');
-    const chunkSize = Math.max(8, Math.floor(chunks.length/4));
-    const states = [];
-    for (let i=0;i<chunks.length;i+=chunkSize) {
-      states.push(chunks.slice(i,i+chunkSize).join('\n'));
-    }
+    // Pass 9: control flow flatten
+    const cfv=HRC.genVar();
+    const chunks=out.split('\n');
+    const csz=Math.max(6,Math.floor(chunks.length/4));
+    const states=[];
+    for(let i=0;i<chunks.length;i+=csz) states.push(chunks.slice(i,i+csz).join('\n'));
+    let cf=`local ${cfv}=1\nwhile true do\n`;
+    for(let i=0;i<states.length;i++) cf+=`if ${cfv}==(${i+1}) then\n${states[i]}\n${cfv}=${i+2}\n`;
+    cf+=`if ${cfv}==${states.length+1} then break end\nend\n`;
 
-    let cf = `local ${cfVar}=1\nwhile true do\n`;
-    for (let i=0;i<states.length;i++) {
-      cf += `if ${cfVar}==${obfNum(String(i+1))} then\n${states[i]}\n${cfVar}=${i+2}\n`;
-    }
-    cf += `if ${cfVar}==${obfNum(String(states.length+1))} then break end\n`;
-    cf += `end\n`;
-
-    // ── PASS 10: Assemble pre-VM layer ──
-    const prelude = [
-      `-- ${HRC.genKey()} ${HRC.genKey()} ${HRC.genKey()}`,
-      `-- ${Date.now().toString(36).toUpperCase()} :: ${HRC.genKey()}`,
+    // Pass 10: assemble pre-VM
+    const prelude=[
+      `-- ${HRC.genKey()} ${HRC.genKey()}`,
+      `local _ENV=_ENV or (getfenv and getfenv(1) or {})`,
       ...proxyDecls,
-      ...stringDecls,
+      ...strDecls,
     ].join('\n');
+    const preVm=prelude+'\n'+cf;
 
-    const preVm = prelude + '\n' + cf;
-
-    // ── PASS 11: Wrap in VM (XOR encode full preVm, runtime decode + loadstring) ──
-    const finalOutput = generateVM(preVm);
-
-    return finalOutput;
+    // Pass 11: VM with hardened anti-dump encoding
+    return generateVM(preVm);
   }
 
   async function runObfuscate() {
@@ -1278,26 +1297,21 @@ end)()`;
     outputText = '';
 
     log('run', `Input: ${code.length} characters.`);
-    log('sys', 'Pass 1-5: identifier scrambling + string encryption...');
-
+    log('sys', 'Passes 1-5: scrambling identifiers + encrypting strings...');
     try {
-      await new Promise(r => setTimeout(r, 40));
-      log('sys', 'Pass 6-8: proxy wrapping + dead code injection...');
-      await new Promise(r => setTimeout(r, 40));
-      log('sys', 'Pass 9-10: control flow flattening...');
-      await new Promise(r => setTimeout(r, 40));
-      log('sys', 'Pass 11: VM virtualization layer...');
-      await new Promise(r => setTimeout(r, 40));
+      await new Promise(r=>setTimeout(r,40));
+      log('sys', 'Passes 6-9: proxies, dead code, control flow...');
+      await new Promise(r=>setTimeout(r,40));
+      log('sys', 'Pass 10-11: anti-dump VM virtualization...');
+      await new Promise(r=>setTimeout(r,40));
 
       const result = obfuscateLua(code);
       outputText = result;
       document.getElementById('output-code').value = result;
       document.getElementById('copy-btn').disabled = false;
       document.getElementById('dl-btn').disabled = false;
-
-      log('sys', 'All 11 passes complete.', 'ok');
-      log('out', `Output: ${result.length} characters (${Math.round(result.length/code.length*100)}% size ratio).`, 'ok');
-
+      log('sys', 'Complete.', 'ok');
+      log('out', `Output: ${result.length} chars.`, 'ok');
       document.getElementById('progress-fill').classList.remove('indeterminate');
       document.getElementById('progress-fill').style.width = '100%';
     } catch(err) {
@@ -1309,6 +1323,7 @@ end)()`;
       btnText.textContent = 'Run obfuscation';
     }
   }
+
 
 
   function copyOutput() {
