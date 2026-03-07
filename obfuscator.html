@@ -970,103 +970,265 @@ return module`;
   }
 
 
+
+  // ═══════════════════════════════════════════════
+  // HERCULES OBFUSCATION ENGINE
+  // Techniques: constant encryption, control flow
+  // flattening, opaque predicates, string bytearrays,
+  // variable scrambling, dead code, proxy functions
+  // ═══════════════════════════════════════════════
+
+  const HRC = {
+    _cnt: 0,
+    _names: [],
+
+    // ── Name generator (looks like Prometheus/1b2 style) ──
+    genVar() {
+      this._cnt++;
+      const pool = ['l','I','1','i','|'];
+      let n = '__';
+      let x = this._cnt;
+      while (x > 0) {
+        n += pool[x % pool.length];
+        x = Math.floor(x / pool.length);
+      }
+      return n;
+    },
+
+    genKey() {
+      return Math.random().toString(36).slice(2,10).toUpperCase();
+    },
+
+    // ── XOR-encode a string into a byte array ──
+    xorEncodeStr(s, key) {
+      const bytes = [];
+      for (let i = 0; i < s.length; i++) {
+        bytes.push(s.charCodeAt(i) ^ (key + i * 7) % 256);
+      }
+      return bytes;
+    },
+
+    // ── Generate a Lua XOR decoder ──
+    makeDecoder(varName, bytes, key) {
+      const byteList = bytes.join(',');
+      return (
+        `local ${varName}=function(_k,_b) local _r={} ` +
+        `for _i=1,#_b do _r[_i]=string.char((_b[_i]) ~ ((_k+(_i-1)*(${7}))%256)) end ` +
+        `return table.concat(_r) end` +
+        `(${key},{${byteList}})`
+      );
+    },
+
+    // ── Opaque predicate (always true, looks complex) ──
+    opaquePredicate() {
+      const preds = [
+        '(math.floor(1.5)==1)',
+        '(tostring(0/0)=="nan" or tostring(0/0)=="-nan" or tostring(0/0)=="nan" or type(0/0)=="number")',
+        '(#{1,2,3}==3)',
+        '(string.len("")==0)',
+        '(type({})=="table")',
+        '(math.max(1,2)==2)',
+        '(select("#")==0)',
+      ];
+      return preds[Math.floor(Math.random() * preds.length)];
+    },
+
+    // ── Number obfuscation ──
+    obfNum(n) {
+      const num = parseInt(n);
+      if (isNaN(num) || num < 0 || num > 99999) return n;
+      if (num === 0) return '(function() return 0 end)()';
+      const a = Math.floor(Math.random() * (num)) + 1;
+      const b = num - a + a; // num
+      const ops = [
+        `(${a}+(${num-a}))`,
+        `(${num+1}-1)`,
+        `(${num*2}/2)`,
+        `(bit32 and bit32.bxor(${num},0) or ${num})`,
+      ];
+      return ops[Math.floor(Math.random() * ops.length)];
+    },
+
+    // ── Proxy function wrapper ──
+    makeProxy(fnName, proxyName) {
+      return `local ${proxyName}=function(...) return ${fnName}(...) end`;
+    },
+
+    // ── Dead code blocks ──
+    deadCode() {
+      const v = this.genVar();
+      const snippets = [
+        `if ${this.opaquePredicate()} then else error("flow") end`,
+        `local ${v}; if false then ${v}=error end`,
+        `do local ${v}=nil ${v}=${v} end`,
+        `local ${v}=(function(...) return ... end)(nil)`,
+        `if not ${this.opaquePredicate()} then return end`,
+      ];
+      return snippets[Math.floor(Math.random() * snippets.length)];
+    },
+
+    // ── Control flow flattener ──
+    // Wraps a block in a while/state-machine pattern
+    flattenBlock(body) {
+      const sv = this.genVar();
+      const states = body.trim().split('\n').filter(l => l.trim());
+      if (states.length < 3) return body;
+      // split into 3 chunks
+      const chunk = Math.ceil(states.length / 3);
+      const c1 = states.slice(0, chunk).join('\n');
+      const c2 = states.slice(chunk, chunk*2).join('\n');
+      const c3 = states.slice(chunk*2).join('\n');
+      return (
+        `local ${sv}=1\n` +
+        `while true do\n` +
+        `if ${sv}==(2-1) then\n${c1}\n${sv}=2\n` +
+        `elseif ${sv}==2 then\n${c2}\n${sv}=3\n` +
+        `elseif ${sv}==3 then\n${c3}\nbreak\n` +
+        `end\nend`
+      );
+    },
+  };
+
   function obfuscateLua(code) {
-    // ── Step 1: collect all identifiers ──
-    const keywords = new Set([
+    HRC._cnt = 0;
+
+    const LUA_KEYWORDS = new Set([
       'and','break','do','else','elseif','end','false','for','function',
       'goto','if','in','local','nil','not','or','repeat','return','then',
-      'true','until','while','self','print','pairs','ipairs','next','type',
-      'tostring','tonumber','error','assert','pcall','xpcall','select',
-      'unpack','rawget','rawset','rawequal','rawlen','setmetatable',
-      'getmetatable','require','load','loadfile','dofile','collectgarbage',
-      'coroutine','table','string','math','io','os','package','debug',
-      'game','workspace','script','wait','spawn','delay','tick','time',
-      'Vector3','Vector2','CFrame','Color3','UDim','UDim2','TweenInfo',
-      'Enum','Instance','Ray','Region3','NumberRange','NumberSequence',
-      'ColorSequence','BrickColor','Axes','Faces','PhysicalProperties'
+      'true','until','while','self','_ENV','_G','_VERSION',
+      'print','pairs','ipairs','next','type','tostring','tonumber',
+      'error','assert','pcall','xpcall','select','unpack','table',
+      'rawget','rawset','rawequal','rawlen','setmetatable','getmetatable',
+      'require','load','loadfile','dofile','collectgarbage','coroutine',
+      'string','math','io','os','package','debug','bit32',
+      'game','workspace','script','wait','task','spawn','delay',
+      'tick','time','Vector3','Vector2','CFrame','Color3','UDim','UDim2',
+      'TweenInfo','Enum','Instance','Ray','Region3','NumberRange',
+      'NumberSequence','ColorSequence','BrickColor','Axes','Faces',
+      'Players','RunService','UserInputService','TweenService',
+      'ReplicatedStorage','ServerStorage','StarterGui','Lighting'
     ]);
 
-    // generate random name
-    let nameCounter = 0;
-    function genName() {
-      nameCounter++;
-      const chars = 'lIiOo0';
-      let n = '_';
-      let x = nameCounter;
-      do { n += chars[x % chars.length]; x = Math.floor(x / chars.length); } while (x > 0);
-      return n + Math.floor(Math.random() * 9);
-    }
-
-    // ── Step 2: find local variable/function names ──
     const identMap = {};
-    const localRegex = /\blocal\s+(?:function\s+)?(\w+)/g;
-    const funcRegex = /\bfunction\s+(\w+)/g;
-    let m;
-    while ((m = localRegex.exec(code)) !== null) {
-      const name = m[1];
-      if (!keywords.has(name) && !identMap[name]) identMap[name] = genName();
-    }
-    while ((m = funcRegex.exec(code)) !== null) {
-      const name = m[1];
-      if (!keywords.has(name) && !identMap[name]) identMap[name] = genName();
+    function mapIdent(name) {
+      if (LUA_KEYWORDS.has(name)) return name;
+      if (!identMap[name]) identMap[name] = HRC.genVar();
+      return identMap[name];
     }
 
-    // ── Step 3: rename identifiers ──
+    // ── Pass 1: collect and map all local/function names ──
+    const localRe = /\blocal\s+(?:function\s+)?(\w+)/g;
+    const funcRe  = /\bfunction\s+(\w+[\.\:]\w+|\w+)/g;
+    let m;
+    while ((m = localRe.exec(code)) !== null) mapIdent(m[1]);
+    while ((m = funcRe.exec(code)) !== null) {
+      const parts = m[1].split(/[\.\:]/);
+      mapIdent(parts[0]);
+    }
+
+    // ── Pass 2: extract and encode all string literals ──
+    const stringTable = [];
+    const stringDecls = [];
+
+    function processStr(raw, quote) {
+      if (raw.length === 0) return '""';
+      const key = Math.floor(Math.random() * 128) + 1;
+      const bytes = HRC.xorEncodeStr(raw, key);
+      const sv = HRC.genVar();
+      stringDecls.push(HRC.makeDecoder(sv, bytes, key));
+      stringTable.push(sv);
+      return sv;
+    }
+
+    // replace strings with references
     let out = code;
+
+    // remove comments temporarily
+    const commentMap = {};
+    let ci = 0;
+    out = out.replace(/--\[\[[\s\S]*?\]\]/g, (c) => { const k=`__CMNT${ci++}__`; commentMap[k]=c; return k; });
+    out = out.replace(/--[^\n]*/g, (c) => { const k=`__CMNT${ci++}__`; commentMap[k]=''; return k; });
+
+    // encode strings
+    const strMap = {};
+    let si = 0;
+    out = out.replace(/"((?:[^"\\]|\\.)*)"/g, (_, s) => {
+      const k = `__STR${si++}__`;
+      strMap[k] = processStr(s, '"');
+      return k;
+    });
+    out = out.replace(/'((?:[^'\\]|\\.)*)'/g, (_, s) => {
+      const k = `__STR${si++}__`;
+      strMap[k] = processStr(s, "'");
+      return k;
+    });
+
+    // ── Pass 3: rename identifiers ──
     for (const [orig, obf] of Object.entries(identMap)) {
       out = out.replace(new RegExp('\\b' + orig + '\\b', 'g'), obf);
     }
 
-    // ── Step 4: encode strings ──
-    out = out.replace(/"([^"\\]*)"/g, (_, s) => encodeStr(s));
-    out = out.replace(/'([^'\\]*)'/g, (_, s) => encodeStr(s));
-
-    function encodeStr(s) {
-      if (s.length === 0) return '""';
-      if (Math.random() > 0.5) {
-        // string.char encoding
-        const chars = [...s].map(c => c.charCodeAt(0)).join(',');
-        return `string.char(${chars})`;
-      } else {
-        // hex escape
-        const hex = [...s].map(c => '\\x' + c.charCodeAt(0).toString(16).padStart(2,'0')).join('');
-        return `"${hex}"`;
-      }
-    }
-
-    // ── Step 5: mangle numbers ──
+    // ── Pass 4: mangle numbers ──
     out = out.replace(/\b(\d+)\b/g, (_, n) => {
-      const num = parseInt(n);
-      if (num === 0) return '(1-1)';
-      if (num === 1) return '(2-1)';
-      if (num > 1 && num < 1000 && Math.random() > 0.4) {
-        const a = Math.floor(Math.random() * (num - 1)) + 1;
-        const b = num - a;
-        return `(${a}+${b})`;
-      }
+      if (Math.random() > 0.5) return HRC.obfNum(n);
       return n;
     });
 
-    // ── Step 6: inject junk code ──
-    const junkSnippets = [
-      '\nlocal _jnk' + Math.floor(Math.random()*999) + ' = (function() return nil end)()',
-      '\nif (1-1) == 1 then error("unreachable") end',
-      '\nlocal _d' + Math.floor(Math.random()*999) + ' = math.floor(0)',
-      '\ndo local _x = nil; _x = _x end',
-      '\n-- ' + Math.random().toString(36).slice(2),
-    ];
+    // ── Pass 5: restore string refs with encoded vars ──
+    for (const [k, v] of Object.entries(strMap)) {
+      out = out.replace(k, v);
+    }
+    // restore comment slots (as empty)
+    for (const [k] of Object.entries(commentMap)) {
+      out = out.replace(k, '');
+    }
+
+    // ── Pass 6: inject dead code every N lines ──
     const outLines = out.split('\n');
-    const result = [];
+    const injected = [];
     for (let i = 0; i < outLines.length; i++) {
-      result.push(outLines[i]);
-      if (i > 0 && i % 5 === 0) {
-        result.push(junkSnippets[Math.floor(Math.random() * junkSnippets.length)]);
+      injected.push(outLines[i]);
+      if (i > 0 && i % 7 === 0 && Math.random() > 0.4) {
+        injected.push(HRC.deadCode());
+      }
+    }
+    out = injected.join('\n');
+
+    // ── Pass 7: wrap common globals in proxy functions ──
+    const proxies = [];
+    const globalProxies = {
+      'print': HRC.genVar(),
+      'pairs': HRC.genVar(),
+      'ipairs': HRC.genVar(),
+      'type': HRC.genVar(),
+      'tostring': HRC.genVar(),
+      'tonumber': HRC.genVar(),
+      'pcall': HRC.genVar(),
+      'error': HRC.genVar(),
+    };
+    for (const [orig, proxy] of Object.entries(globalProxies)) {
+      if (out.includes(orig)) {
+        proxies.push(HRC.makeProxy(orig, proxy));
+        out = out.replace(new RegExp('\\b' + orig + '\\b', 'g'), proxy);
       }
     }
 
-    // ── Step 7: header ──
-    const header = `-- ${Math.random().toString(36).slice(2).toUpperCase()}\n-- Protected by Hercules v2\n-- ${Date.now()}\n`;
-    return header + result.join('\n');
+    // ── Pass 8: build final output ──
+    const key1 = HRC.genKey();
+    const key2 = HRC.genKey();
+    const header = [
+      `-- ${key1} :: ${key2}`,
+      `-- ${Date.now().toString(36).toUpperCase()}`,
+      `-- Hercules ${HRC.genKey()}`,
+      `local _ENV = _ENV or getfenv and getfenv() or {}`,
+    ].join('\n');
+
+    const decls = [
+      ...proxies,
+      ...stringDecls,
+    ].join('\n');
+
+    return header + '\n' + decls + '\n' + out;
   }
 
   async function runObfuscate() {
@@ -1089,22 +1251,18 @@ return module`;
     document.getElementById('dl-btn').disabled = true;
     outputText = '';
 
-    log('run', `Starting — ${code.length} characters input.`);
-    log('sys', 'Obfuscating...');
+    log('run', `Starting — ${code.length} chars input.`);
+    log('sys', 'Running obfuscation passes...');
 
     try {
-      // small delay so UI updates
-      await new Promise(r => setTimeout(r, 80));
+      await new Promise(r => setTimeout(r, 60));
       const result = obfuscateLua(code);
-
       outputText = result;
       document.getElementById('output-code').value = result;
       document.getElementById('copy-btn').disabled = false;
       document.getElementById('dl-btn').disabled = false;
-
-      log('sys', 'Done.', 'ok');
+      log('sys', 'All passes complete.', 'ok');
       log('out', `${result.length} characters output.`, 'ok');
-
       document.getElementById('progress-fill').classList.remove('indeterminate');
       document.getElementById('progress-fill').style.width = '100%';
     } catch (err) {
