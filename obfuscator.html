@@ -7,776 +7,192 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:       #0a0b0d;
-    --bg2:      #0f1114;
-    --bg3:      #141619;
-    --bg4:      #1a1d21;
-    --bg5:      #20242a;
-    --border:   #1e2228;
-    --border2:  #272c34;
-    --accent:   #e8ff47;
-    --accent2:  #c8df30;
-    --accent-dim: rgba(232,255,71,0.08);
-    --accent-glow: rgba(232,255,71,0.15);
-    --text:     #c8cdd6;
-    --text2:    #6b7280;
-    --text3:    #343840;
-    --success:  #4ade80;
-    --error:    #f87171;
-    --warn:     #fbbf24;
-    --white:    #f0f2f5;
+    --bg:#0a0b0d;--bg2:#0f1114;--bg3:#141619;--bg4:#1a1d21;
+    --border:#1e2228;--border2:#272c34;
+    --accent:#e8ff47;--accent2:#c8df30;
+    --accent-dim:rgba(232,255,71,0.07);--accent-glow:rgba(232,255,71,0.14);
+    --text:#c8cdd6;--text2:#6b7280;--text3:#343840;
+    --success:#4ade80;--error:#f87171;--warn:#fbbf24;--white:#f0f2f5;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    min-height: 100vh;
-    font-size: 14px;
-    line-height: 1.5;
-    overflow-x: hidden;
-  }
-
-  /* Scanline overlay */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.03) 2px,
-      rgba(0,0,0,0.03) 4px
-    );
-    pointer-events: none;
-    z-index: 9998;
-  }
-
-  /* Ambient glow top */
-  .ambient {
-    position: fixed;
-    top: -200px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 800px;
-    height: 400px;
-    background: radial-gradient(ellipse, rgba(232,255,71,0.04) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .layout {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    min-height: 100vh;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ── Sidebar ── */
-  .sidebar {
-    background: var(--bg2);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  .sidebar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0.4;
-  }
-
-  .sidebar-logo {
-    padding: 22px 18px 18px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .logo-mark {
-    font-family: 'Syne', sans-serif;
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--accent);
-    letter-spacing: -0.5px;
-    text-transform: uppercase;
-    line-height: 1;
-  }
-
-  .logo-sub {
-    font-size: 10px;
-    color: var(--text3);
-    margin-top: 4px;
-    font-family: 'Space Mono', monospace;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .sidebar-section {
-    padding: 14px 10px 6px;
-  }
-
-  .sidebar-label {
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--text3);
-    padding: 0 8px;
-    margin-bottom: 8px;
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 8px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    color: var(--text2);
-    font-size: 12.5px;
-    font-weight: 500;
-    transition: all 0.15s;
-    border: 1px solid transparent;
-    user-select: none;
-    position: relative;
-  }
-
-  .nav-item:hover { background: var(--bg3); color: var(--text); }
-
-  .nav-item.active {
-    background: var(--accent-dim);
-    color: var(--accent);
-    border-color: rgba(232,255,71,0.15);
-  }
-
-  .nav-item.active .nav-icon { opacity: 1; color: var(--accent); }
-
-  .nav-icon { width: 14px; height: 14px; opacity: 0.5; flex-shrink: 0; }
-
-  .sidebar-divider { height: 1px; background: var(--border); margin: 8px 10px; }
-
-  .sidebar-footer {
-    margin-top: auto;
-    padding: 14px;
-    border-top: 1px solid var(--border);
-  }
-
-  .status-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 10px;
-    color: var(--text2);
-    font-family: 'Space Mono', monospace;
-  }
-
-  .status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--success);
-    flex-shrink: 0;
-    box-shadow: 0 0 6px var(--success);
-    animation: pulse 2s ease infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
-
-  /* ── Main ── */
-  .main { display: flex; flex-direction: column; overflow: hidden; }
-
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    height: 48px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-  }
-
-  .topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--text3);
-    font-family: 'Space Mono', monospace;
-  }
-
-  .breadcrumb-active { color: var(--text); }
-
-  .topbar-right { display: flex; align-items: center; gap: 8px; }
-
-  .chip {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 3px 9px;
-    font-size: 10px;
-    color: var(--text2);
-    font-family: 'Space Mono', monospace;
-  }
-
-  .chip.accent {
-    background: var(--accent-dim);
-    border-color: rgba(232,255,71,0.2);
-    color: var(--accent);
-  }
-
-  .content {
-    flex: 1;
-    padding: 20px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    overflow-y: auto;
-  }
-
-  .content::-webkit-scrollbar { width: 4px; }
-  .content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-  /* ── Cards ── */
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg3);
-  }
-
-  .card-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text);
-    font-family: 'Space Mono', monospace;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .card-badge {
-    background: var(--bg4);
-    border: 1px solid var(--border2);
-    border-radius: 2px;
-    padding: 1px 6px;
-    font-size: 9px;
-    color: var(--text3);
-    font-weight: 400;
-    text-transform: lowercase;
-  }
-
-  .card-actions { display: flex; gap: 5px; }
-
-  .btn-ghost {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    color: var(--text2);
-    font-family: 'Space Mono', monospace;
-    font-size: 9px;
-    padding: 4px 9px;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .btn-ghost:hover:not(:disabled) { background: var(--bg4); color: var(--text); border-color: var(--border2); }
-  .btn-ghost:disabled { opacity: 0.25; cursor: not-allowed; }
-
-  /* Mode toggle */
-  .mode-toggle {
-    display: flex;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    padding: 3px;
-    gap: 2px;
-  }
-
-  .mode-btn {
-    padding: 6px 16px;
-    border: none;
-    border-radius: 3px;
-    background: transparent;
-    color: var(--text2);
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .mode-btn.active {
-    background: var(--accent);
-    color: #0a0b0d;
-  }
-
-  /* Editor */
-  .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-
-  textarea {
-    width: 100%;
-    height: 300px;
-    background: var(--bg2);
-    border: none;
-    outline: none;
-    resize: none;
-    padding: 14px 16px;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    line-height: 1.75;
-    color: var(--text);
-    caret-color: var(--accent);
-    tab-size: 4;
-  }
-
-  textarea::placeholder { color: var(--text3); }
-  textarea::-webkit-scrollbar { width: 4px; }
-  textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
-  /* Drop zone */
-  .drop-zone {
-    height: 140px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin: 12px;
-    border-radius: 5px;
-    border: 1px dashed var(--border2);
-  }
-
-  .drop-zone:hover, .drop-zone.dragover {
-    border-color: var(--accent);
-    background: var(--accent-dim);
-  }
-
-  .drop-zone:hover .drop-svg { color: var(--accent); }
-  .drop-svg { color: var(--text3); transition: color 0.2s; }
-
-  .drop-text { font-size: 12.5px; color: var(--text2); font-weight: 600; }
-  .drop-sub { font-size: 10px; color: var(--text3); font-family: 'Space Mono', monospace; }
-
-  .file-loaded {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 14px;
-    background: rgba(74,222,128,0.05);
-    border-top: 1px solid var(--border);
-    font-size: 11px;
-    font-family: 'Space Mono', monospace;
-    color: var(--success);
-  }
-
-  .file-clear { margin-left: auto; cursor: pointer; color: var(--text3); font-size: 10px; transition: color 0.15s; }
-  .file-clear:hover { color: var(--text); }
-  #file-input { display: none; }
-
-  /* Run row */
-  .run-row { display: flex; gap: 10px; align-items: center; }
-
-  .btn-primary {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 22px;
-    background: var(--accent);
-    border: none;
-    border-radius: 5px;
-    color: #0a0b0d;
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .btn-primary::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15) 100%);
-    pointer-events: none;
-  }
-
-  .btn-primary:hover:not(:disabled) { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
-  .btn-primary:active:not(:disabled) { transform: translateY(0); }
-  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
-
-  .btn-secondary {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 10px 16px;
-    background: var(--bg3);
-    border: 1px solid var(--border2);
-    border-radius: 5px;
-    color: var(--text2);
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
-
-  .btn-secondary:hover:not(:disabled) { background: var(--bg4); color: var(--text); border-color: var(--border2); }
-  .btn-secondary:disabled { opacity: 0.25; cursor: not-allowed; }
-
-  .spacer { flex: 1; }
-
-  /* Progress */
-  .progress-track { height: 1px; background: var(--bg4); overflow: hidden; }
-  .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.4s ease; }
-  .progress-fill.indeterminate { width: 35%; animation: indeterminate 1.2s ease infinite; }
-
-  @keyframes indeterminate {
-    0%   { transform: translateX(-200%); }
-    100% { transform: translateX(400%); }
-  }
-
-  /* Log */
-  .log-body {
-    padding: 10px 14px;
-    height: 110px;
-    overflow-y: auto;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    line-height: 2;
-  }
-
-  .log-body::-webkit-scrollbar { width: 3px; }
-  .log-body::-webkit-scrollbar-thumb { background: var(--border2); }
-
-  .log-line { display: flex; gap: 14px; }
-  .log-ts { color: var(--text3); flex-shrink: 0; }
-  .log-tag { flex-shrink: 0; min-width: 46px; color: var(--text3); }
-  .log-msg { color: var(--text2); }
-  .log-msg.ok { color: var(--success); }
-  .log-msg.err { color: var(--error); }
-  .log-msg.warn { color: var(--warn); }
-
-  /* Stats bar */
-  .stats-bar {
-    display: flex;
-    gap: 1px;
-    overflow: hidden;
-    border-radius: 4px;
-  }
-
-  .stat-pill {
-    flex: 1;
-    padding: 8px 12px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    text-align: center;
-    border-radius: 0;
-  }
-
-  .stat-pill:first-child { border-radius: 4px 0 0 4px; }
-  .stat-pill:last-child { border-radius: 0 4px 4px 0; }
-
-  .stat-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--accent);
-    line-height: 1;
-  }
-
-  .stat-lbl {
-    font-size: 9px;
-    color: var(--text3);
-    margin-top: 3px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-  }
-
-  /* Fade in */
-  .content > * { animation: fadeUp 0.2s ease forwards; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(5px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* About modal */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(6px);
-  }
-  .modal-overlay.open { display: flex; }
-
-  .dc-card {
-    width: 300px;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #1e1f22;
-    box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05);
-    font-family: 'Syne', sans-serif;
-    animation: popIn 0.2s ease;
-  }
-
-  @keyframes popIn {
-    from { transform: scale(0.92) translateY(8px); opacity: 0; }
-    to   { transform: scale(1) translateY(0); opacity: 1; }
-  }
-
-  .dc-banner { height: 88px; background: linear-gradient(135deg, #1a1d2e, #2d1f3d); position: relative; }
-  .dc-avatar-wrap { position: absolute; bottom: -38px; left: 16px; }
-
-  .dc-avatar {
-    width: 76px;
-    height: 76px;
-    border-radius: 50%;
-    border: 5px solid #1e1f22;
-    object-fit: cover;
-    display: block;
-  }
-
-  .dc-status {
-    width: 16px;
-    height: 16px;
-    background: #23a55a;
-    border-radius: 50%;
-    border: 3px solid #1e1f22;
-    position: absolute;
-    bottom: 4px;
-    right: 4px;
-  }
-
-  .dc-close {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    background: rgba(0,0,0,0.5);
-    border: none;
-    color: #fff;
-    border-radius: 50%;
-    width: 26px;
-    height: 26px;
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .dc-body { padding: 50px 16px 16px; }
-
-  .dc-names { margin-bottom: 12px; }
-
-  .dc-display {
-    font-size: 19px;
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.2;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .dc-nitro-crown {
-    font-size: 13px;
-    background: linear-gradient(135deg, #ff73fa, #7289da);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .dc-username { font-size: 13px; color: #b5bac1; margin-top: 2px; font-weight: 400; }
-  .dc-divider { height: 1px; background: #2e3035; margin: 12px 0; }
-  .dc-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #b5bac1; margin-bottom: 8px; }
-
-  .dc-badges { display: flex; flex-wrap: wrap; gap: 6px; }
-
-  .dc-badge {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    position: relative;
-    cursor: default;
-    transition: transform 0.15s;
-  }
-
-  .dc-badge:hover { transform: scale(1.15); }
-  .dc-badge img { width: 24px; height: 24px; object-fit: contain; }
-
-  .dc-badge:hover::after {
-    content: attr(data-tip);
-    position: absolute;
-    bottom: 34px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #111;
-    color: #fff;
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 10;
-  }
-
-  .dc-about { font-size: 13px; color: #dbdee1; line-height: 1.6; white-space: pre-line; text-align: center; font-weight: 400; }
-
-  @media (max-width: 860px) {
-    .layout { grid-template-columns: 1fr; }
-    .sidebar { display: none; }
-    .editor-grid { grid-template-columns: 1fr; }
-  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;font-size:14px;line-height:1.5;overflow-x:hidden}
+  body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);pointer-events:none;z-index:9998}
+  .ambient{position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse,rgba(232,255,71,0.035) 0%,transparent 70%);pointer-events:none;z-index:0}
+  .layout{display:grid;grid-template-columns:200px 1fr;min-height:100vh;position:relative;z-index:1}
+  .sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden}
+  .sidebar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.35}
+  .sidebar-logo{padding:22px 18px 18px;border-bottom:1px solid var(--border)}
+  .logo-mark{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--accent);letter-spacing:-.5px;text-transform:uppercase;line-height:1}
+  .logo-sub{font-size:10px;color:var(--text3);margin-top:4px;font-family:'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase}
+  .sidebar-section{padding:14px 10px 6px}
+  .sidebar-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--text3);padding:0 8px;margin-bottom:8px}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:5px;cursor:pointer;color:var(--text2);font-size:12.5px;font-weight:500;transition:all .15s;border:1px solid transparent;user-select:none}
+  .nav-item:hover{background:var(--bg3);color:var(--text)}
+  .nav-item.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(232,255,71,.15)}
+  .nav-item.active .nav-icon{opacity:1;color:var(--accent)}
+  .nav-icon{width:14px;height:14px;opacity:.5;flex-shrink:0}
+  .sidebar-divider{height:1px;background:var(--border);margin:8px 10px}
+  .sidebar-footer{margin-top:auto;padding:14px;border-top:1px solid var(--border)}
+  .status-badge{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--text2);font-family:'Space Mono',monospace}
+  .status-dot{width:6px;height:6px;border-radius:50%;background:var(--success);flex-shrink:0;box-shadow:0 0 6px var(--success);animation:pulse 2s ease infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .main{display:flex;flex-direction:column;overflow:hidden}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:48px;border-bottom:1px solid var(--border);flex-shrink:0}
+  .topbar-left{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);font-family:'Space Mono',monospace}
+  .breadcrumb-active{color:var(--text)}
+  .topbar-right{display:flex;align-items:center;gap:8px}
+  .chip{background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:3px 9px;font-size:10px;color:var(--text2);font-family:'Space Mono',monospace}
+  .chip.accent{background:var(--accent-dim);border-color:rgba(232,255,71,.2);color:var(--accent)}
+  .content{flex:1;padding:20px 24px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+  .content::-webkit-scrollbar{width:4px}
+  .content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+  .card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+  .card-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg3)}
+  .card-title{font-size:11px;font-weight:700;color:var(--text);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+  .card-badge{background:var(--bg4);border:1px solid var(--border2);border-radius:2px;padding:1px 6px;font-size:9px;color:var(--text3);font-weight:400;text-transform:lowercase}
+  .card-actions{display:flex;gap:5px}
+  .btn-ghost{background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--text2);font-family:'Space Mono',monospace;font-size:9px;padding:4px 9px;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.5px}
+  .btn-ghost:hover:not(:disabled){background:var(--bg4);color:var(--text);border-color:var(--border2)}
+  .btn-ghost:disabled{opacity:.25;cursor:not-allowed}
+  .mode-toggle{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:3px;gap:2px}
+  .mode-btn{padding:6px 16px;border:none;border-radius:3px;background:transparent;color:var(--text2);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.5px}
+  .mode-btn.active{background:var(--accent);color:#0a0b0d}
+  .editor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  textarea{width:100%;height:300px;background:var(--bg2);border:none;outline:none;resize:none;padding:14px 16px;font-family:'Space Mono',monospace;font-size:12px;line-height:1.75;color:var(--text);caret-color:var(--accent);tab-size:4}
+  textarea::placeholder{color:var(--text3)}
+  textarea::-webkit-scrollbar{width:4px}
+  textarea::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+  .drop-zone{height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all .2s;margin:12px;border-radius:5px;border:1px dashed var(--border2)}
+  .drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:var(--accent-dim)}
+  .drop-zone:hover .drop-svg{color:var(--accent)}
+  .drop-svg{color:var(--text3);transition:color .2s}
+  .drop-text{font-size:12.5px;color:var(--text2);font-weight:600}
+  .drop-sub{font-size:10px;color:var(--text3);font-family:'Space Mono',monospace}
+  .file-loaded{display:flex;align-items:center;gap:10px;padding:9px 14px;background:rgba(74,222,128,.05);border-top:1px solid var(--border);font-size:11px;font-family:'Space Mono',monospace;color:var(--success)}
+  .file-clear{margin-left:auto;cursor:pointer;color:var(--text3);font-size:10px;transition:color .15s}
+  .file-clear:hover{color:var(--text)}
+  #file-input{display:none}
+  .run-row{display:flex;gap:10px;align-items:center}
+  .btn-primary{display:flex;align-items:center;gap:8px;padding:10px 22px;background:var(--accent);border:none;border-radius:5px;color:#0a0b0d;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.5px;position:relative;overflow:hidden}
+  .btn-primary::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.12) 100%);pointer-events:none}
+  .btn-primary:hover:not(:disabled){background:var(--accent2);transform:translateY(-1px);box-shadow:0 4px 16px var(--accent-glow)}
+  .btn-primary:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn-secondary{display:flex;align-items:center;gap:7px;padding:10px 16px;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.3px}
+  .btn-secondary:hover:not(:disabled){background:var(--bg4);color:var(--text)}
+  .btn-secondary:disabled{opacity:.25;cursor:not-allowed}
+  .spacer{flex:1}
+  .progress-track{height:1px;background:var(--bg4);overflow:hidden}
+  .progress-fill{height:100%;width:0%;background:var(--accent);transition:width .4s ease}
+  .progress-fill.indeterminate{width:35%;animation:indeterminate 1.2s ease infinite}
+  @keyframes indeterminate{0%{transform:translateX(-200%)}100%{transform:translateX(400%)}}
+  .log-body{padding:10px 14px;height:110px;overflow-y:auto;font-family:'Space Mono',monospace;font-size:11px;line-height:2}
+  .log-body::-webkit-scrollbar{width:3px}
+  .log-body::-webkit-scrollbar-thumb{background:var(--border2)}
+  .log-line{display:flex;gap:14px}
+  .log-ts{color:var(--text3);flex-shrink:0}
+  .log-tag{flex-shrink:0;min-width:46px;color:var(--text3)}
+  .log-msg{color:var(--text2)}
+  .log-msg.ok{color:var(--success)}
+  .log-msg.err{color:var(--error)}
+  .log-msg.warn{color:var(--warn)}
+  .stats-bar{display:flex;gap:1px;overflow:hidden;border-radius:4px}
+  .stat-pill{flex:1;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);text-align:center;border-radius:0}
+  .stat-pill:first-child{border-radius:4px 0 0 4px}
+  .stat-pill:last-child{border-radius:0 4px 4px 0}
+  .stat-val{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--accent);line-height:1}
+  .stat-lbl{font-size:9px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:1px;font-weight:600}
+  .content>*{animation:fadeUp .2s ease forwards}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
+  .modal-overlay.open{display:flex}
+  .dc-card{width:300px;border-radius:10px;overflow:hidden;background:#1e1f22;box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.05);font-family:'Syne',sans-serif;animation:popIn .2s ease}
+  @keyframes popIn{from{transform:scale(.92) translateY(8px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+  .dc-banner{height:88px;background:linear-gradient(135deg,#1a1d2e,#2d1f3d);position:relative}
+  .dc-avatar-wrap{position:absolute;bottom:-38px;left:16px}
+  .dc-avatar{width:76px;height:76px;border-radius:50%;border:5px solid #1e1f22;object-fit:cover;display:block}
+  .dc-status{width:16px;height:16px;background:#23a55a;border-radius:50%;border:3px solid #1e1f22;position:absolute;bottom:4px;right:4px}
+  .dc-close{position:absolute;top:10px;right:12px;background:rgba(0,0,0,.5);border:none;color:#fff;border-radius:50%;width:26px;height:26px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .dc-body{padding:50px 16px 16px}
+  .dc-names{margin-bottom:12px}
+  .dc-display{font-size:19px;font-weight:800;color:#fff;line-height:1.2;display:flex;align-items:center;gap:6px}
+  .dc-nitro-crown{font-size:13px;background:linear-gradient(135deg,#ff73fa,#7289da);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .dc-username{font-size:13px;color:#b5bac1;margin-top:2px;font-weight:400}
+  .dc-divider{height:1px;background:#2e3035;margin:12px 0}
+  .dc-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#b5bac1;margin-bottom:8px}
+  .dc-badges{display:flex;flex-wrap:wrap;gap:6px}
+  .dc-badge{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;background:transparent;position:relative;cursor:default;transition:transform .15s}
+  .dc-badge:hover{transform:scale(1.15)}
+  .dc-badge img{width:24px;height:24px;object-fit:contain}
+  .dc-badge:hover::after{content:attr(data-tip);position:absolute;bottom:34px;left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:4px 8px;border-radius:4px;white-space:nowrap;pointer-events:none;z-index:10}
+  .dc-about{font-size:13px;color:#dbdee1;line-height:1.6;white-space:pre-line;text-align:center;font-weight:400}
+  @media(max-width:860px){.layout{grid-template-columns:1fr}.sidebar{display:none}.editor-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-
 <div class="ambient"></div>
-
 <div class="layout">
-
-  <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-mark">Hercules</div>
-      <div class="logo-sub">lua obfuscator · v3</div>
+      <div class="logo-sub">lua obfuscator · v4</div>
     </div>
-
     <div class="sidebar-section">
       <div class="sidebar-label">Input</div>
       <div class="nav-item active" onclick="setMode('paste')" id="nav-paste">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="3" y="2" width="10" height="12" rx="1.5"/>
-          <path d="M6 6h4M6 9h3"/>
-        </svg>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1.5"/><path d="M6 6h4M6 9h3"/></svg>
         Paste Code
       </div>
       <div class="nav-item" onclick="setMode('file')" id="nav-file">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M3 2h7l3 3v9H3V2z"/><path d="M10 2v3h3"/>
-          <path d="M8 7v5M5.5 9.5L8 7l2.5 2.5"/>
-        </svg>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h7l3 3v9H3V2z"/><path d="M10 2v3h3"/><path d="M8 7v5M5.5 9.5L8 7l2.5 2.5"/></svg>
         Upload File
       </div>
     </div>
-
     <div class="sidebar-divider"></div>
-
     <div class="sidebar-section">
       <div class="sidebar-label">Info</div>
       <div class="nav-item" onclick="showAbout()">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.5v.5"/>
-        </svg>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.5v.5"/></svg>
         About
       </div>
     </div>
-
     <div class="sidebar-footer">
-      <div class="status-badge">
-        <div class="status-dot"></div>
-        engine ready
-      </div>
+      <div class="status-badge"><div class="status-dot"></div>vm engine ready</div>
     </div>
   </aside>
-
-  <!-- Main -->
   <div class="main">
-
     <div class="topbar">
       <div class="topbar-left">
-        <span>hercules</span>
-        <span style="color:var(--text3)">/</span>
+        <span>hercules</span><span style="color:var(--text3)">/</span>
         <span class="breadcrumb-active" id="breadcrumb">paste-code</span>
       </div>
       <div class="topbar-right">
-        <div class="chip accent">v3.0</div>
+        <div class="chip accent">v4.0 · VM</div>
         <div class="chip">.lua · .luau · .txt</div>
       </div>
     </div>
-
     <div class="content">
-
-      <!-- Mode toggle -->
-      <div style="display:flex; align-items:center; gap:12px">
+      <div style="display:flex;align-items:center;gap:12px">
         <div class="mode-toggle">
           <button class="mode-btn active" id="tab-paste" onclick="setMode('paste')">Paste code</button>
           <button class="mode-btn" id="tab-file" onclick="setMode('file')">Upload file</button>
         </div>
-        <span style="font-size:11px; color:var(--text3); font-family:'Space Mono',monospace">select input</span>
+        <span style="font-size:11px;color:var(--text3);font-family:'Space Mono',monospace">select input</span>
       </div>
-
-      <!-- File upload card -->
       <div class="card" id="file-card" style="display:none">
-        <div class="card-header">
-          <div class="card-title">Input <span class="card-badge">file upload</span></div>
-        </div>
+        <div class="card-header"><div class="card-title">Input <span class="card-badge">file upload</span></div></div>
         <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-          <svg class="drop-svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
+          <svg class="drop-svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           <div class="drop-text">Drop file or click to browse</div>
           <div class="drop-sub">.lua · .luau · .txt</div>
         </div>
         <input type="file" id="file-input" accept=".lua,.luau,.txt">
         <div class="file-loaded" id="file-loaded" style="display:none">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 11.5L3 8l1.4-1.4 2.1 2.1 4.1-4.1L12 6l-5.5 5.5z"/></svg>
-          <span id="file-name"></span>
-          <span style="color:var(--text3)">·</span>
+          <span id="file-name"></span><span style="color:var(--text3)">·</span>
           <span id="file-size" style="color:var(--text3)"></span>
           <span class="file-clear" onclick="clearFile()">remove</span>
         </div>
       </div>
-
-      <!-- Editor grid -->
       <div class="editor-grid" id="editor-grid">
         <div class="card">
           <div class="card-header">
@@ -790,68 +206,44 @@
         </div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Output <span class="card-badge">obfuscated</span></div>
+            <div class="card-title">Output <span class="card-badge">vm obfuscated</span></div>
             <div class="card-actions">
               <button class="btn-ghost" id="copy-btn" onclick="copyOutput()" disabled>copy</button>
             </div>
           </div>
-          <textarea id="output-code" spellcheck="false" placeholder="-- Obfuscated output will appear here..." readonly></textarea>
+          <textarea id="output-code" spellcheck="false" placeholder="-- VM-obfuscated output will appear here..." readonly></textarea>
         </div>
       </div>
-
-      <!-- Run row -->
       <div class="run-row">
         <button class="btn-primary" id="run-btn" onclick="runObfuscate()">
           <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg>
           <span id="btn-text">Run Obfuscation</span>
         </button>
         <button class="btn-secondary" id="dl-btn" onclick="downloadOutput()" disabled>
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 13h10"/>
-          </svg>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 13h10"/></svg>
           Download .lua
         </button>
         <div class="spacer"></div>
-        <span style="font-size:10px; color:var(--text3); font-family:'Space Mono',monospace" id="char-count"></span>
+        <span style="font-size:10px;color:var(--text3);font-family:'Space Mono',monospace" id="char-count"></span>
       </div>
-
-      <!-- Stats bar (hidden until run) -->
       <div class="stats-bar" id="stats-bar" style="display:none">
-        <div class="stat-pill">
-          <div class="stat-val" id="stat-in">—</div>
-          <div class="stat-lbl">Input Chars</div>
-        </div>
-        <div class="stat-pill">
-          <div class="stat-val" id="stat-out">—</div>
-          <div class="stat-lbl">Output Chars</div>
-        </div>
-        <div class="stat-pill">
-          <div class="stat-val" id="stat-ratio">—</div>
-          <div class="stat-lbl">Expansion</div>
-        </div>
-        <div class="stat-pill">
-          <div class="stat-val" id="stat-time">—</div>
-          <div class="stat-lbl">Time (ms)</div>
-        </div>
+        <div class="stat-pill"><div class="stat-val" id="stat-in">--</div><div class="stat-lbl">Input Chars</div></div>
+        <div class="stat-pill"><div class="stat-val" id="stat-out">--</div><div class="stat-lbl">Output Chars</div></div>
+        <div class="stat-pill"><div class="stat-val" id="stat-ratio">--</div><div class="stat-lbl">Expansion</div></div>
+        <div class="stat-pill"><div class="stat-val" id="stat-time">--</div><div class="stat-lbl">Time (ms)</div></div>
       </div>
-
-      <!-- Console card -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">Console <span class="card-badge">output</span></div>
-          <div class="card-actions">
-            <button class="btn-ghost" onclick="clearLog()">clear</button>
-          </div>
+          <div class="card-actions"><button class="btn-ghost" onclick="clearLog()">clear</button></div>
         </div>
         <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
         <div class="log-body" id="log-body"></div>
       </div>
-
     </div>
   </div>
 </div>
 
-<!-- About Modal -->
 <div class="modal-overlay" id="about-modal" onclick="closeAbout(event)">
   <div class="dc-card">
     <div class="dc-banner">
@@ -859,11 +251,11 @@
         <img class="dc-avatar" src="https://cdn.discordapp.com/avatars/1452536108201279645/f47dee2867aa91d9c1f2406a989bbeeb.png?size=512" alt="avatar">
         <div class="dc-status"></div>
       </div>
-      <button class="dc-close" onclick="document.getElementById('about-modal').classList.remove('open')">✕</button>
+      <button class="dc-close" onclick="document.getElementById('about-modal').classList.remove('open')">X</button>
     </div>
     <div class="dc-body">
       <div class="dc-names">
-        <div class="dc-display">keoyooo <span class="dc-nitro-crown">✦</span></div>
+        <div class="dc-display">keoyooo <span class="dc-nitro-crown">*</span></div>
         <div class="dc-username">b9hj</div>
       </div>
       <div class="dc-divider"></div>
@@ -877,522 +269,1158 @@
       </div>
       <div class="dc-divider"></div>
       <div class="dc-section-label">About Me</div>
-      <div class="dc-about"> °.✽✦✽.◦✽✦✽.°
- surely with hardship comes ease.
- °.✽✦✽.◦✽✦✽.°</div>
+      <div class="dc-about"> surely with hardship comes ease.</div>
     </div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════
-let currentMode = 'paste';
-let loadedFile = null;
-let outputText = '';
+// =====================================================================
+// HERCULES v4 — IronBrew2/Prometheus-style Lua VM Obfuscator
+//
+// Pipeline:
+//  1. Tokenise Lua 5.1/Luau source
+//  2. Parse into AST (recursive descent)
+//  3. Compile AST to custom register-based bytecode (Lua 5.1 opcodes)
+//  4. Serialise proto tree to bytes
+//  5. XOR-encrypt + Fisher-Yates shuffle the byte payload
+//  6. Emit a self-contained Lua VM (register machine) that:
+//      - Decrypts the payload at runtime
+//      - Deserialises the proto tree
+//      - Executes it using a full dispatch loop
+//      - Uses randomised virtual opcode IDs each run (IronBrew2 technique)
+//      - Uses confusable-ASCII variable names
+//      - Uses bit32 throughout (executor safe)
+// =====================================================================
 
-log('init', 'Hercules v3 engine loaded.', 'ok');
-log('init', 'Executor-compatible Luau VM output.');
+// ── UI ────────────────────────────────────────────────────────────────
+let currentMode='paste', loadedFile=null, outputText='';
 
-// ═══════════════════════════════════════════════
-// UI HELPERS
-// ═══════════════════════════════════════════════
-function setMode(mode) {
-  currentMode = mode;
-  ['paste','file'].forEach(m => {
-    document.getElementById('tab-' + m).classList.toggle('active', m === mode);
-    document.getElementById('nav-' + m).classList.toggle('active', m === mode);
+log('init','Hercules v4 VM engine loaded.','ok');
+log('init','IronBrew2/Prometheus-style register VM output.');
+
+function setMode(m){
+  currentMode=m;
+  ['paste','file'].forEach(x=>{
+    document.getElementById('tab-'+x).classList.toggle('active',x===m);
+    document.getElementById('nav-'+x).classList.toggle('active',x===m);
   });
-  document.getElementById('editor-grid').style.display = mode === 'paste' ? 'grid' : 'none';
-  document.getElementById('file-card').style.display  = mode === 'file'  ? 'block' : 'none';
-  document.getElementById('breadcrumb').textContent   = mode === 'paste' ? 'paste-code' : 'upload-file';
+  document.getElementById('editor-grid').style.display=m==='paste'?'grid':'none';
+  document.getElementById('file-card').style.display=m==='file'?'block':'none';
+  document.getElementById('breadcrumb').textContent=m==='paste'?'paste-code':'upload-file';
 }
 
-const dropZone  = document.getElementById('drop-zone');
-const fileInput = document.getElementById('file-input');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+const dropZone=document.getElementById('drop-zone'),fileInput=document.getElementById('file-input');
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('dragover')});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('dragover');handleFile(e.dataTransfer.files[0])});
+fileInput.addEventListener('change',e=>handleFile(e.target.files[0]));
 
-function handleFile(file) {
-  if (!file) return;
-  const ext = file.name.split('.').pop().toLowerCase();
-  if (!['lua','luau','txt'].includes(ext)) { log('error', 'Invalid file type. Accepted: .lua .luau .txt', 'err'); return; }
-  loadedFile = file;
-  document.getElementById('file-name').textContent = file.name;
-  document.getElementById('file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
-  document.getElementById('file-loaded').style.display = 'flex';
-  log('file', `Loaded ${file.name} (${(file.size/1024).toFixed(1)} KB)`, 'ok');
+function handleFile(f){
+  if(!f)return;
+  const ext=f.name.split('.').pop().toLowerCase();
+  if(!['lua','luau','txt'].includes(ext)){log('error','Invalid file type.','err');return;}
+  loadedFile=f;
+  document.getElementById('file-name').textContent=f.name;
+  document.getElementById('file-size').textContent=(f.size/1024).toFixed(1)+' KB';
+  document.getElementById('file-loaded').style.display='flex';
+  log('file','Loaded '+f.name,'ok');
+}
+function clearFile(){loadedFile=null;fileInput.value='';document.getElementById('file-loaded').style.display='none';}
+function clearInput(){document.getElementById('input-code').value='';updateCC();}
+document.getElementById('input-code').addEventListener('input',updateCC);
+function updateCC(){const l=document.getElementById('input-code').value.length;document.getElementById('char-count').textContent=l?l+' chars':'';}
+
+function log(tag,msg,type){
+  type=type||'';
+  const b=document.getElementById('log-body'),n=new Date();
+  const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
+  const d=document.createElement('div');d.className='log-line';
+  d.innerHTML='<span class="log-ts">'+ts+'</span><span class="log-tag">'+tag+'</span><span class="log-msg '+type+'">'+msg+'</span>';
+  b.appendChild(d);b.scrollTop=b.scrollHeight;
+}
+function clearLog(){document.getElementById('log-body').innerHTML='';}
+function copyOutput(){if(!outputText)return;navigator.clipboard.writeText(outputText).then(function(){log('sys','Copied.','ok')});}
+function downloadOutput(){
+  if(!outputText)return;
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([outputText],{type:'text/plain'}));
+  a.download='obfuscated.lua';a.click();
+  log('sys','Downloaded obfuscated.lua','ok');
+}
+function showAbout(){document.getElementById('about-modal').classList.add('open');}
+function closeAbout(e){if(e.target===document.getElementById('about-modal'))document.getElementById('about-modal').classList.remove('open');}
+function loadExample(){
+  document.getElementById('input-code').value=
+'local Players = game:GetService("Players")\n'+
+'local RunService = game:GetService("RunService")\n\n'+
+'local module = {}\n'+
+'local cache = {}\n\n'+
+'function module.getPlayer(name)\n'+
+'    if cache[name] then return cache[name] end\n'+
+'    for _, plr in pairs(Players:GetPlayers()) do\n'+
+'        if plr.Name == name then\n'+
+'            cache[name] = plr\n'+
+'            return plr\n'+
+'        end\n'+
+'    end\n'+
+'    return nil\n'+
+'end\n\n'+
+'function module.teleport(player, position)\n'+
+'    local char = player.Character\n'+
+'    if char and char:FindFirstChild("HumanoidRootPart") then\n'+
+'        char.HumanoidRootPart.CFrame = CFrame.new(position)\n'+
+'    end\n'+
+'end\n\n'+
+'return module';
+  updateCC();log('input','Example loaded.');
 }
 
-function clearFile() {
-  loadedFile = null;
-  fileInput.value = '';
-  document.getElementById('file-loaded').style.display = 'none';
-  log('file', 'File removed.');
+// =====================================================================
+// SECTION 1 — TOKENISER
+// =====================================================================
+var KW_LIST=['and','break','do','else','elseif','end','false','for',
+  'function','goto','if','in','local','nil','not','or','repeat',
+  'return','then','true','until','while'];
+var KEYWORDS=new Set(KW_LIST);
+
+function tokenise(src){
+  var tokens=[],i=0,len=src.length;
+  function ch(n){return src[i+(n||0)];}
+  function adv(){return src[i++];}
+  function isD(c){return c>='0'&&c<='9';}
+  function isA(c){return (c>='a'&&c<='z')||(c>='A'&&c<='Z')||c==='_';}
+  function isAN(c){return isA(c)||isD(c);}
+
+  while(i<len){
+    var c=src[i];
+    // whitespace
+    if(c===' '||c==='\t'||c==='\r'||c==='\n'){i++;continue;}
+    // comments
+    if(c==='-'&&ch(1)==='-'){
+      if(ch(2)==='['){
+        var j=i+2,eq=0;
+        while(src[j+eq]==='=')eq++;
+        if(src[j+eq]==='['){
+          j+=eq+1;
+          var cl=']'+'='.repeat(eq)+']';
+          var end=src.indexOf(cl,j);
+          i=end<0?len:end+cl.length;continue;
+        }
+      }
+      while(i<len&&src[i]!=='\n')i++;
+      continue;
+    }
+    // long strings
+    if(c==='['){
+      var j2=i+1,eq2=0;
+      while(src[j2+eq2]==='=')eq2++;
+      if(src[j2+eq2]==='['){
+        j2+=eq2+1;
+        var cl2=']'+'='.repeat(eq2)+']';
+        var end2=src.indexOf(cl2,j2);
+        var sv=src.slice(j2,end2<0?len:end2);
+        tokens.push({t:'string',v:sv});
+        i=end2<0?len:end2+cl2.length;continue;
+      }
+    }
+    // strings
+    if(c==='"'||c==="'"){
+      var q=adv(),s='';
+      while(i<len&&src[i]!==q){
+        if(src[i]==='\\'){
+          adv();var e=adv();
+          var esc={n:'\n',t:'\t',r:'\r','\\':'\\','"':'"',"'":'\'',a:'\x07',b:'\b',f:'\f',v:'\v'};
+          s+=esc[e]!==undefined?esc[e]:e;
+        } else s+=adv();
+      }
+      adv();tokens.push({t:'string',v:s});continue;
+    }
+    // hex numbers
+    if(c==='0'&&(ch(1)==='x'||ch(1)==='X')){
+      var ns='0x';i+=2;
+      while(i<len&&/[0-9a-fA-F]/.test(src[i]))ns+=adv();
+      tokens.push({t:'number',v:parseInt(ns,16)});continue;
+    }
+    // decimal numbers
+    if(isD(c)||(c==='.'&&isD(ch(1)))){
+      var ns2='';
+      while(i<len&&(isD(src[i])||src[i]==='.'))ns2+=adv();
+      if(src[i]==='e'||src[i]==='E'){ns2+=adv();if(src[i]==='+'||src[i]==='-')ns2+=adv();while(isD(src[i]))ns2+=adv();}
+      tokens.push({t:'number',v:parseFloat(ns2)});continue;
+    }
+    // identifiers
+    if(isA(c)){
+      var id='';
+      while(i<len&&isAN(src[i]))id+=adv();
+      tokens.push({t:KEYWORDS.has(id)?id:'name',v:id});continue;
+    }
+    // 3-char
+    if(src.slice(i,i+3)==='...'){tokens.push({t:'...',v:'...'});i+=3;continue;}
+    // 2-char
+    var two=src.slice(i,i+2);
+    if(['==','~=','<=','>=','..','::'].indexOf(two)>=0){tokens.push({t:two,v:two});i+=2;continue;}
+    // single char
+    tokens.push({t:c,v:c});i++;
+  }
+  tokens.push({t:'eof',v:''});
+  return tokens;
 }
 
-function loadExample() {
-  document.getElementById('input-code').value =
-`local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+// =====================================================================
+// SECTION 2 — PARSER
+// =====================================================================
+function parse(tokens){
+  var pos=0;
+  function peek(){return tokens[pos];}
+  function check(t){return peek().t===t;}
+  function adv(){return tokens[pos++];}
+  function eat(t){if(!check(t))throw new Error("Expected '"+t+"' got '"+peek().t+"' ("+peek().v+") pos="+pos);return adv();}
+  function match(){for(var i=0;i<arguments.length;i++){if(check(arguments[i])){adv();return true;}}return false;}
 
-local module = {}
-local cache = {}
+  function block(){
+    var stmts=[];
+    while(true){
+      var t=peek().t;
+      if(t==='eof'||t==='end'||t==='else'||t==='elseif'||t==='until')break;
+      match(';');
+      t=peek().t;
+      if(t==='eof'||t==='end'||t==='else'||t==='elseif'||t==='until')break;
+      var s=stmt();
+      if(s){stmts.push(s);if(s.type==='ReturnStatement')break;}
+    }
+    return {type:'Block',body:stmts};
+  }
 
-function module.getPlayer(name)
-    if cache[name] then return cache[name] end
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr.Name == name then
-            cache[name] = plr
-            return plr
-        end
-    end
-    return nil
-end
+  function stmt(){
+    match(';');
+    var t=peek().t;
+    if(t==='if')     return parseIf();
+    if(t==='while')  return parseWhile();
+    if(t==='do')     return parseDo();
+    if(t==='for')    return parseFor();
+    if(t==='repeat') return parseRepeat();
+    if(t==='function') return parseFuncStat();
+    if(t==='local')  return parseLocal();
+    if(t==='return') return parseReturn();
+    if(t==='break')  {adv();return {type:'BreakStatement'};}
+    if(t==='goto')   {adv();return {type:'GotoStatement',label:eat('name').v};}
+    if(t==='::'){adv();var lb=eat('name').v;eat('::');return {type:'LabelStatement',label:lb};}
+    return parseExprStat();
+  }
 
-function module.teleport(player, position)
-    local char = player.Character
-    if char and char:FindFirstChild("HumanoidRootPart") then
-        char.HumanoidRootPart.CFrame = CFrame.new(position)
-    end
-end
+  function parseIf(){
+    eat('if');var cond=expr();eat('then');var cons=block();
+    var alts=[];
+    while(check('elseif')){adv();var c=expr();eat('then');alts.push({cond:c,body:block()});}
+    var alt=check('else')?(adv(),block()):null;
+    eat('end');
+    return {type:'IfStatement',cond:cond,cons:cons,alts:alts,alt:alt};
+  }
+  function parseWhile(){eat('while');var c=expr();eat('do');var b=block();eat('end');return {type:'WhileStatement',cond:c,body:b};}
+  function parseDo(){eat('do');var b=block();eat('end');return {type:'DoStatement',body:b};}
+  function parseRepeat(){eat('repeat');var b=block();eat('until');var c=expr();return {type:'RepeatStatement',body:b,cond:c};}
+  function parseFor(){
+    eat('for');var n=eat('name').v;
+    if(check('=')){
+      adv();var s=expr();eat(',');var e=expr();var step=match(',')?expr():null;
+      eat('do');var b=block();eat('end');
+      return {type:'NumericFor',name:n,start:s,limit:e,step:step,body:b};
+    }
+    var names=[n];while(match(','))names.push(eat('name').v);
+    eat('in');var iters=exprList();eat('do');var b2=block();eat('end');
+    return {type:'GenericFor',names:names,iters:iters,body:b2};
+  }
+  function parseFuncStat(){
+    eat('function');var name=eat('name').v,method=null;
+    while(check('.')){adv();name+='.'+eat('name').v;}
+    if(check(':')){adv();method=eat('name').v;}
+    var fn=funcBody(method);
+    return {type:'FunctionStatement',name:name,method:method,fn:fn};
+  }
+  function parseLocal(){
+    eat('local');
+    if(check('function')){adv();var n=eat('name').v;var fn=funcBody(null);return {type:'LocalFunction',name:n,fn:fn};}
+    var names=[eat('name').v];while(match(','))names.push(eat('name').v);
+    var vals=check('=')?(adv(),exprList()):[];
+    return {type:'LocalStatement',names:names,vals:vals};
+  }
+  function parseReturn(){
+    eat('return');
+    var noMore=check('end')||check('else')||check('elseif')||check('until')||check('eof')||check(';');
+    var vals=noMore?[]:(exprList());
+    match(';');
+    return {type:'ReturnStatement',vals:vals};
+  }
+  function parseExprStat(){
+    var e=suffixedExpr();
+    if(check('=')||check(',')){
+      var targets=[e];while(match(','))targets.push(suffixedExpr());
+      eat('=');var vals=exprList();
+      return {type:'AssignStatement',targets:targets,vals:vals};
+    }
+    if(e.type==='CallExpression'||e.type==='MethodCallExpression')return {type:'CallStatement',expr:e};
+    throw new Error('Unexpected expression statement type: '+e.type);
+  }
+  function exprList(){var es=[expr()];while(match(','))es.push(expr());return es;}
 
-return module`;
-  updateCharCount();
-  log('input', 'Example loaded.');
+  function funcBody(implicitSelf){
+    eat('(');var params=[];if(implicitSelf)params.push('self');
+    var vararg=false;
+    if(!check(')')){
+      if(check('...')){adv();vararg=true;}
+      else{
+        params.push(eat('name').v);
+        while(match(',')){
+          if(check('...')){adv();vararg=true;break;}
+          params.push(eat('name').v);
+        }
+      }
+    }
+    eat(')');var b=block();eat('end');
+    return {type:'FunctionExpr',params:params,vararg:vararg,body:b};
+  }
+
+  var UNOPS=new Set(['not','-','#']);
+  var BINPREC={'or':1,'and':2,'<':3,'>':3,'<=':3,'>=':3,'==':3,'~=':3,'..':8,'+':9,'-':9,'*':10,'/':10,'%':10,'^':12};
+
+  function expr(minP){
+    minP=minP||0;
+    var node;
+    if(UNOPS.has(peek().t)){var op=adv().t;node={type:'UnaryExpr',op:op,arg:expr(11)};}
+    else node=simpleExpr();
+    while(true){
+      var op=peek().t,p=BINPREC[op];
+      if(p===undefined||p<=minP)break;
+      adv();
+      var right=expr(op==='^'||op==='..'?p-1:p);
+      node={type:'BinaryExpr',op:op,left:node,right:right};
+    }
+    return node;
+  }
+  function simpleExpr(){
+    var t=peek();
+    if(t.t==='number'){adv();return {type:'NumberLiteral',v:t.v};}
+    if(t.t==='string'){adv();return {type:'StringLiteral',v:t.v};}
+    if(t.t==='nil'){adv();return {type:'NilLiteral'};}
+    if(t.t==='true'){adv();return {type:'BoolLiteral',v:true};}
+    if(t.t==='false'){adv();return {type:'BoolLiteral',v:false};}
+    if(t.t==='...'){adv();return {type:'VarargExpr'};}
+    if(t.t==='function'){adv();return funcBody(null);}
+    if(t.t==='{')return tableConstructor();
+    return suffixedExpr();
+  }
+  function suffixedExpr(){
+    var node=primaryExpr();
+    while(true){
+      if(check('.')){adv();var n=eat('name').v;node={type:'IndexExpr',obj:node,key:{type:'StringLiteral',v:n}};}
+      else if(check('[')){adv();var k=expr();eat(']');node={type:'IndexExpr',obj:node,key:k};}
+      else if(check(':')){adv();var m=eat('name').v;var args=callArgs();node={type:'MethodCallExpression',obj:node,method:m,args:args};}
+      else if(check('(')||check('{')||check('string')){var args2=callArgs();node={type:'CallExpression',fn:node,args:args2};}
+      else break;
+    }
+    return node;
+  }
+  function primaryExpr(){
+    if(check('name')){var n=adv().v;return {type:'NameExpr',name:n};}
+    if(check('(')){adv();var e=expr();eat(')');return {type:'ParenExpr',expr:e};}
+    throw new Error("Unexpected token '"+peek().t+"' ('"+peek().v+"') at pos "+pos);
+  }
+  function callArgs(){
+    if(check('(')){adv();var a=!check(')')?exprList():[];eat(')');return a;}
+    if(check('{'))return [tableConstructor()];
+    if(check('string')){var v=adv().v;return [{type:'StringLiteral',v:v}];}
+    throw new Error('Expected call arguments at pos '+pos);
+  }
+  function tableConstructor(){
+    eat('{');var fields=[];
+    while(!check('}')){
+      if(check('[')){adv();var k=expr();eat(']');eat('=');var v=expr();fields.push({type:'computed',key:k,val:v});}
+      else if(check('name')&&tokens[pos+1]&&tokens[pos+1].t==='='){var k2=adv().v;adv();var v2=expr();fields.push({type:'named',key:k2,val:v2});}
+      else fields.push({type:'value',val:expr()});
+      if(!match(','))if(!match(';'))break;
+    }
+    eat('}');return {type:'TableConstructor',fields:fields};
+  }
+  return block();
 }
 
-function clearInput() { document.getElementById('input-code').value = ''; updateCharCount(); }
+// =====================================================================
+// SECTION 3 — COMPILER (AST -> bytecode)
+// =====================================================================
+var OP={
+  MOVE:0,LOADK:1,LOADBOOL:2,LOADNIL:3,GETUPVAL:4,
+  GETGLOBAL:5,GETTABLE:6,SETGLOBAL:7,SETUPVAL:8,SETTABLE:9,
+  NEWTABLE:10,SELF:11,ADD:12,SUB:13,MUL:14,DIV:15,MOD:16,
+  POW:17,UNM:18,NOT:19,LEN:20,CONCAT:21,JMP:22,EQ:23,LT:24,
+  LE:25,TEST:26,TESTSET:27,CALL:28,TAILCALL:29,RETURN:30,
+  FORLOOP:31,FORPREP:32,TFORLOOP:33,SETLIST:34,CLOSE:35,VARARG:36
+};
+var OP_NAMES=Object.keys(OP);
+var MAXARG_Bx=(1<<18)-1;
+var MAXARG_sBx=MAXARG_Bx>>1;
 
-document.getElementById('input-code').addEventListener('input', updateCharCount);
-function updateCharCount() {
-  const len = document.getElementById('input-code').value.length;
-  document.getElementById('char-count').textContent = len > 0 ? len + ' chars' : '';
+function mkI(op,a,b,c){return (op&63)|((a&255)<<6)|((b&511)<<14)|((c&511)<<23);}
+function mkIBx(op,a,bx){return (op&63)|((a&255)<<6)|((bx&262143)<<14);}
+function mkIsBx(op,a,sbx){return mkIBx(op,a,sbx+MAXARG_sBx);}
+
+function Proto(parent){
+  this.parent=parent||null;
+  this.instrs=[];
+  this.consts=[];
+  this.protos=[];
+  this.params=0;
+  this.vararg=false;
+  this.maxStack=2;
+  this._reg=0;
+  this._scopes=[];
+  this._cmap=new Map();
 }
-
-function log(tag, msg, type = '') {
-  const body = document.getElementById('log-body');
-  const now  = new Date();
-  const ts   = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
-  const line = document.createElement('div');
-  line.className = 'log-line';
-  line.innerHTML = `<span class="log-ts">${ts}</span><span class="log-tag">${tag}</span><span class="log-msg ${type}">${msg}</span>`;
-  body.appendChild(line);
-  body.scrollTop = body.scrollHeight;
-}
-
-function clearLog() { document.getElementById('log-body').innerHTML = ''; }
-
-function copyOutput() {
-  if (!outputText) return;
-  navigator.clipboard.writeText(outputText).then(() => log('sys', 'Copied to clipboard.', 'ok'));
-}
-
-function downloadOutput() {
-  if (!outputText) return;
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([outputText], { type: 'text/plain' }));
-  a.download = 'obfuscated.lua';
-  a.click();
-  log('sys', 'Downloaded obfuscated.lua', 'ok');
-}
-
-function showAbout()  { document.getElementById('about-modal').classList.add('open'); }
-function closeAbout(e) { if (e.target === document.getElementById('about-modal')) document.getElementById('about-modal').classList.remove('open'); }
-
-// ═══════════════════════════════════════════════
-// HERCULES ENGINE v3
-// Roblox executor-safe Luau obfuscator
-// Uses: bit32, loadstring, setfenv, getfenv
-// ═══════════════════════════════════════════════
-const HRC = {
-  _cnt: 0,
-  genVar() {
-    this._cnt++;
-    // Pure ASCII lookalike chars only — safe for all executors and UTF-8 parsers
-    const p = ['l','I','O','o','i','L','I','l','O','L'];
-    let n = '_';
-    let x = this._cnt;
-    do { n += p[x % p.length]; x = Math.floor(x / p.length); } while (x > 0);
-    return n + '_';
-  },
-  genKey(len = 8) {
-    let s = '';
-    while (s.length < len) s += Math.random().toString(36).slice(2);
-    return s.slice(0, len).toUpperCase();
-  },
-  rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; },
+Proto.prototype.allocReg=function(){var r=this._reg++;if(this._reg>this.maxStack)this.maxStack=this._reg;return r;};
+Proto.prototype.freeRegs=function(n){this._reg=Math.max(0,this._reg-n);};
+Proto.prototype.setTop=function(n){this._reg=n;if(n>this.maxStack)this.maxStack=n;};
+Proto.prototype.addConst=function(v){
+  var k=typeof v==='string'?'s:'+v:typeof v==='number'?'n:'+v:'b:'+(v===null?'nil':String(v));
+  if(this._cmap.has(k))return this._cmap.get(k);
+  var i=this.consts.length;this.consts.push(v);this._cmap.set(k,i);return i;
+};
+Proto.prototype.emit=function(op,a,b,c){var pc=this.instrs.length;this.instrs.push(mkI(op,a,b,c));return pc;};
+Proto.prototype.emitBx=function(op,a,bx){var pc=this.instrs.length;this.instrs.push(mkIBx(op,a,bx));return pc;};
+Proto.prototype.emitsBx=function(op,a,sbx){var pc=this.instrs.length;this.instrs.push(mkIsBx(op,a,sbx));return pc;};
+Proto.prototype.patchJmp=function(pc){
+  var raw=this.instrs[pc];
+  var a=(raw>>>6)&255;
+  this.instrs[pc]=mkIsBx(OP.JMP,a,this.instrs.length-pc-1);
+};
+Proto.prototype.pushScope=function(){this._scopes.push({locals:new Map(),base:this._reg});};
+Proto.prototype.popScope=function(){return this._scopes.pop();};
+Proto.prototype.addLocal=function(name){var r=this.allocReg();this._scopes[this._scopes.length-1].locals.set(name,r);return r;};
+Proto.prototype.resolveLocal=function(name){
+  for(var i=this._scopes.length-1;i>=0;i--){
+    var r=this._scopes[i].locals.get(name);
+    if(r!==undefined)return r;
+  }
+  return null;
 };
 
-// ── Opaque predicates ──────────────────────────
-function opaque() {
-  const ops = [
-    '(math.floor(1.9)==1)',
-    '(type(nil)=="nil")',
-    '(string.byte("A")==65)',
-    '(math.abs(-1)==1)',
-    '(not false)',
-    '(1<2)',
-    '(math.max(0,1)==1)',
-    '((1+1)==2)',
-    '(#{0}==1)',
-  ];
-  return ops[HRC.rand(0, ops.length - 1)];
-}
-function opaqueF() {
-  const ops = ['(1>2)', '(false)', '(nil==1)', '(math.floor(1.9)==2)', '(type(1)=="string")'];
-  return ops[HRC.rand(0, ops.length - 1)];
+function compile(ast){
+  var root=new Proto(null);
+  root.vararg=true;
+  compBlock(ast,root);
+  root.emit(OP.RETURN,0,1,0);
+  return root;
 }
 
-// ── Dead code injection ────────────────────────
-function deadCode() {
-  const v = HRC.genVar(), v2 = HRC.genVar();
-  const s = [
-    `if ${opaqueF()} then local ${v}=error("x") end`,
-    `do local ${v}=0 local ${v2}=${v}*0 end`,
-    `if ${opaque()} then else error("dead") end`,
-    `local ${v}=(function(...) return ... end)(nil)`,
-    `while ${opaqueF()} do break end`,
-    `for ${v}=1,0 do end`,
-    `local ${v}=nil if ${v} then end`,
-    `repeat until true`,
-  ];
-  return s[HRC.rand(0, s.length - 1)];
+function compBlock(block,p){
+  p.pushScope();
+  for(var i=0;i<block.body.length;i++)compStmt(block.body[i],p);
+  var s=p.popScope();
+  p.setTop(s.base);
 }
 
-// ── Number obfuscation ─────────────────────────
-function obfNum(raw) {
-  const n = parseInt(raw);
-  if (isNaN(n) || n < 0 || n > 99999) return raw;
-  const a = HRC.rand(1, Math.max(1, n === 0 ? 1 : n));
-  const styles = [
-    () => `(${a}+(${n - a}))`,
-    () => `(${n + HRC.rand(1,50)}-${HRC.rand(1,50)})`,
-    () => n === 0 ? '(1-1)' : `(${Math.ceil(n/2)}+${Math.floor(n/2)})`,
-    () => `(function() return ${n} end)()`,
-    () => `(${n + HRC.rand(1,20)}-${HRC.rand(1,20)})`,
-  ];
-  return styles[HRC.rand(0, styles.length - 1)]();
-}
-
-// ── String encryption ──────────────────────────
-// Uses bit32.bxor for Luau executor compatibility
-function encryptStr(raw) {
-  if (!raw || raw.length === 0) return { ref: '""', decl: null };
-  const k  = HRC.rand(10, 120);
-  const bytes = [];
-  for (let i = 0; i < raw.length; i++) {
-    // Keep key in 0-127 range so XOR of ASCII never produces values that
-    // look like a partial multi-byte UTF-8 sequence to strict parsers
-    const keyByte = (k + i * 13 + i * i * 7) % 127;
-    bytes.push(raw.charCodeAt(i) ^ keyByte);
-  }
-  const sv   = HRC.genVar();
-  const ki   = HRC.genVar(), di = HRC.genVar(), ri = HRC.genVar(), ii = HRC.genVar();
-  const decl = `local ${sv};do local ${ki}=${k} local ${di}={${bytes.join(',')}} local ${ri}={} for ${ii}=1,#${di} do ${ri}[${ii}]=string.char(bit32.bxor(${di}[${ii}],(${ki}+(${ii}-1)*13+(${ii}-1)*(${ii}-1)*7)%127)) end ${sv}=table.concat(${ri}) end`;
-  return { ref: sv, decl };
-}
-
-// ── XorShift32 RNG for shuffle ─────────────────
-function xorshift32(seed) {
-  let s = seed >>> 0;
-  return function() {
-    s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
-    return s >>> 0;
-  };
-}
-
-// ── Payload encoder ────────────────────────────
-function encodePayload(str) {
-  const k1 = HRC.rand(2, 15), k2 = HRC.rand(3, 20);
-  const k3 = HRC.rand(7, 50), k4 = HRC.rand(11, 200);
-  const bytes = [];
-  for (let i = 0; i < str.length; i++) {
-    const key = (k1*i*i*i + k2*i*i + k3*i + k4) % 251;
-    bytes.push(str.charCodeAt(i) ^ key);
-  }
-  const shuffleSeed = HRC.rand(100000, 999999);
-  const rng     = xorshift32(shuffleSeed);
-  const indices = Array.from({ length: bytes.length }, (_, i) => i);
-  for (let i = indices.length - 1; i > 0; i--) {
-    const j = rng() % (i + 1);
-    [indices[i], indices[j]] = [indices[j], indices[i]];
-  }
-  const shuffled = new Array(bytes.length);
-  for (let i = 0; i < bytes.length; i++) shuffled[indices[i]] = bytes[i];
-  const noiseKey = HRC.rand(5, 30);
-  const noised   = shuffled.map(b => (b + noiseKey) % 256);
-  return { noised, k1, k2, k3, k4, shuffleSeed, noiseKey, len: str.length };
-}
-
-// ── VM generator ───────────────────────────────
-// Emits pure Luau that runs via executor loadstring/setfenv
-function generateVM(obfCode) {
-  const enc = encodePayload(obfCode);
-
-  const vData   = HRC.genVar(), vLen   = HRC.genVar(), vI     = HRC.genVar();
-  const vJ      = HRC.genVar(), vRng   = HRC.genVar(), vSeed  = HRC.genVar();
-  const vIdx    = HRC.genVar(), vShuf  = HRC.genVar(), vUnshuf= HRC.genVar();
-  const vDecoded= HRC.genVar(), vKey   = HRC.genVar(), vByte  = HRC.genVar();
-  const vResult = HRC.genVar(), vExec  = HRC.genVar(), vErr   = HRC.genVar();
-  const vK1     = HRC.genVar(), vK2    = HRC.genVar(), vK3    = HRC.genVar();
-  const vK4     = HRC.genVar(), vNoise = HRC.genVar(), vTmp   = HRC.genVar();
-  const vS      = HRC.genVar();
-
-  // Split key constants so they're not literal in the output
-  const k1a = HRC.rand(1, enc.k1); const k1b = enc.k1 - k1a;
-  const k2a = HRC.rand(1, enc.k2); const k2b = enc.k2 - k2a;
-  const k3a = HRC.rand(1, enc.k3); const k3b = enc.k3 - k3a;
-  const k4a = HRC.rand(1, enc.k4); const k4b = enc.k4 - k4a;
-  const na  = HRC.rand(1, enc.noiseKey); const nb = enc.noiseKey - na;
-  const sa  = HRC.rand(1000, 99999);    const sb = enc.shuffleSeed - sa;
-
-  // XorShift constants split
-  const c13a = HRC.rand(5,11); const c13b = 13 - c13a;
-  const c17a = HRC.rand(8,14); const c17b = 17 - c17a;
-  const c5a  = HRC.rand(2, 4); const c5b  =  5 - c5a;
-  const c13  = `(${c13a}+${c13b})`;
-  const c17  = `(${c17a}+${c17b})`;
-  const c5   = `(${c5a}+${c5b})`;
-
-  // Chunk data array to avoid single-line length limits in some executors
-  const CHUNK = 150;
-  let dataDecl = `local ${vData}={`;
-  const rows = [];
-  for (let i = 0; i < enc.noised.length; i += CHUNK)
-    rows.push(enc.noised.slice(i, i + CHUNK).join(','));
-  dataDecl += rows.join(',\n') + '}';
-
-  const vm = `-- ${HRC.genKey()} :: ${HRC.genKey()} :: ${HRC.genKey()}
-${dataDecl}
-local ${vLen}=${obfNum(String(enc.len))}
-local ${vK1}=(${k1a}+${k1b})
-local ${vK2}=(${k2a}+${k2b})
-local ${vK3}=(${k3a}+${k3b})
-local ${vK4}=(${k4a}+${k4b})
-local ${vNoise}=(${na}+${nb})
-local ${vSeed}=(${sa}+${sb})
-local ${vRng}=(function(${vTmp})
-  local ${vS}=${vTmp}
-  return function()
-    ${vS}=bit32.bxor(${vS},bit32.lshift(${vS},${c13}))
-    ${vS}=bit32.bxor(${vS},bit32.rshift(${vS},${c17}))
-    ${vS}=bit32.bxor(${vS},bit32.lshift(${vS},${c5}))
-    return ${vS}
-  end
-end)(${vSeed})
-local ${vShuf}={}
-for ${vI}=1,${vLen} do ${vShuf}[${vI}]=${vI} end
-for ${vI}=${vLen},2,-1 do
-  local ${vJ}=(${vRng}()%${vI})+1
-  ${vShuf}[${vI}],${vShuf}[${vJ}]=${vShuf}[${vJ}],${vShuf}[${vI}]
-end
-local ${vUnshuf}={}
-for ${vI}=1,${vLen} do ${vUnshuf}[${vShuf}[${vI}]]=${vI} end
-local ${vDecoded}={}
-for ${vI}=1,${vLen} do
-  local ${vByte}=(${vData}[${vUnshuf}[${vI}]]-${vNoise})%256
-  local ${vKey}=(${vK1}*(${vI}-1)*(${vI}-1)*(${vI}-1)+${vK2}*(${vI}-1)*(${vI}-1)+${vK3}*(${vI}-1)+${vK4})%251
-  ${vDecoded}[${vI}]=string.char(bit32.bxor(${vByte},${vKey}))
-end
-local ${vResult}=table.concat(${vDecoded})
-local ${vExec},${vErr}=loadstring(${vResult})
-if ${vExec} then
-  setfenv(${vExec},getfenv())
-  ${vExec}()
-else
-  warn("[Hercules] Decode error: "..tostring(${vErr}))
-end`;
-  return vm;
-}
-
-// ── Main obfuscation pipeline ──────────────────
-function obfuscateLua(code) {
-  HRC._cnt = 0;
-
-  const KEYWORDS = new Set([
-    // Lua keywords
-    'and','break','do','else','elseif','end','false','for','function',
-    'goto','if','in','local','nil','not','or','repeat','return','then',
-    'true','until','while','self','_ENV','_G','_VERSION',
-    // Lua stdlib
-    'print','pairs','ipairs','next','type','tostring','tonumber',
-    'error','assert','pcall','xpcall','select','unpack','table',
-    'rawget','rawset','rawequal','rawlen','setmetatable','getmetatable',
-    'require','load','loadstring','loadfile','dofile','collectgarbage',
-    'coroutine','string','math','io','os','package','debug','bit32',
-    // Roblox globals
-    'game','workspace','script','wait','task','spawn','delay','warn',
-    'tick','time','Vector3','Vector2','Vector3int16','Vector2int16',
-    'CFrame','Color3','UDim','UDim2','TweenInfo','Enum','Instance',
-    'Ray','Region3','NumberRange','NumberSequence','ColorSequence',
-    'BrickColor','Axes','Faces','PhysicalProperties','Random','DateTime',
-    'RaycastParams','OverlapParams','PathfindingResult',
-    'Players','RunService','UserInputService','TweenService','Lighting',
-    'ReplicatedStorage','ReplicatedFirst','ServerStorage','ServerScriptService',
-    'StarterGui','StarterPlayer','StarterCharacterScripts','StarterPlayerScripts',
-    'HttpService','DataStoreService','MarketplaceService','BadgeService',
-    'TextService','ContentProvider','SoundService','ChatService',
-    'GuiService','ContextActionService','VirtualUser','InsertService',
-    'getfenv','setfenv','newproxy','typeof','SharedTable',
-    'WaitForChild','FindFirstChild','FindFirstChildOfClass',
-    'GetService','GetPlayers','GetChildren','GetDescendants',
-  ]);
-
-  const identMap = {};
-  function mapId(name) {
-    if (KEYWORDS.has(name) || name.startsWith('__')) return name;
-    if (!identMap[name]) identMap[name] = HRC.genVar();
-    return identMap[name];
-  }
-
-  let out = code;
-
-  // Pass 1: protect string literals and comments
-  const cslots = {}; let ci = 0;
-  out = out.replace(/--\[\[[\s\S]*?\]\]/g, c => { const k = `@@C${ci++}@@`; cslots[k] = ''; return k; });
-  out = out.replace(/--[^\n]*/g,           _ => { const k = `@@C${ci++}@@`; cslots[k] = ''; return k; });
-
-  // Pass 2: collect local & function identifiers to rename
-  let mm;
-  const re1 = /\blocal\s+(?:function\s+)?([A-Za-z_]\w*)/g;
-  const re2 = /\bfunction\s+([A-Za-z_][\w\.]*)/g;
-  while ((mm = re1.exec(out)) !== null) mapId(mm[1]);
-  while ((mm = re2.exec(out)) !== null) mapId(mm[1].split('.')[0]);
-
-  // Pass 3: encrypt string literals
-  const strDecls = [];
-  const sslots   = {}; let si = 0;
-  function replaceStr(_, s) {
-    const k   = `@@S${si++}@@`;
-    const enc = encryptStr(s);
-    if (enc.decl) strDecls.push(enc.decl);
-    sslots[k] = enc.ref;
-    return k;
-  }
-  out = out.replace(/"((?:[^"\\]|\\.)*)"/g, replaceStr);
-  out = out.replace(/'((?:[^'\\]|\\.)*)'/g, replaceStr);
-
-  // Pass 4: rename identifiers
-  for (const [orig, obf] of Object.entries(identMap)) {
-    out = out.replace(new RegExp('\\b' + orig + '\\b', 'g'), obf);
-  }
-
-  // Pass 5: obfuscate numeric literals
-  out = out.replace(/\b(\d+)\b/g, (_, n) => Math.random() > 0.45 ? obfNum(n) : n);
-
-  // Pass 6: proxy common globals through local indirection
-  const proxyDecls = [];
-  const PROXIES = ['print','warn','type','tostring','tonumber','pairs','ipairs','pcall','error','select','require','task','game','workspace'];
-  for (const fn of PROXIES) {
-    if (out.includes(fn) && KEYWORDS.has(fn)) {
-      const pv = HRC.genVar();
-      proxyDecls.push(`local ${pv};${pv}=function(...) return ${fn}(...) end`);
-      out = out.replace(new RegExp('\\b' + fn + '\\b', 'g'), pv);
+function compStmt(node,p){
+  if(node.type==='LocalStatement'){
+    var base=p._reg,vals=node.vals||[];
+    for(var i=0;i<node.names.length;i++){
+      var r=p.allocReg();
+      if(i<vals.length)compExprTo(vals[i],p,r);
+      else p.emit(OP.LOADNIL,r,r,0);
     }
+    for(var i=0;i<node.names.length;i++)p._scopes[p._scopes.length-1].locals.set(node.names[i],base+i);
+    return;
   }
-
-  // Pass 7: restore string/comment slots
-  for (const [k, v] of Object.entries(sslots)) out = out.replaceAll(k, v);
-  for (const [k]    of Object.entries(cslots)) out = out.replaceAll(k, '');
-
-  // Pass 8: inject dead code every ~5 lines
-  const ls = out.split('\n'), wd = [];
-  for (let i = 0; i < ls.length; i++) {
-    wd.push(ls[i]);
-    if (i > 0 && i % 5 === 0 && Math.random() > 0.35) wd.push(deadCode());
+  if(node.type==='LocalFunction'){var r=p.addLocal(node.name);compFuncTo(node.fn,p,r);return;}
+  if(node.type==='AssignStatement'){
+    var base2=p._reg,tmps=[];
+    for(var i=0;i<node.targets.length;i++){
+      var r=p.allocReg();tmps.push(r);
+      if(i<node.vals.length)compExprTo(node.vals[i],p,r);
+      else p.emit(OP.LOADNIL,r,r,0);
+    }
+    for(var i=0;i<node.targets.length;i++)assignTarget(node.targets[i],p,tmps[i]);
+    p.setTop(base2);return;
   }
-  out = wd.join('\n');
-
-  // Pass 9: control flow flattening
-  const cfv   = HRC.genVar();
-  const lines  = out.split('\n');
-  const csz    = Math.max(5, Math.floor(lines.length / 5));
-  const states = [];
-  for (let i = 0; i < lines.length; i += csz)
-    states.push(lines.slice(i, i + csz).join('\n'));
-
-  let cf = `local ${cfv}=1\nwhile true do\n`;
-  for (let i = 0; i < states.length; i++)
-    cf += `if ${cfv}==(${i + 1}) then\n${states[i]}\n${cfv}=${i + 2}\n`;
-  cf += `if ${cfv}==${states.length + 1} then break end\nend\n`;
-
-  // Pass 10: assemble pre-VM string
-  const prelude = [
-    `-- ${HRC.genKey()} ${HRC.genKey()}`,
-    ...proxyDecls,
-    ...strDecls,
-  ].join('\n');
-
-  const preVm = prelude + '\n' + cf;
-
-  // Pass 11: wrap in VM layer
-  return generateVM(preVm);
+  if(node.type==='FunctionStatement'){
+    var parts=node.name.split('.');
+    var r=p.allocReg();compFuncTo(node.fn,p,r);
+    if(parts.length===1&&!node.method){
+      var loc=p.resolveLocal(parts[0]);
+      if(loc!==null){p.emit(OP.MOVE,loc,r,0);p.freeRegs(1);}
+      else{var k=p.addConst(parts[0]);p.emit(OP.SETGLOBAL,r,k,0);p.freeRegs(1);}
+    } else {
+      compAssignDotted(p,parts,node.method,r);p.freeRegs(1);
+    }
+    return;
+  }
+  if(node.type==='CallStatement'){compExprTo(node.expr,p,-1);return;}
+  if(node.type==='DoStatement'){compBlock(node.body,p);return;}
+  if(node.type==='WhileStatement'){
+    var top=p.instrs.length;
+    var cr=p.allocReg();compExprTo(node.cond,p,cr);
+    p.emit(OP.TEST,cr,0,0);p.freeRegs(1);
+    var jmp=p.emitsBx(OP.JMP,0,0);
+    compBlock(node.body,p);
+    p.emitsBx(OP.JMP,0,top-p.instrs.length-1);
+    p.patchJmp(jmp);return;
+  }
+  if(node.type==='RepeatStatement'){
+    var top=p.instrs.length;
+    compBlock(node.body,p);
+    var cr=p.allocReg();compExprTo(node.cond,p,cr);
+    p.emit(OP.TEST,cr,0,1);p.freeRegs(1);
+    p.emitsBx(OP.JMP,0,top-p.instrs.length-1);return;
+  }
+  if(node.type==='IfStatement'){
+    var ends=[];
+    function compIf(cond,cons,alts,alt){
+      var cr=p.allocReg();compExprTo(cond,p,cr);
+      p.emit(OP.TEST,cr,0,0);p.freeRegs(1);
+      var jF=p.emitsBx(OP.JMP,0,0);
+      compBlock(cons,p);
+      if(alts.length||alt){var j=p.emitsBx(OP.JMP,0,0);ends.push(j);}
+      p.patchJmp(jF);
+      if(alts.length){compIf(alts[0].cond,alts[0].body,alts.slice(1),alt);}
+      else if(alt)compBlock(alt,p);
+    }
+    compIf(node.cond,node.cons,node.alts,node.alt);
+    for(var i=0;i<ends.length;i++)p.patchJmp(ends[i]);
+    return;
+  }
+  if(node.type==='NumericFor'){
+    var base=p._reg;
+    var rI=p.allocReg(),rL=p.allocReg(),rS=p.allocReg(),rV=p.allocReg();
+    compExprTo(node.start,p,rI);compExprTo(node.limit,p,rL);
+    if(node.step)compExprTo(node.step,p,rS);
+    else{var k=p.addConst(1);p.emitBx(OP.LOADK,rS,k);}
+    var prep=p.emitsBx(OP.FORPREP,rI,0);
+    var sc={locals:new Map([[node.name,rV]]),base:p._reg};
+    p._scopes.push(sc);
+    compBlock(node.body,p);
+    p._scopes.pop();
+    var loop=p.emitsBx(OP.FORLOOP,rI,0);
+    p.instrs[prep]=mkIsBx(OP.FORPREP,rI,loop-prep-1);
+    p.instrs[loop]=mkIsBx(OP.FORLOOP,rI,prep-loop);
+    p.setTop(base);return;
+  }
+  if(node.type==='GenericFor'){
+    var base=p._reg;
+    var rIt=p.allocReg(),rSt=p.allocReg(),rCtl=p.allocReg();
+    for(var i=0;i<node.iters.length&&i<3;i++)compExprTo(node.iters[i],p,rIt+i);
+    var top=p.instrs.length;
+    var tf=p.emit(OP.TFORLOOP,rIt,0,node.names.length);
+    var jmp=p.emitsBx(OP.JMP,0,0);
+    var sc2={locals:new Map(),base:p._reg};
+    for(var i=0;i<node.names.length;i++)sc2.locals.set(node.names[i],rCtl+1+i);
+    p._scopes.push(sc2);
+    compBlock(node.body,p);
+    p._scopes.pop();
+    p.emitsBx(OP.JMP,0,top-p.instrs.length-1);
+    p.patchJmp(jmp);
+    p.setTop(base);return;
+  }
+  if(node.type==='ReturnStatement'){
+    if(node.vals.length===0){p.emit(OP.RETURN,0,1,0);}
+    else if(node.vals.length===1){
+      var r=p.allocReg();compExprTo(node.vals[0],p,r);
+      p.emit(OP.RETURN,r,2,0);p.freeRegs(1);
+    } else {
+      var start=p._reg;
+      for(var i=0;i<node.vals.length;i++){var r=p.allocReg();compExprTo(node.vals[i],p,r);}
+      p.emit(OP.RETURN,start,node.vals.length+1,0);
+      p.setTop(start);
+    }
+    return;
+  }
+  // BreakStatement, GotoStatement, LabelStatement - skip
 }
 
-// ── Run ────────────────────────────────────────
-async function runObfuscate() {
-  let code = '';
-  if (currentMode === 'paste') {
-    code = document.getElementById('input-code').value.trim();
-    if (!code) { log('error', 'No input code.', 'err'); return; }
-  } else {
-    if (!loadedFile) { log('error', 'No file loaded.', 'err'); return; }
-    code = await loadedFile.text();
+function assignTarget(target,p,src){
+  if(target.type==='NameExpr'){
+    var loc=p.resolveLocal(target.name);
+    if(loc!==null)p.emit(OP.MOVE,loc,src,0);
+    else{var k=p.addConst(target.name);p.emit(OP.SETGLOBAL,src,k,0);}
+  } else if(target.type==='IndexExpr'){
+    var obj=p.allocReg(),key=p.allocReg();
+    compExprTo(target.obj,p,obj);compExprTo(target.key,p,key);
+    p.emit(OP.SETTABLE,obj,key,src);p.freeRegs(2);
+  }
+}
+
+function compAssignDotted(p,parts,method,src){
+  var base=p.allocReg();
+  var loc=p.resolveLocal(parts[0]);
+  if(loc!==null)p.emit(OP.MOVE,base,loc,0);
+  else{var k=p.addConst(parts[0]);p.emit(OP.GETGLOBAL,base,k,0);}
+  for(var i=1;i<parts.length-1;i++){
+    var k=p.addConst(parts[i]),nxt=p.allocReg();
+    p.emit(OP.GETTABLE,nxt,base,256+k);p.emit(OP.MOVE,base,nxt,0);p.freeRegs(1);
+  }
+  var last=method||parts[parts.length-1];
+  var k=p.addConst(last);
+  p.emit(OP.SETTABLE,base,256+k,src);
+  p.freeRegs(1);
+}
+
+function compFuncTo(fn,p,dst){
+  var child=new Proto(p);
+  child.params=fn.params.length;
+  child.vararg=fn.vararg;
+  child.pushScope();
+  for(var i=0;i<fn.params.length;i++)child.addLocal(fn.params[i]);
+  compBlock(fn.body,child);
+  child.emit(OP.RETURN,0,1,0);
+  child.popScope();
+  var idx=p.protos.length;p.protos.push(child);
+  // Use LOADK with high bit in Bx as closure marker
+  p.instrs.push(mkIBx(OP.LOADK,dst,(1<<17)|idx));
+}
+
+function compExprTo(node,p,dst){
+  if(dst===-1){var r=p.allocReg();compExprTo(node,p,r);p.freeRegs(1);return;}
+  var t=node.type;
+  if(t==='NilLiteral'){p.emit(OP.LOADNIL,dst,dst,0);return;}
+  if(t==='BoolLiteral'){p.emit(OP.LOADBOOL,dst,node.v?1:0,0);return;}
+  if(t==='NumberLiteral'){var k=p.addConst(node.v);p.emitBx(OP.LOADK,dst,k);return;}
+  if(t==='StringLiteral'){var k=p.addConst(node.v);p.emitBx(OP.LOADK,dst,k);return;}
+  if(t==='VarargExpr'){p.emit(OP.VARARG,dst,2,0);return;}
+  if(t==='NameExpr'){
+    var loc=p.resolveLocal(node.name);
+    if(loc!==null)p.emit(OP.MOVE,dst,loc,0);
+    else{var k=p.addConst(node.name);p.emit(OP.GETGLOBAL,dst,k,0);}
+    return;
+  }
+  if(t==='IndexExpr'){
+    var obj=p.allocReg();compExprTo(node.obj,p,obj);
+    if(node.key.type==='StringLiteral'||node.key.type==='NumberLiteral'){
+      var k=p.addConst(node.key.v);p.emit(OP.GETTABLE,dst,obj,256+k);
+    } else {
+      var key=p.allocReg();compExprTo(node.key,p,key);
+      p.emit(OP.GETTABLE,dst,obj,key);p.freeRegs(1);
+    }
+    p.freeRegs(1);return;
+  }
+  if(t==='UnaryExpr'){
+    var r=p.allocReg();compExprTo(node.arg,p,r);
+    var um={'-':OP.UNM,'not':OP.NOT,'#':OP.LEN};
+    p.emit(um[node.op]||OP.UNM,dst,r,0);p.freeRegs(1);return;
+  }
+  if(t==='BinaryExpr'){
+    var arith={'+':OP.ADD,'-':OP.SUB,'*':OP.MUL,'/':OP.DIV,'%':OP.MOD,'^':OP.POW};
+    var cmp={'==':OP.EQ,'~=':OP.EQ,'<':OP.LT,'<=':OP.LE,'>':OP.LT,'>=':OP.LE};
+    if(node.op==='..'){
+      var l=p.allocReg(),r2=p.allocReg();
+      compExprTo(node.left,p,l);compExprTo(node.right,p,r2);
+      p.emit(OP.CONCAT,dst,l,r2);p.freeRegs(2);
+    } else if(arith[node.op]!==undefined){
+      var l=p.allocReg(),r2=p.allocReg();
+      compExprTo(node.left,p,l);compExprTo(node.right,p,r2);
+      p.emit(arith[node.op],dst,l,r2);p.freeRegs(2);
+    } else if(cmp[node.op]!==undefined){
+      var la=node.left,ra=node.right;
+      if(node.op==='>'||node.op==='>='){var tmp=la;la=ra;ra=tmp;}
+      var l=p.allocReg(),r2=p.allocReg();
+      compExprTo(la,p,l);compExprTo(ra,p,r2);
+      var neg=(node.op==='~=')?1:0;
+      p.emit(cmp[node.op],neg,l,r2);
+      p.emitsBx(OP.JMP,0,1);
+      p.emit(OP.LOADBOOL,dst,0,1);
+      p.emit(OP.LOADBOOL,dst,1,0);
+      p.freeRegs(2);
+    } else if(node.op==='and'){
+      compExprTo(node.left,p,dst);
+      p.emit(OP.TEST,dst,0,0);
+      var j=p.emitsBx(OP.JMP,0,0);
+      compExprTo(node.right,p,dst);
+      p.patchJmp(j);
+    } else if(node.op==='or'){
+      compExprTo(node.left,p,dst);
+      p.emit(OP.TEST,dst,0,1);
+      var j=p.emitsBx(OP.JMP,0,0);
+      compExprTo(node.right,p,dst);
+      p.patchJmp(j);
+    }
+    return;
+  }
+  if(t==='CallExpression'){
+    var fn=p.allocReg();compExprTo(node.fn,p,fn);
+    for(var i=0;i<node.args.length;i++){var r=p.allocReg();compExprTo(node.args[i],p,r);}
+    p.emit(OP.CALL,fn,node.args.length+1,2);
+    if(dst!==fn)p.emit(OP.MOVE,dst,fn,0);
+    p.freeRegs(node.args.length+(dst!==fn?1:0));
+    if(dst===fn)p.freeRegs(1);
+    return;
+  }
+  if(t==='MethodCallExpression'){
+    var obj=p.allocReg();compExprTo(node.obj,p,obj);
+    var fn=p.allocReg();var k=p.addConst(node.method);
+    p.emit(OP.SELF,fn,obj,256+k);
+    for(var i=0;i<node.args.length;i++){var r=p.allocReg();compExprTo(node.args[i],p,r);}
+    p.emit(OP.CALL,fn,node.args.length+2,2);
+    if(dst!==fn)p.emit(OP.MOVE,dst,fn,0);
+    p.freeRegs(node.args.length+1+(dst!==fn?1:0));
+    if(dst===fn)p.freeRegs(1);
+    return;
+  }
+  if(t==='TableConstructor'){
+    p.emit(OP.NEWTABLE,dst,0,0);
+    var arr=0;
+    for(var i=0;i<node.fields.length;i++){
+      var f=node.fields[i];
+      if(f.type==='value'){
+        var r=p.allocReg();compExprTo(f.val,p,r);arr++;
+        p.emit(OP.SETLIST,dst,1,arr);p.freeRegs(1);
+      } else if(f.type==='named'){
+        var r=p.allocReg();compExprTo(f.val,p,r);
+        var k=p.addConst(f.key);p.emit(OP.SETTABLE,dst,256+k,r);p.freeRegs(1);
+      } else {
+        var kr=p.allocReg();compExprTo(f.key,p,kr);
+        var vr=p.allocReg();compExprTo(f.val,p,vr);
+        p.emit(OP.SETTABLE,dst,kr,vr);p.freeRegs(2);
+      }
+    }
+    return;
+  }
+  if(t==='FunctionExpr'){compFuncTo(node,p,dst);return;}
+  if(t==='ParenExpr'){compExprTo(node.expr,p,dst);return;}
+  p.emit(OP.LOADNIL,dst,dst,0);
+}
+
+// =====================================================================
+// SECTION 4 — SERIALISER
+// =====================================================================
+function serialise(proto){
+  var out=[];
+  function u8(n){out.push(n&255);}
+  function u32(n){n=n>>>0;out.push(n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255);}
+  function f64(v){
+    var buf=new ArrayBuffer(8);
+    new DataView(buf).setFloat64(0,v,true);
+    var bytes=new Uint8Array(buf);
+    for(var i=0;i<8;i++)out.push(bytes[i]);
+  }
+  function str(s){
+    u32(s.length);
+    for(var i=0;i<s.length;i++)u8(s.charCodeAt(i)&255);
+  }
+  // magic: HRC\x04
+  out.push(0x48,0x52,0x43,0x04);
+  // instructions
+  u32(proto.instrs.length);
+  for(var i=0;i<proto.instrs.length;i++)u32(proto.instrs[i]);
+  // constants
+  u32(proto.consts.length);
+  for(var i=0;i<proto.consts.length;i++){
+    var c=proto.consts[i];
+    if(c===null||c===undefined){u8(0);}
+    else if(typeof c==='boolean'){u8(1);u8(c?1:0);}
+    else if(typeof c==='number'){u8(2);f64(c);}
+    else if(typeof c==='string'){u8(3);str(c);}
+  }
+  // child protos
+  u32(proto.protos.length);
+  for(var i=0;i<proto.protos.length;i++){
+    var sub=serialise(proto.protos[i]);
+    for(var j=0;j<sub.length;j++)out.push(sub[j]);
+  }
+  // meta
+  u8(proto.params);u8(proto.vararg?1:0);
+  out.push(proto.maxStack&255,(proto.maxStack>>>8)&255);
+  return out;
+}
+
+// =====================================================================
+// SECTION 5 — ENCRYPTION
+// =====================================================================
+function encryptBytes(bytes){
+  var seed=rnd(100000,999999);
+  var noise=rnd(3,25);
+  var k1=rnd(2,10),k2=rnd(1,12),k3=rnd(5,35),k4=rnd(8,150);
+  // XOR encrypt (mod 127 key so bytes stay clean)
+  var enc=bytes.map(function(b,i){
+    var key=(k1*i*i+k2*i+k3+k4)%127;
+    return b^key;
+  });
+  // Fisher-Yates shuffle via xorshift32
+  function xs(s){s^=(s<<13)>>>0;s^=s>>>17;s^=(s<<5)>>>0;return s>>>0;}
+  var st=seed>>>0;
+  var idx=enc.map(function(_,i){return i;});
+  for(var i=idx.length-1;i>0;i--){st=xs(st);var j=st%(i+1);var tmp=idx[i];idx[i]=idx[j];idx[j]=tmp;}
+  var shuf=new Array(enc.length);
+  for(var i=0;i<enc.length;i++)shuf[idx[i]]=enc[i];
+  var noised=shuf.map(function(b){return (b+noise)%256;});
+  return {noised:noised,seed:seed,noise:noise,k1:k1,k2:k2,k3:k3,k4:k4};
+}
+
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+
+// =====================================================================
+// SECTION 6 — VM EMITTER
+// Emits a self-contained Lua VM script
+// =====================================================================
+var VC=0;
+function gv(){
+  VC++;
+  var p=['l','I','O','o','i','L'];
+  var n='_',x=VC;
+  do{n+=p[x%p.length];x=Math.floor(x/p.length);}while(x>0);
+  return n+'_';
+}
+function rk(n){n=n||8;var s='';while(s.length<n)s+=Math.random().toString(36).slice(2);return s.slice(0,n).toUpperCase();}
+
+function emitVM(bytes){
+  VC=0;
+  var E=encryptBytes(bytes);
+
+  // Randomise virtual opcode IDs (IronBrew2 signature technique)
+  var virtMap=OP_NAMES.slice();
+  for(var i=virtMap.length-1;i>0;i--){var j=rnd(0,i);var tmp=virtMap[i];virtMap[i]=virtMap[j];virtMap[j]=tmp;}
+  // virtMap[virtualID] = opcode name
+  // toVirt[realOpcode] = virtualID
+  var toVirt=new Array(37);
+  for(var i=0;i<virtMap.length;i++)toVirt[OP[virtMap[i]]]=i;
+
+  // Variable names
+  var vData=gv(),vLen=gv(),vSeed=gv(),vNoise=gv();
+  var vK1=gv(),vK2=gv(),vK3=gv(),vK4=gv();
+  var vRng=gv(),vSt=gv(),vIdx=gv(),vUnshuf=gv();
+  var vDec=gv(),vI=gv(),vJ=gv(),vByt=gv(),vKey=gv();
+  var vPos=gv(),vRU8=gv(),vRU32=gv(),vRF64=gv(),vRStr=gv(),vRProto=gv();
+  var vExec=gv(),vProto=gv(),vEnv=gv();
+  var vReg=gv(),vKst=gv(),vProt=gv(),vInst=gv(),vPC=gv();
+  var vOp=gv(),vA=gv(),vBv=gv(),vCv=gv(),vBx=gv(),vSBx=gv();
+  var vRK=gv(),vCall=gv();
+  var vM=gv(),vArgs=gv(),vRets=gv(),vN=gv(),vVarg=gv();
+  var vTa=gv(),vTb=gv(),vTc=gv();
+
+  // Split secrets
+  var s1=rnd(1000,99999),s2=E.seed-s1;
+  var n1=rnd(1,Math.max(1,E.noise-1)),n2=E.noise-n1;
+  var k1a=rnd(1,Math.max(1,E.k1)),k1b=E.k1-k1a;
+  var k2a=rnd(1,Math.max(1,E.k2)),k2b=E.k2-k2a;
+  var k3a=rnd(1,Math.max(1,E.k3)),k3b=E.k3-k3a;
+  var k4a=rnd(1,Math.max(1,E.k4)),k4b=E.k4-k4a;
+  var c13a=rnd(5,11),c17a=rnd(8,14),c5a=rnd(2,4);
+  var c13='('+(c13a)+'+'+(13-c13a)+')',c17='('+(c17a)+'+'+(17-c17a)+')',c5='('+(c5a)+'+'+(5-c5a)+')';
+
+  // Chunk data
+  var CHUNK=100;
+  var rows=[];
+  for(var i=0;i<E.noised.length;i+=CHUNK)rows.push(E.noised.slice(i,i+CHUNK).join(','));
+
+  // Virtual opcode variable declarations
+  var opVars={};
+  var opDeclLines=[];
+  for(var i=0;i<OP_NAMES.length;i++){
+    var nm=OP_NAMES[i];
+    opVars[nm]=gv();
+    opDeclLines.push('local '+opVars[nm]+'='+toVirt[OP[nm]]);
   }
 
-  const btn = document.getElementById('run-btn');
-  const btnText = document.getElementById('btn-text');
-  btn.disabled = true;
-  btnText.textContent = 'Processing…';
+  var sBiasPart1=rnd(1000,99999),sBiasPart2=MAXARG_sBx-sBiasPart1;
+  var sBias='('+sBiasPart1+'+'+sBiasPart2+')';
+
+  var lines=[];
+  lines.push('-- '+rk()+' :: '+rk()+' :: '+rk()+' :: '+rk());
+  lines.push('local '+vData+'={');
+  lines.push(rows.join(',\n'));
+  lines.push('}');
+  lines.push('local '+vLen+'='+(E.noised.length));
+  lines.push('local '+vSeed+'=('+s1+'+'+s2+')');
+  lines.push('local '+vNoise+'=('+n1+'+'+n2+')');
+  lines.push('local '+vK1+'=('+k1a+'+'+k1b+')');
+  lines.push('local '+vK2+'=('+k2a+'+'+k2b+')');
+  lines.push('local '+vK3+'=('+k3a+'+'+k3b+')');
+  lines.push('local '+vK4+'=('+k4a+'+'+k4b+')');
+  lines.push('local '+vRng+'=(function('+vSt+')');
+  lines.push('  local _s='+vSt);
+  lines.push('  return function()');
+  lines.push('    _s=bit32.bxor(_s,bit32.lshift(_s,'+c13+'))');
+  lines.push('    _s=bit32.bxor(_s,bit32.rshift(_s,'+c17+'))');
+  lines.push('    _s=bit32.bxor(_s,bit32.lshift(_s,'+c5+'))');
+  lines.push('    return _s');
+  lines.push('  end');
+  lines.push('end)('+vSeed+')');
+  lines.push('local '+vIdx+'={}');
+  lines.push('for '+vI+'=1,'+vLen+' do '+vIdx+'['+vI+']='+vI+' end');
+  lines.push('for '+vI+'='+vLen+',2,-1 do');
+  lines.push('  local '+vJ+'=('+vRng+'()%'+vI+')+1');
+  lines.push('  '+vIdx+'['+vI+'],'+vIdx+'['+vJ+']='+vIdx+'['+vJ+'],'+vIdx+'['+vI+']');
+  lines.push('end');
+  lines.push('local '+vUnshuf+'={}');
+  lines.push('for '+vI+'=1,'+vLen+' do '+vUnshuf+'['+vIdx+'['+vI+']]= '+vI+' end');
+  lines.push('local '+vDec+'={}');
+  lines.push('for '+vI+'=1,'+vLen+' do');
+  lines.push('  local '+vByt+'=('+vData+'['+vUnshuf+'['+vI+']]-'+vNoise+')%256');
+  lines.push('  local '+vKey+'=('+vK1+'*('+vI+'-1)*('+vI+'-1)+'+vK2+'*('+vI+'-1)+'+vK3+'+'+vK4+')%127');
+  lines.push('  '+vDec+'['+vI+']=bit32.bxor('+vByt+','+vKey+')');
+  lines.push('end');
+  lines.push('local '+vPos+'=1');
+  lines.push('local '+vRU8+' = function() local b='+vDec+'['+vPos+'] '+vPos+'='+vPos+'+1 return b end');
+  lines.push('local '+vRU32+' = function()');
+  lines.push('  local a,b,c,d='+vRU8+'(),'+vRU8+'(),'+vRU8+'(),'+vRU8+'()');
+  lines.push('  return a+b*256+c*65536+d*16777216');
+  lines.push('end');
+  // f64 decoder - manual IEEE 754 via bit32
+  lines.push('local '+vRF64+' = function()');
+  lines.push('  local '+vTa+'={}');
+  lines.push('  for _=1,8 do '+vTa+'[#'+vTa+'+1]='+vRU8+'() end');
+  lines.push('  local sign=bit32.rshift('+vTa+'[8],7)');
+  lines.push('  local exp=bit32.bor(bit32.lshift(bit32.band('+vTa+'[8],127),4),bit32.rshift('+vTa+'[7],4))');
+  lines.push('  local mant=0');
+  lines.push('  for bi=1,6 do');
+  lines.push('    for bit_i=0,7 do');
+  lines.push('      if bit32.band('+vTa+'[bi],bit32.lshift(1,bit_i))~=0 then');
+  lines.push('        mant=mant+2^(bit_i+(bi-1)*8-52)');
+  lines.push('      end');
+  lines.push('    end');
+  lines.push('  end');
+  lines.push('  for bit_i=0,3 do');
+  lines.push('    if bit32.band('+vTa+'[7],bit32.lshift(1,bit_i))~=0 then mant=mant+2^(bit_i+48-52) end');
+  lines.push('  end');
+  lines.push('  local s=sign==0 and 1 or -1');
+  lines.push('  if exp==0 and mant==0 then return 0 end');
+  lines.push('  if exp==2047 then return s*(mant==0 and math.huge or 0/0) end');
+  lines.push('  if exp>0 then mant=mant+1 end');
+  lines.push('  return s*mant*2^(exp-1023-(exp>0 and 52 or 51))');
+  lines.push('end');
+  lines.push('local '+vRStr+' = function()');
+  lines.push('  local n='+vRU32+'()');
+  lines.push('  local t={}');
+  lines.push('  for _=1,n do t[#t+1]=string.char('+vRU8+'()) end');
+  lines.push('  return table.concat(t)');
+  lines.push('end');
+  lines.push(vRProto+'=nil');
+  lines.push(vRProto+' = function()');
+  lines.push('  local m1,m2,m3,m4='+vRU8+'(),'+vRU8+'(),'+vRU8+'(),'+vRU8+'()');
+  lines.push('  assert(m1==0x48 and m2==0x52 and m3==0x43 and m4==0x04,"[Hercules] Bad magic")');
+  lines.push('  local ni='+vRU32+'()');
+  lines.push('  local inst={}');
+  lines.push('  for i=1,ni do inst[i]='+vRU32+'() end');
+  lines.push('  local nk='+vRU32+'()');
+  lines.push('  local kst={}');
+  lines.push('  for i=1,nk do');
+  lines.push('    local kt='+vRU8+'()');
+  lines.push('    if kt==0 then kst[i]=nil');
+  lines.push('    elseif kt==1 then kst[i]='+vRU8+'()==1');
+  lines.push('    elseif kt==2 then kst[i]='+vRF64+'()');
+  lines.push('    elseif kt==3 then kst[i]='+vRStr+'()');
+  lines.push('    end');
+  lines.push('  end');
+  lines.push('  local np='+vRU32+'()');
+  lines.push('  local protos={}');
+  lines.push('  for i=1,np do protos[i]='+vRProto+'() end');
+  lines.push('  local params='+vRU8+'()');
+  lines.push('  local isVararg='+vRU8+'()==1');
+  lines.push('  local maxStack='+vRU8+'()+'+vRU8+'()*256');
+  lines.push('  return {inst=inst,kst=kst,protos=protos,params=params,vararg=isVararg,maxStack=maxStack}');
+  lines.push('end');
+  // RK helper
+  lines.push('local '+vRK+' = function(reg,kst,idx)');
+  lines.push('  if idx>=256 then return kst[idx-256+1] else return reg[idx] end');
+  lines.push('end');
+  // The main VM executor
+  lines.push(vCall+'=nil');
+  lines.push(vCall+' = function(proto,env,upvals,...)');
+  lines.push('  local '+vReg+'={}');
+  lines.push('  local '+vKst+'=proto.kst');
+  lines.push('  local '+vProt+'=proto.protos');
+  lines.push('  local '+vInst+'=proto.inst');
+  lines.push('  local '+vPC+'=1');
+  lines.push('  local args={...}');
+  lines.push('  for i=1,proto.params do '+vReg+'[i-1]=args[i] end');
+  lines.push('  local '+vVarg+'={}');
+  lines.push('  if proto.vararg then for i=proto.params+1,#args do '+vVarg+'[#'+vVarg+'+1]=args[i] end end');
+  // opcode virtual ID declarations
+  lines.push(opDeclLines.join('\n'));
+  // dispatch loop
+  lines.push('  while true do');
+  lines.push('    local '+vM+'='+vInst+'['+vPC+']');
+  lines.push('    '+vPC+'='+vPC+'+1');
+  lines.push('    local '+vOp+'='+vM+'%64');
+  lines.push('    local '+vA+'=bit32.band(bit32.rshift('+vM+',6),255)');
+  lines.push('    local '+vBv+'=bit32.band(bit32.rshift('+vM+',14),511)');
+  lines.push('    local '+vCv+'=bit32.band(bit32.rshift('+vM+',23),511)');
+  lines.push('    local '+vBx+'=bit32.band(bit32.rshift('+vM+',14),262143)');
+  lines.push('    local '+vSBx+'='+vBx+'-'+sBias);
+  lines.push('    if '+vOp+'=='+opVars['MOVE']+' then');
+  lines.push('      '+vReg+'['+vA+']='+vReg+'['+vBv+']');
+  lines.push('    elseif '+vOp+'=='+opVars['LOADK']+' then');
+  lines.push('      if bit32.band('+vBx+',131072)~=0 then');
+  lines.push('        local pidx=bit32.band('+vBx+',131071)+1');
+  lines.push('        local cp='+vProt+'[pidx]');
+  lines.push('        '+vReg+'['+vA+']=function(...) return '+vCall+'(cp,env,{}) end');
+  lines.push('      else '+vReg+'['+vA+']='+vKst+'['+vBx+'+1] end');
+  lines.push('    elseif '+vOp+'=='+opVars['LOADBOOL']+' then');
+  lines.push('      '+vReg+'['+vA+']=('+vBv+'~=0)');
+  lines.push('      if '+vCv+'~=0 then '+vPC+'='+vPC+'+1 end');
+  lines.push('    elseif '+vOp+'=='+opVars['LOADNIL']+' then');
+  lines.push('      for _i='+vA+','+vBv+' do '+vReg+'[_i]=nil end');
+  lines.push('    elseif '+vOp+'=='+opVars['GETGLOBAL']+' then');
+  lines.push('      '+vReg+'['+vA+']=env['+vKst+'['+vBv+'+1]]');
+  lines.push('    elseif '+vOp+'=='+opVars['SETGLOBAL']+' then');
+  lines.push('      env['+vKst+'['+vBv+'+1]]='+vReg+'['+vA+']');
+  lines.push('    elseif '+vOp+'=='+opVars['GETTABLE']+' then');
+  lines.push('      '+vReg+'['+vA+']='+vReg+'['+vBv+']['+vRK+'('+vReg+','+vKst+','+vCv+')]');
+  lines.push('    elseif '+vOp+'=='+opVars['SETTABLE']+' then');
+  lines.push('      '+vReg+'['+vA+']['+vRK+'('+vReg+','+vKst+','+vBv+')]='+vRK+'('+vReg+','+vKst+','+vCv+')');
+  lines.push('    elseif '+vOp+'=='+opVars['NEWTABLE']+' then');
+  lines.push('      '+vReg+'['+vA+']={}');
+  lines.push('    elseif '+vOp+'=='+opVars['SELF']+' then');
+  lines.push('      '+vReg+'['+vA+'+1]='+vReg+'['+vBv+']');
+  lines.push('      '+vReg+'['+vA+']='+vReg+'['+vBv+']['+vRK+'('+vReg+','+vKst+','+vCv+')]');
+  lines.push('    elseif '+vOp+'=='+opVars['ADD']+' then');
+  lines.push('      '+vReg+'['+vA+']='+vRK+'('+vReg+','+vKst+','+vBv+')+'+vRK+'('+vReg+','+vKst+','+vCv+')');
+  lines.push('    elseif '+vOp+'=='+opVars['SUB']+' then');
+  lines.push('      '+vReg+'['+vA+']='+vRK+'('+vReg+','+vKst+','+vBv+')-'+vRK+'('+vReg+','+vKst+','+vCv+')');
+  lines.push('    elseif '+vOp+'=='+opVars['MUL']+' then');
+  lines.push('      '+vReg+'['+vA+']='+vRK+'('+vReg+','+vKst+','+vBv+')*'+vRK+'('+vReg+','+vKst+','+vCv+')');
+  lines.push('    elseif '+vOp+'=='+opVars['DIV']+' then');
+  lines.push('      '+vReg+'['+vA+']='+vRK+'('+vReg+','+vKst+','+vBv+')/'+vRK+'('+vReg+','+vKst+','+vCv+')');
+  lines.push('    elseif '+vOp+'=='+opVars['MOD']+' then');
+  lines.push('      '+vReg+'['+vA+']='+vRK+'('+vReg+','+vKst+','+vBv+')%'+vRK+'('+vReg+','+vKst+','+vCv+')');
+  lines.push('    elseif '+vOp+'=='+opVars['POW']+' then');
+  lines.push('      '+vReg+'['+vA+']='+vRK+'('+vReg+','+vKst+','+vBv+')^'+vRK+'('+vReg+','+vKst+','+vCv+')');
+  lines.push('    elseif '+vOp+'=='+opVars['UNM']+' then');
+  lines.push('      '+vReg+'['+vA+']=-'+vReg+'['+vBv+']');
+  lines.push('    elseif '+vOp+'=='+opVars['NOT']+' then');
+  lines.push('      '+vReg+'['+vA+']=not '+vReg+'['+vBv+']');
+  lines.push('    elseif '+vOp+'=='+opVars['LEN']+' then');
+  lines.push('      '+vReg+'['+vA+']=#'+vReg+'['+vBv+']');
+  lines.push('    elseif '+vOp+'=='+opVars['CONCAT']+' then');
+  lines.push('      local '+vTa+'={}');
+  lines.push('      for _i='+vBv+','+vCv+' do '+vTa+'[#'+vTa+'+1]=tostring('+vReg+'[_i]) end');
+  lines.push('      '+vReg+'['+vA+']=table.concat('+vTa+')');
+  lines.push('    elseif '+vOp+'=='+opVars['JMP']+' then');
+  lines.push('      '+vPC+'='+vPC+'+'+vSBx);
+  lines.push('    elseif '+vOp+'=='+opVars['EQ']+' then');
+  lines.push('      if ('+vRK+'('+vReg+','+vKst+','+vBv+')=='+vRK+'('+vReg+','+vKst+','+vCv+'))==('+vA+'==0) then '+vPC+'='+vPC+'+1 end');
+  lines.push('    elseif '+vOp+'=='+opVars['LT']+' then');
+  lines.push('      if ('+vRK+'('+vReg+','+vKst+','+vBv+')<'+vRK+'('+vReg+','+vKst+','+vCv+'))==('+vA+'==0) then '+vPC+'='+vPC+'+1 end');
+  lines.push('    elseif '+vOp+'=='+opVars['LE']+' then');
+  lines.push('      if ('+vRK+'('+vReg+','+vKst+','+vBv+')<='+vRK+'('+vReg+','+vKst+','+vCv+'))==('+vA+'==0) then '+vPC+'='+vPC+'+1 end');
+  lines.push('    elseif '+vOp+'=='+opVars['TEST']+' then');
+  lines.push('      if ('+vReg+'['+vA+'] and true or false)==('+vCv+'==1) then '+vPC+'='+vPC+'+1 end');
+  lines.push('    elseif '+vOp+'=='+opVars['TESTSET']+' then');
+  lines.push('      if ('+vReg+'['+vBv+'] and true or false)==('+vCv+'==1) then '+vReg+'['+vA+']='+vReg+'['+vBv+'] else '+vPC+'='+vPC+'+1 end');
+  lines.push('    elseif '+vOp+'=='+opVars['CALL']+' then');
+  lines.push('      local fn='+vReg+'['+vA+']');
+  lines.push('      local '+vArgs+'={}');
+  lines.push('      local na='+vBv+'-1');
+  lines.push('      if na<0 then for _i='+vA+'+1,proto.maxStack do if '+vReg+'[_i]~=nil then '+vArgs+'[#'+vArgs+'+1]='+vReg+'[_i] end end');
+  lines.push('      else for _i=1,na do '+vArgs+'[#'+vArgs+'+1]='+vReg+'['+vA+'+_i] end end');
+  lines.push('      local '+vRets+'={fn(table.unpack('+vArgs+'))}');
+  lines.push('      local nr='+vCv+'-1');
+  lines.push('      if nr<0 then for _i=1,#'+vRets+' do '+vReg+'['+vA+'+_i-1]='+vRets+'[_i] end');
+  lines.push('      else for _i=1,nr do '+vReg+'['+vA+'+_i-1]='+vRets+'[_i] end end');
+  lines.push('    elseif '+vOp+'=='+opVars['TAILCALL']+' then');
+  lines.push('      local fn='+vReg+'['+vA+']');
+  lines.push('      local '+vArgs+'={}');
+  lines.push('      for _i=1,'+vBv+'-1 do '+vArgs+'[#'+vArgs+'+1]='+vReg+'['+vA+'+_i] end');
+  lines.push('      return fn(table.unpack('+vArgs+'))');
+  lines.push('    elseif '+vOp+'=='+opVars['RETURN']+' then');
+  lines.push('      local nr='+vBv+'-1');
+  lines.push('      if nr==0 then return end');
+  lines.push('      local '+vRets+'={}');
+  lines.push('      if nr<0 then for _i='+vA+',proto.maxStack do if '+vReg+'[_i]~=nil then '+vRets+'[#'+vRets+'+1]='+vReg+'[_i] end end');
+  lines.push('      else for _i=0,nr-1 do '+vRets+'[#'+vRets+'+1]='+vReg+'['+vA+'+_i] end end');
+  lines.push('      return table.unpack('+vRets+')');
+  lines.push('    elseif '+vOp+'=='+opVars['FORPREP']+' then');
+  lines.push('      '+vReg+'['+vA+']='+vReg+'['+vA+']-'+vReg+'['+vA+'+2]');
+  lines.push('      '+vPC+'='+vPC+'+'+vSBx);
+  lines.push('    elseif '+vOp+'=='+opVars['FORLOOP']+' then');
+  lines.push('      '+vReg+'['+vA+']='+vReg+'['+vA+']+'+vReg+'['+vA+'+2]');
+  lines.push('      if ('+vReg+'['+vA+'+2]>0 and '+vReg+'['+vA+']<='+vReg+'['+vA+'+1]) or ('+vReg+'['+vA+'+2]<=0 and '+vReg+'['+vA+']>='+vReg+'['+vA+'+1]) then');
+  lines.push('        '+vPC+'='+vPC+'+'+vSBx);
+  lines.push('        '+vReg+'['+vA+'+3]='+vReg+'['+vA+']');
+  lines.push('      end');
+  lines.push('    elseif '+vOp+'=='+opVars['TFORLOOP']+' then');
+  lines.push('      local itfn='+vReg+'['+vA+']');
+  lines.push('      local '+vRets+'={itfn('+vReg+'['+vA+'+1],'+vReg+'['+vA+'+2])}');
+  lines.push('      if '+vRets+'[1]~=nil then');
+  lines.push('        '+vReg+'['+vA+'+2]='+vRets+'[1]');
+  lines.push('        for _i=1,'+vCv+' do '+vReg+'['+vA+'+2+_i]='+vRets+'[_i] end');
+  lines.push('      else '+vPC+'='+vPC+'+1 end');
+  lines.push('    elseif '+vOp+'=='+opVars['SETLIST']+' then');
+  lines.push('      local bse='+vA+',n='+vBv+',off=('+vCv+'-1)*50');
+  lines.push('      for _i=1,n do '+vReg+'[bse][off+_i]='+vReg+'[bse+_i] end');
+  lines.push('    elseif '+vOp+'=='+opVars['VARARG']+' then');
+  lines.push('      local n='+vBv+'-1');
+  lines.push('      if n<0 then for _i=1,#'+vVarg+' do '+vReg+'['+vA+'+_i-1]='+vVarg+'[_i] end');
+  lines.push('      else for _i=1,n do '+vReg+'['+vA+'+_i-1]='+vVarg+'[_i] end end');
+  lines.push('    elseif '+vOp+'=='+opVars['CLOSE']+' then');
+  lines.push('      -- upvalue close (no-op in this simplified impl)');
+  lines.push('    end'); // end if/elseif chain
+  lines.push('  end'); // end while
+  lines.push('end'); // end vCall function
+  // Bootstrap
+  lines.push('local '+vProto+'='+vRProto+'()');
+  lines.push('local '+vEnv+'=getfenv()');
+  lines.push(vCall+'('+vProto+','+vEnv+',{})');
+
+  return lines.join('\n');
+}
+
+// =====================================================================
+// MAIN PIPELINE
+// =====================================================================
+function obfuscate(src){
+  var tokens=tokenise(src);
+  var ast=parse(tokens);
+  var proto=compile(ast);
+  var bytes=serialise(proto);
+  return emitVM(bytes);
+}
+
+async function runObfuscate(){
+  var code='';
+  if(currentMode==='paste'){
+    code=document.getElementById('input-code').value.trim();
+    if(!code){log('error','No input code.','err');return;}
+  } else {
+    if(!loadedFile){log('error','No file loaded.','err');return;}
+    code=await loadedFile.text();
+  }
+  var btn=document.getElementById('run-btn'),btnText=document.getElementById('btn-text');
+  btn.disabled=true;btnText.textContent='Processing...';
   document.getElementById('progress-fill').classList.add('indeterminate');
-  document.getElementById('output-code').value = '';
-  document.getElementById('copy-btn').disabled = true;
-  document.getElementById('dl-btn').disabled = true;
-  outputText = '';
-
-  const t0 = performance.now();
-  log('run', `Input: ${code.length} chars.`);
-  log('sys', 'Pass 1–5: strip comments, rename, encrypt strings…');
-
+  document.getElementById('output-code').value='';
+  document.getElementById('copy-btn').disabled=true;
+  document.getElementById('dl-btn').disabled=true;
+  outputText='';
+  var t0=performance.now();
+  log('run','Input: '+code.length+' chars.');
+  log('sys','Phase 1: tokenising + parsing AST...');
   try {
-    await new Promise(r => setTimeout(r, 30));
-    log('sys', 'Pass 6–9: proxies, dead code, control flow…');
-    await new Promise(r => setTimeout(r, 30));
-    log('sys', 'Pass 10–11: VM virtualization layer…');
-    await new Promise(r => setTimeout(r, 30));
-
-    const result = obfuscateLua(code);
-    const t1     = performance.now();
-
-    outputText = result;
-    document.getElementById('output-code').value = result;
-    document.getElementById('copy-btn').disabled = false;
-    document.getElementById('dl-btn').disabled   = false;
-
-    // Stats
-    const statsBar = document.getElementById('stats-bar');
-    statsBar.style.display = 'flex';
-    document.getElementById('stat-in').textContent    = code.length.toLocaleString();
-    document.getElementById('stat-out').textContent   = result.length.toLocaleString();
-    document.getElementById('stat-ratio').textContent = (result.length / code.length).toFixed(1) + 'x';
-    document.getElementById('stat-time').textContent  = Math.round(t1 - t0);
-
-    log('sys', 'Obfuscation complete.', 'ok');
-    log('out', `Output: ${result.length} chars in ${Math.round(t1-t0)}ms.`, 'ok');
-
+    await new Promise(function(r){setTimeout(r,20)});
+    log('sys','Phase 2: compiling to register bytecode...');
+    await new Promise(function(r){setTimeout(r,20)});
+    log('sys','Phase 3: serialising + encrypting...');
+    await new Promise(function(r){setTimeout(r,20)});
+    log('sys','Phase 4: emitting VM...');
+    await new Promise(function(r){setTimeout(r,20)});
+    var result=obfuscate(code);
+    var t1=performance.now();
+    outputText=result;
+    document.getElementById('output-code').value=result;
+    document.getElementById('copy-btn').disabled=false;
+    document.getElementById('dl-btn').disabled=false;
+    var sb=document.getElementById('stats-bar');
+    sb.style.display='flex';
+    document.getElementById('stat-in').textContent=code.length.toLocaleString();
+    document.getElementById('stat-out').textContent=result.length.toLocaleString();
+    document.getElementById('stat-ratio').textContent=(result.length/code.length).toFixed(1)+'x';
+    document.getElementById('stat-time').textContent=Math.round(t1-t0);
+    log('sys','VM obfuscation complete.','ok');
+    log('out','Output: '+result.length+' chars in '+Math.round(t1-t0)+'ms.','ok');
     document.getElementById('progress-fill').classList.remove('indeterminate');
-    document.getElementById('progress-fill').style.width = '100%';
-  } catch (err) {
-    log('error', err.message, 'err');
+    document.getElementById('progress-fill').style.width='100%';
+  } catch(err){
+    log('error','Error: '+err.message,'err');
+    console.error(err);
     document.getElementById('progress-fill').classList.remove('indeterminate');
-    document.getElementById('progress-fill').style.width = '0%';
+    document.getElementById('progress-fill').style.width='0%';
   } finally {
-    btn.disabled = false;
-    btnText.textContent = 'Run Obfuscation';
+    btn.disabled=false;btnText.textContent='Run Obfuscation';
   }
 }
 </script>
