@@ -6,335 +6,536 @@
 <title>Hercules — Luau Obfuscator</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#0a0b0d;--bg2:#0f1114;--bg3:#141619;--bg4:#1a1d21;--brd:#1e2228;--brd2:#272c34;--acc:#e8ff47;--acc2:#c8df30;--adim:rgba(232,255,71,0.07);--agl:rgba(232,255,71,0.14);--tx:#c8cdd6;--tx2:#6b7280;--tx3:#343840;--ok:#4ade80;--er:#f87171;--wn:#fbbf24}
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;min-height:100vh;font-size:14px;overflow-x:hidden}
-  body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);pointer-events:none;z-index:9998}
-  .amb{position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:400px;background:radial-gradient(ellipse,rgba(232,255,71,.035),transparent 70%);pointer-events:none;z-index:0}
-  .layout{display:grid;grid-template-columns:200px 1fr;min-height:100vh;position:relative;z-index:1}
-  .sb{background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
-  .sb::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent);opacity:.35}
-  .sbl{padding:22px 18px 18px;border-bottom:1px solid var(--brd)}
-  .logo{font-size:20px;font-weight:800;color:var(--acc);letter-spacing:-.5px;text-transform:uppercase}
-  .logo-s{font-size:10px;color:var(--tx3);margin-top:4px;font-family:'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase}
-  .ss{padding:14px 10px 6px}
-  .sl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--tx3);padding:0 8px;margin-bottom:8px}
-  .ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:5px;cursor:pointer;color:var(--tx2);font-size:12.5px;font-weight:500;transition:all .15s;border:1px solid transparent;user-select:none}
-  .ni:hover{background:var(--bg3);color:var(--tx)}
-  .ni.on{background:var(--adim);color:var(--acc);border-color:rgba(232,255,71,.15)}
-  .ni svg{width:14px;height:14px;opacity:.5;flex-shrink:0}
-  .ni.on svg{opacity:1}
-  .div{height:1px;background:var(--brd);margin:8px 10px}
-  .sbf{margin-top:auto;padding:14px;border-top:1px solid var(--brd)}
-  .stbdg{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--tx2);font-family:'Space Mono',monospace}
-  .stdt{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok);animation:pulse 2s ease infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-  .main{display:flex;flex-direction:column}
-  .tb{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:48px;border-bottom:1px solid var(--brd);flex-shrink:0}
-  .tbl{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--tx3);font-family:'Space Mono',monospace}
-  .tba{color:var(--tx)}
-  .tbr{display:flex;align-items:center;gap:8px}
-  .ch{background:var(--bg3);border:1px solid var(--brd);border-radius:3px;padding:3px 9px;font-size:10px;color:var(--tx2);font-family:'Space Mono',monospace}
-  .ch.ac{background:var(--adim);border-color:rgba(232,255,71,.2);color:var(--acc)}
-  .cn{flex:1;padding:20px 24px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
-  .cn::-webkit-scrollbar{width:4px}
-  .cn::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
-  .cd{background:var(--bg2);border:1px solid var(--brd);border-radius:6px;overflow:hidden}
-  .cdh{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--brd);background:var(--bg3)}
-  .cdt{font-size:11px;font-weight:700;color:var(--tx);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
-  .cdb{background:var(--bg4);border:1px solid var(--brd2);border-radius:2px;padding:1px 6px;font-size:9px;color:var(--tx3);text-transform:lowercase}
-  .cda{display:flex;gap:5px}
-  .bg{background:transparent;border:1px solid var(--brd);border-radius:3px;color:var(--tx2);font-family:'Space Mono',monospace;font-size:9px;padding:4px 9px;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.5px}
-  .bg:hover:not(:disabled){background:var(--bg4);color:var(--tx);border-color:var(--brd2)}
-  .bg:disabled{opacity:.25;cursor:not-allowed}
-  .mt{display:flex;background:var(--bg3);border:1px solid var(--brd);border-radius:5px;padding:3px;gap:2px}
-  .mb{padding:6px 16px;border:none;border-radius:3px;background:transparent;color:var(--tx2);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.5px}
-  .mb.on{background:var(--acc);color:#0a0b0d}
-  .eg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  textarea{width:100%;height:300px;background:var(--bg2);border:none;outline:none;resize:none;padding:14px 16px;font-family:'Space Mono',monospace;font-size:12px;line-height:1.75;color:var(--tx);caret-color:var(--acc)}
-  textarea::placeholder{color:var(--tx3)}
-  textarea::-webkit-scrollbar{width:4px}
-  textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
-  .dz{height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all .2s;margin:12px;border-radius:5px;border:1px dashed var(--brd2)}
-  .dz:hover,.dz.ov{border-color:var(--acc);background:var(--adim)}
-  .dz svg{color:var(--tx3);transition:color .2s}
-  .dz:hover svg{color:var(--acc)}
-  .dt{font-size:12.5px;color:var(--tx2);font-weight:600}
-  .ds{font-size:10px;color:var(--tx3);font-family:'Space Mono',monospace}
-  .fl{display:flex;align-items:center;gap:10px;padding:9px 14px;background:rgba(74,222,128,.05);border-top:1px solid var(--brd);font-size:11px;font-family:'Space Mono',monospace;color:var(--ok)}
-  .fc{margin-left:auto;cursor:pointer;color:var(--tx3);font-size:10px}
-  .fc:hover{color:var(--tx)}
-  #fi{display:none}
-  .rr{display:flex;gap:10px;align-items:center}
-  .bp{display:flex;align-items:center;gap:8px;padding:10px 22px;background:var(--acc);border:none;border-radius:5px;color:#0a0b0d;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;text-transform:uppercase;letter-spacing:.5px}
-  .bp:hover:not(:disabled){background:var(--acc2);transform:translateY(-1px);box-shadow:0 4px 16px var(--agl)}
-  .bp:disabled{opacity:.35;cursor:not-allowed;transform:none}
-  .bs{display:flex;align-items:center;gap:7px;padding:10px 16px;background:var(--bg3);border:1px solid var(--brd2);border-radius:5px;color:var(--tx2);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;text-transform:uppercase}
-  .bs:hover:not(:disabled){background:var(--bg4);color:var(--tx)}
-  .bs:disabled{opacity:.25;cursor:not-allowed}
-  .sp{flex:1}
-  .pt{height:1px;background:var(--bg4);overflow:hidden}
-  .pf{height:100%;width:0%;background:var(--acc);transition:width .4s}
-  .pf.ind{width:35%;animation:ind 1.2s ease infinite}
-  @keyframes ind{0%{transform:translateX(-200%)}100%{transform:translateX(400%)}}
-  .lb{padding:10px 14px;height:110px;overflow-y:auto;font-family:'Space Mono',monospace;font-size:11px;line-height:2}
-  .lb::-webkit-scrollbar{width:3px}
-  .lb::-webkit-scrollbar-thumb{background:var(--brd2)}
-  .ll{display:flex;gap:14px}
-  .lts{color:var(--tx3);flex-shrink:0}
-  .ltg{flex-shrink:0;min-width:46px;color:var(--tx3)}
-  .lm{color:var(--tx2)}
-  .lm.ok{color:var(--ok)}
-  .lm.er{color:var(--er)}
-  .statbar{display:flex;gap:1px;border-radius:4px;overflow:hidden}
-  .stp{flex:1;padding:8px 12px;background:var(--bg3);border:1px solid var(--brd);text-align:center}
-  .stp:first-child{border-radius:4px 0 0 4px}
-  .stp:last-child{border-radius:0 4px 4px 0}
-  .stv{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--acc);line-height:1}
-  .stl{font-size:9px;color:var(--tx3);margin-top:3px;text-transform:uppercase;letter-spacing:1px}
-  .cn>*{animation:fu .2s ease forwards}
-  @keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-  /* modal */
-  .mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
-  .mo.open{display:flex}
-  .dc{width:300px;border-radius:10px;overflow:hidden;background:#1e1f22;box-shadow:0 32px 80px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.05);animation:pi .2s ease}
-  @keyframes pi{from{transform:scale(.92) translateY(8px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
-  .dcbanner{height:88px;background:linear-gradient(135deg,#1a1d2e,#2d1f3d);position:relative}
-  .dcaw{position:absolute;bottom:-38px;left:16px}
-  .dcav{width:76px;height:76px;border-radius:50%;border:5px solid #1e1f22;object-fit:cover}
-  .dcst{width:16px;height:16px;background:#23a55a;border-radius:50%;border:3px solid #1e1f22;position:absolute;bottom:4px;right:4px}
-  .dccl{position:absolute;top:10px;right:12px;background:rgba(0,0,0,.5);border:none;color:#fff;border-radius:50%;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px}
-  .dcbody{padding:50px 16px 16px;font-family:'Syne',sans-serif}
-  .dcname{font-size:19px;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px}
-  .dcnitro{font-size:13px;background:linear-gradient(135deg,#ff73fa,#7289da);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-  .dcuser{font-size:13px;color:#b5bac1;margin-top:2px}
-  .dcdiv{height:1px;background:#2e3035;margin:12px 0}
-  .dcsl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#b5bac1;margin-bottom:8px}
-  .dcbgs{display:flex;flex-wrap:wrap;gap:6px}
-  .dcbdg{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:default;position:relative;transition:transform .15s}
-  .dcbdg:hover{transform:scale(1.15)}
-  .dcbdg img{width:24px;height:24px;object-fit:contain}
-  .dcbdg:hover::after{content:attr(data-tip);position:absolute;bottom:34px;left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:4px 8px;border-radius:4px;white-space:nowrap;pointer-events:none;z-index:10}
-  .dcabout{font-size:13px;color:#dbdee1;line-height:1.6;text-align:center}
-  @media(max-width:860px){.layout{grid-template-columns:1fr}.sb{display:none}.eg{grid-template-columns:1fr}}
+:root{
+  --bg:#0a0b0d;--bg2:#0f1114;--bg3:#141619;--bg4:#1a1d21;--bg5:#1e2228;
+  --brd:#1e2228;--brd2:#272c34;--brd3:#2e3440;
+  --acc:#e8ff47;--acc2:#c8df30;--acc3:#f0ff80;
+  --adim:rgba(232,255,71,0.07);--agl:rgba(232,255,71,0.18);
+  --tx:#c8cdd6;--tx2:#6b7280;--tx3:#343840;--tx4:#4b5563;
+  --ok:#4ade80;--er:#f87171;--wn:#fbbf24;--inf:#60a5fa;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;font-size:14px;overflow:hidden}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.022) 2px,rgba(0,0,0,.022) 4px);pointer-events:none;z-index:9000}
+.amb{position:fixed;top:-180px;left:50%;transform:translateX(-50%);width:900px;height:400px;background:radial-gradient(ellipse,rgba(232,255,71,.03),transparent 70%);pointer-events:none;z-index:0}
+
+/* ── layout ── */
+.layout{display:grid;grid-template-columns:220px 1fr;height:100vh;position:relative;z-index:1}
+
+/* ── sidebar ── */
+.sidebar{background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden}
+.sidebar::before{content:'';position:absolute;top:0;left:0;width:220px;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent);opacity:.3;z-index:2}
+.slogo{padding:20px 16px 16px;border-bottom:1px solid var(--brd);flex-shrink:0}
+.slogo-name{font-size:19px;font-weight:800;color:var(--acc);letter-spacing:-.5px;text-transform:uppercase;line-height:1}
+.slogo-ver{font-size:9px;color:var(--tx3);margin-top:3px;font-family:'Space Mono',monospace;letter-spacing:1.5px;text-transform:uppercase}
+.snav{padding:10px 8px;flex-shrink:0}
+.snav-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--tx3);padding:6px 8px 4px}
+.ni{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:5px;cursor:pointer;color:var(--tx2);font-size:12px;font-weight:600;transition:all .14s;border:1px solid transparent;user-select:none;position:relative}
+.ni:hover{background:var(--bg3);color:var(--tx)}
+.ni.on{background:var(--adim);color:var(--acc);border-color:rgba(232,255,71,.12)}
+.ni svg{width:13px;height:13px;opacity:.45;flex-shrink:0;transition:opacity .14s}
+.ni.on svg,.ni:hover svg{opacity:.9}
+.sdiv{height:1px;background:var(--brd);margin:6px 8px}
+
+/* ── options panel (in sidebar) ── */
+.opts-wrap{flex:1;overflow-y:auto;padding:0 8px 8px}
+.opts-wrap::-webkit-scrollbar{width:3px}
+.opts-wrap::-webkit-scrollbar-thumb{background:var(--brd2)}
+.opt-section{margin-bottom:4px}
+.opt-section-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--tx3);padding:10px 8px 4px}
+.opt-row{display:flex;align-items:center;justify-content:space-between;padding:7px 8px;border-radius:5px;cursor:pointer;transition:background .13s;gap:8px}
+.opt-row:hover{background:var(--bg3)}
+.opt-row.disabled-opt{opacity:.35;pointer-events:none}
+.opt-info{flex:1;min-width:0}
+.opt-name{font-size:11.5px;font-weight:600;color:var(--tx);line-height:1.2}
+.opt-desc{font-size:9.5px;color:var(--tx4);margin-top:2px;line-height:1.4}
+/* toggle switch */
+.tog{width:32px;height:18px;background:var(--bg4);border:1px solid var(--brd2);border-radius:99px;position:relative;flex-shrink:0;transition:all .18s;cursor:pointer}
+.tog.on{background:var(--acc);border-color:var(--acc2)}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .18s;opacity:.7}
+.tog.on::after{transform:translateX(14px);opacity:1}
+/* intensity selector */
+.int-sel{display:flex;gap:2px;flex-shrink:0}
+.int-btn{padding:3px 7px;font-size:9px;font-family:'Space Mono',monospace;border:1px solid var(--brd2);border-radius:3px;background:transparent;color:var(--tx3);cursor:pointer;transition:all .14s;text-transform:uppercase}
+.int-btn:hover{background:var(--bg4);color:var(--tx2)}
+.int-btn.on{background:var(--adim);color:var(--acc);border-color:rgba(232,255,71,.2)}
+
+.sbfoot{padding:12px 14px;border-top:1px solid var(--brd);flex-shrink:0}
+.status-dot{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--tx2);font-family:'Space Mono',monospace}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 5px var(--ok);animation:pulse 2.2s ease infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── main area ── */
+.main{display:flex;flex-direction:column;overflow:hidden;height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 22px;height:46px;border-bottom:1px solid var(--brd);flex-shrink:0}
+.tbl{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--tx3);font-family:'Space Mono',monospace}
+.tba{color:var(--tx)}
+.tbr{display:flex;align-items:center;gap:6px}
+.badge{background:var(--bg3);border:1px solid var(--brd);border-radius:3px;padding:2px 8px;font-size:9.5px;color:var(--tx2);font-family:'Space Mono',monospace}
+.badge.acc{background:var(--adim);border-color:rgba(232,255,71,.18);color:var(--acc)}
+
+.content{flex:1;padding:18px 22px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
+
+/* ── input tabs ── */
+.tabs{display:flex;background:var(--bg3);border:1px solid var(--brd);border-radius:5px;padding:3px;gap:2px;width:fit-content}
+.tab{padding:5px 14px;border:none;border-radius:3px;background:transparent;color:var(--tx2);font-family:'Syne',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .14s;text-transform:uppercase;letter-spacing:.5px}
+.tab.on{background:var(--acc);color:#0a0b0d}
+
+/* ── cards ── */
+.card{background:var(--bg2);border:1px solid var(--brd);border-radius:6px;overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border-bottom:1px solid var(--brd);background:var(--bg3)}
+.card-title{font-size:10.5px;font-weight:700;color:var(--tx);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:7px}
+.card-sub{background:var(--bg4);border:1px solid var(--brd2);border-radius:2px;padding:1px 5px;font-size:8.5px;color:var(--tx3);text-transform:lowercase;font-weight:400}
+.card-acts{display:flex;gap:4px}
+.act-btn{background:transparent;border:1px solid var(--brd);border-radius:3px;color:var(--tx2);font-family:'Space Mono',monospace;font-size:8.5px;padding:3px 8px;cursor:pointer;transition:all .14s;text-transform:uppercase;letter-spacing:.5px}
+.act-btn:hover:not(:disabled){background:var(--bg4);color:var(--tx);border-color:var(--brd2)}
+.act-btn:disabled{opacity:.22;cursor:not-allowed}
+
+.editors{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+textarea{width:100%;height:280px;background:var(--bg2);border:none;outline:none;resize:none;padding:12px 14px;font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.8;color:var(--tx);caret-color:var(--acc)}
+textarea::placeholder{color:var(--tx3)}
+textarea::-webkit-scrollbar{width:3px}
+textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
+
+/* ── dropzone ── */
+.dropzone{height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .18s;margin:10px;border-radius:5px;border:1px dashed var(--brd2)}
+.dropzone:hover,.dropzone.ov{border-color:var(--acc);background:var(--adim)}
+.dropzone svg{color:var(--tx3);transition:color .18s}
+.dropzone:hover svg,.dropzone.ov svg{color:var(--acc)}
+.dz-t{font-size:12px;color:var(--tx2);font-weight:600}
+.dz-s{font-size:9.5px;color:var(--tx3);font-family:'Space Mono',monospace}
+.file-info{display:flex;align-items:center;gap:9px;padding:8px 13px;background:rgba(74,222,128,.05);border-top:1px solid var(--brd);font-size:10.5px;font-family:'Space Mono',monospace;color:var(--ok)}
+.fi-rm{margin-left:auto;cursor:pointer;color:var(--tx3);font-size:9.5px;transition:color .13s}
+.fi-rm:hover{color:var(--tx)}
+#file-input{display:none}
+
+/* ── run row ── */
+.run-row{display:flex;gap:9px;align-items:center}
+.run-btn{display:flex;align-items:center;gap:7px;padding:9px 20px;background:var(--acc);border:none;border-radius:5px;color:#0a0b0d;font-family:'Syne',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .14s;text-transform:uppercase;letter-spacing:.5px;position:relative;overflow:hidden}
+.run-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.1));pointer-events:none}
+.run-btn:hover:not(:disabled){background:var(--acc2);transform:translateY(-1px);box-shadow:0 4px 18px var(--agl)}
+.run-btn:disabled{opacity:.32;cursor:not-allowed;transform:none;box-shadow:none}
+.dl-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;background:var(--bg3);border:1px solid var(--brd2);border-radius:5px;color:var(--tx2);font-family:'Syne',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .14s;text-transform:uppercase}
+.dl-btn:hover:not(:disabled){background:var(--bg4);color:var(--tx)}
+.dl-btn:disabled{opacity:.22;cursor:not-allowed}
+.flex-sp{flex:1}
+.char-ct{font-size:9.5px;color:var(--tx3);font-family:'Space Mono',monospace}
+
+/* ── stats ── */
+.stats{display:flex;gap:1px;border-radius:4px;overflow:hidden}
+.stat{flex:1;padding:7px 10px;background:var(--bg3);border:1px solid var(--brd);text-align:center}
+.stat:first-child{border-radius:4px 0 0 4px}
+.stat:last-child{border-radius:0 4px 4px 0}
+.stat-v{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--acc);line-height:1}
+.stat-l{font-size:8.5px;color:var(--tx3);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+
+/* ── console ── */
+.progress{height:1px;background:var(--bg4);overflow:hidden}
+.progress-bar{height:100%;width:0%;background:var(--acc);transition:width .35s}
+.progress-bar.running{width:40%;animation:sweep 1.1s ease infinite}
+@keyframes sweep{0%{transform:translateX(-200%)}100%{transform:translateX(350%)};}
+.console-body{padding:9px 13px;height:105px;overflow-y:auto;font-family:'Space Mono',monospace;font-size:10.5px;line-height:1.9}
+.console-body::-webkit-scrollbar{width:3px}
+.console-body::-webkit-scrollbar-thumb{background:var(--brd2)}
+.log-line{display:flex;gap:12px}
+.log-ts{color:var(--tx3);flex-shrink:0}
+.log-tag{flex-shrink:0;min-width:44px;color:var(--tx3);font-size:9.5px}
+.log-msg{color:var(--tx2)}
+.log-msg.ok{color:var(--ok)}
+.log-msg.er{color:var(--er)}
+.log-msg.wn{color:var(--wn)}
+.log-msg.inf{color:var(--inf)}
+
+/* ── about modal ── */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(7px)}
+.modal.open{display:flex}
+.profile-card{width:295px;border-radius:10px;overflow:hidden;background:#1e1f22;box-shadow:0 28px 70px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.04);animation:card-in .18s ease}
+@keyframes card-in{from{transform:scale(.93) translateY(8px);opacity:0}to{transform:scale(1);opacity:1}}
+.pc-banner{height:86px;background:linear-gradient(135deg,#1a1d2e,#2d1f3d);position:relative}
+.pc-av-wrap{position:absolute;bottom:-36px;left:14px}
+.pc-av{width:74px;height:74px;border-radius:50%;border:5px solid #1e1f22;object-fit:cover;display:block}
+.pc-online{width:15px;height:15px;background:#23a55a;border-radius:50%;border:3px solid #1e1f22;position:absolute;bottom:4px;right:4px}
+.pc-close{position:absolute;top:9px;right:10px;background:rgba(0,0,0,.5);border:none;color:#fff;border-radius:50%;width:25px;height:25px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1}
+.pc-body{padding:46px 14px 14px;font-family:'Syne',sans-serif}
+.pc-name{font-size:18px;font-weight:800;color:#fff;display:flex;align-items:center;gap:5px;line-height:1.2}
+.pc-nitro{font-size:12px;background:linear-gradient(135deg,#ff73fa,#7289da);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.pc-tag{font-size:12.5px;color:#b5bac1;margin-top:2px}
+.pc-div{height:1px;background:#2e3035;margin:11px 0}
+.pc-sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#b5bac1;margin-bottom:7px}
+.pc-badges{display:flex;flex-wrap:wrap;gap:5px}
+.pc-badge{width:27px;height:27px;border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:default;position:relative;transition:transform .13s}
+.pc-badge:hover{transform:scale(1.15)}
+.pc-badge img{width:22px;height:22px;object-fit:contain}
+.pc-badge:hover::after{content:attr(data-tip);position:absolute;bottom:32px;left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:10px;padding:3px 7px;border-radius:3px;white-space:nowrap;pointer-events:none;z-index:20}
+.pc-about{font-size:12.5px;color:#dbdee1;line-height:1.6;text-align:center}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .editors{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 <div class="amb"></div>
 <div class="layout">
-  <aside class="sb">
-    <div class="sbl"><div class="logo">Hercules</div><div class="logo-s">lua obfuscator · v5</div></div>
-    <div class="ss">
-      <div class="sl">Input</div>
-      <div class="ni on" id="npaste" onclick="setMode('paste')">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1.5"/><path d="M6 6h4M6 9h3"/></svg>Paste Code
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside class="sidebar">
+  <div class="slogo">
+    <div class="slogo-name">Hercules</div>
+    <div class="slogo-ver">obfuscator · v6.0</div>
+  </div>
+
+  <div class="snav">
+    <div class="snav-lbl">Input</div>
+    <div class="ni on" id="nav-paste" onclick="setMode('paste')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="2" width="10" height="12" rx="1.5"/><path d="M6 6h4M6 9h3"/></svg>Paste Code
+    </div>
+    <div class="ni" id="nav-file" onclick="setMode('file')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h7l3 3v9H3V2z"/><path d="M10 2v3h3"/><path d="M8 7v5M5.5 9.5L8 7l2.5 2.5"/></svg>Upload File
+    </div>
+    <div class="sdiv"></div>
+    <div class="snav-lbl">Info</div>
+    <div class="ni" onclick="showAbout()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.2v.4"/></svg>About
+    </div>
+  </div>
+
+  <div class="sdiv"></div>
+
+  <!-- ── OPTIONS ── -->
+  <div class="opts-wrap" id="opts-wrap">
+    <div class="opt-section">
+      <div class="opt-section-lbl">Encryption</div>
+
+      <div class="opt-row" onclick="toggleOpt('chunkSplit')">
+        <div class="opt-info">
+          <div class="opt-name">Chunk Splitting</div>
+          <div class="opt-desc">Break script into encrypted pieces</div>
+        </div>
+        <div class="tog on" id="tog-chunkSplit"></div>
       </div>
-      <div class="ni" id="nfile" onclick="setMode('file')">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h7l3 3v9H3V2z"/><path d="M10 2v3h3"/><path d="M8 7v5M5.5 9.5L8 7l2.5 2.5"/></svg>Upload File
+
+      <div class="opt-row" onclick="toggleOpt('multiLayer')">
+        <div class="opt-info">
+          <div class="opt-name">Multi-Layer XOR</div>
+          <div class="opt-desc">Stack 3 encryption passes</div>
+        </div>
+        <div class="tog on" id="tog-multiLayer"></div>
+      </div>
+
+      <div class="opt-row" onclick="toggleOpt('runtimeKeys')">
+        <div class="opt-info">
+          <div class="opt-name">Runtime Keys</div>
+          <div class="opt-desc">Keys derived at execution time</div>
+        </div>
+        <div class="tog on" id="tog-runtimeKeys"></div>
+      </div>
+
+      <div class="opt-row" onclick="toggleOpt('stringEnc')">
+        <div class="opt-info">
+          <div class="opt-name">String Encryption</div>
+          <div class="opt-desc">Hide all literal strings</div>
+        </div>
+        <div class="tog on" id="tog-stringEnc"></div>
       </div>
     </div>
-    <div class="div"></div>
-    <div class="ss">
-      <div class="sl">Info</div>
-      <div class="ni" onclick="showAbout()">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.5v.5"/></svg>About
+
+    <div class="opt-section">
+      <div class="opt-section-lbl">Obfuscation</div>
+
+      <div class="opt-row" onclick="toggleOpt('hideLoader')">
+        <div class="opt-info">
+          <div class="opt-name">Hide Loader</div>
+          <div class="opt-desc">Conceal loadstring call</div>
+        </div>
+        <div class="tog on" id="tog-hideLoader"></div>
+      </div>
+
+      <div class="opt-row" onclick="toggleOpt('fakeFlow')">
+        <div class="opt-info">
+          <div class="opt-name">Fake Control Flow</div>
+          <div class="opt-desc">Junk branches to fool decompilers</div>
+        </div>
+        <div class="tog on" id="tog-fakeFlow"></div>
+      </div>
+
+      <div class="opt-row" onclick="toggleOpt('hideGlobals')">
+        <div class="opt-info">
+          <div class="opt-name">Hide Globals</div>
+          <div class="opt-desc">Resolve builtins dynamically</div>
+        </div>
+        <div class="tog on" id="tog-hideGlobals"></div>
+      </div>
+
+      <div class="opt-row" onclick="toggleOpt('numSplit')">
+        <div class="opt-info">
+          <div class="opt-name">Number Splitting</div>
+          <div class="opt-desc">Constants as arithmetic expressions</div>
+        </div>
+        <div class="tog on" id="tog-numSplit"></div>
       </div>
     </div>
-    <div class="sbf"><div class="stbdg"><div class="stdt"></div>vm engine ready</div></div>
-  </aside>
 
-  <div class="main">
-    <div class="tb">
-      <div class="tbl"><span>hercules</span><span style="color:var(--tx3)">/</span><span class="tba" id="crumb">paste-code</span></div>
-      <div class="tbr"><div class="ch ac">v5.0 · VM</div><div class="ch">.lua · .luau · .txt</div></div>
-    </div>
-    <div class="cn">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="mt">
-          <button class="mb on" id="tpaste" onclick="setMode('paste')">Paste code</button>
-          <button class="mb" id="tfile" onclick="setMode('file')">Upload file</button>
+    <div class="opt-section">
+      <div class="opt-section-lbl">Intensity</div>
+      <div class="opt-row">
+        <div class="opt-info">
+          <div class="opt-name">Junk Density</div>
+          <div class="opt-desc">Amount of dead code injected</div>
         </div>
-        <span style="font-size:11px;color:var(--tx3);font-family:'Space Mono',monospace">select input</span>
-      </div>
-
-      <div class="cd" id="fcard" style="display:none">
-        <div class="cdh"><div class="cdt">Input <span class="cdb">file upload</span></div></div>
-        <div class="dz" id="dz" onclick="document.getElementById('fi').click()">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          <div class="dt">Drop file or click to browse</div><div class="ds">.lua · .luau · .txt</div>
-        </div>
-        <input type="file" id="fi" accept=".lua,.luau,.txt">
-        <div class="fl" id="flinfo" style="display:none">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 11.5L3 8l1.4-1.4 2.1 2.1 4.1-4.1L12 6l-5.5 5.5z"/></svg>
-          <span id="fname"></span><span style="color:var(--tx3)">·</span><span id="fsize" style="color:var(--tx3)"></span>
-          <span class="fc" onclick="clearFile()">remove</span>
+        <div class="int-sel">
+          <button class="int-btn" id="junk-low" onclick="setIntensity('junk','low')">Low</button>
+          <button class="int-btn on" id="junk-med" onclick="setIntensity('junk','med')">Med</button>
+          <button class="int-btn" id="junk-hi" onclick="setIntensity('junk','hi')">Hi</button>
         </div>
       </div>
-
-      <div class="eg" id="eg">
-        <div class="cd">
-          <div class="cdh">
-            <div class="cdt">Input <span class="cdb">raw lua/luau</span></div>
-            <div class="cda"><button class="bg" onclick="loadEx()">example</button><button class="bg" onclick="document.getElementById('inp').value='';updCC()">clear</button></div>
-          </div>
-          <textarea id="inp" spellcheck="false" placeholder="-- Paste your Lua / Luau script here..."></textarea>
+      <div class="opt-row">
+        <div class="opt-info">
+          <div class="opt-name">Chunk Count</div>
+          <div class="opt-desc">How many pieces to split into</div>
         </div>
-        <div class="cd">
-          <div class="cdh">
-            <div class="cdt">Output <span class="cdb">vm obfuscated</span></div>
-            <div class="cda"><button class="bg" id="cpbtn" onclick="doCopy()" disabled>copy</button></div>
-          </div>
-          <textarea id="outp" spellcheck="false" placeholder="-- Obfuscated output appears here..." readonly></textarea>
+        <div class="int-sel">
+          <button class="int-btn" id="chunk-low" onclick="setIntensity('chunk','low')">4</button>
+          <button class="int-btn on" id="chunk-med" onclick="setIntensity('chunk','med')">8</button>
+          <button class="int-btn" id="chunk-hi" onclick="setIntensity('chunk','hi')">16</button>
         </div>
-      </div>
-
-      <div class="rr">
-        <button class="bp" id="runbtn" onclick="runObf()">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg>
-          <span id="btxt">Run Obfuscation</span>
-        </button>
-        <button class="bs" id="dlbtn" onclick="doDl()" disabled>
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 13h10"/></svg>Download .lua
-        </button>
-        <div class="sp"></div>
-        <span style="font-size:10px;color:var(--tx3);font-family:'Space Mono',monospace" id="cc"></span>
-      </div>
-
-      <div class="statbar" id="statbar" style="display:none">
-        <div class="stp"><div class="stv" id="si">--</div><div class="stl">Input Chars</div></div>
-        <div class="stp"><div class="stv" id="so">--</div><div class="stl">Output Chars</div></div>
-        <div class="stp"><div class="stv" id="sr">--</div><div class="stl">Expansion</div></div>
-        <div class="stp"><div class="stv" id="st">--</div><div class="stl">Time (ms)</div></div>
-      </div>
-
-      <div class="cd">
-        <div class="cdh">
-          <div class="cdt">Console <span class="cdb">output</span></div>
-          <div class="cda"><button class="bg" onclick="document.getElementById('lb').innerHTML=''">clear</button></div>
-        </div>
-        <div class="pt"><div class="pf" id="pf"></div></div>
-        <div class="lb" id="lb"></div>
       </div>
     </div>
   </div>
+
+  <div class="sbfoot">
+    <div class="status-dot"><div class="dot"></div><span id="status-txt">ready</span></div>
+  </div>
+</aside>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<div class="main">
+  <div class="topbar">
+    <div class="tbl">
+      <span>hercules</span>
+      <span style="color:var(--tx3)">/</span>
+      <span class="tba" id="crumb">paste-code</span>
+    </div>
+    <div class="tbr">
+      <div class="badge acc">v6.0</div>
+      <div class="badge" id="active-badge">8 layers on</div>
+      <div class="badge">.lua · .luau · .txt</div>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- tabs -->
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="tabs">
+        <button class="tab on" id="tab-paste" onclick="setMode('paste')">Paste</button>
+        <button class="tab" id="tab-file" onclick="setMode('file')">File</button>
+      </div>
+      <span class="char-ct" id="char-ct"></span>
+    </div>
+
+    <!-- file card -->
+    <div class="card" id="file-card" style="display:none">
+      <div class="card-head"><div class="card-title">Input <span class="card-sub">file upload</span></div></div>
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div class="dz-t">Drop file or click to browse</div>
+        <div class="dz-s">.lua · .luau · .txt</div>
+      </div>
+      <input type="file" id="file-input" accept=".lua,.luau,.txt">
+      <div class="file-info" id="file-info" style="display:none">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="var(--ok)"><path d="M6.5 11.5L3 8l1.4-1.4 2.1 2.1 4.1-4.1L12 6l-5.5 5.5z"/></svg>
+        <span id="file-name"></span><span style="color:var(--tx3)">·</span><span id="file-size" style="color:var(--tx3)"></span>
+        <span class="fi-rm" onclick="clearFile()">remove</span>
+      </div>
+    </div>
+
+    <!-- editors -->
+    <div class="editors" id="editors">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Input <span class="card-sub">source lua</span></div>
+          <div class="card-acts">
+            <button class="act-btn" onclick="loadExample()">example</button>
+            <button class="act-btn" onclick="clearInput()">clear</button>
+          </div>
+        </div>
+        <textarea id="inp" spellcheck="false" placeholder="-- Paste your Lua / Luau script here..."></textarea>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Output <span class="card-sub">obfuscated</span></div>
+          <div class="card-acts">
+            <button class="act-btn" id="copy-btn" onclick="doCopy()" disabled>copy</button>
+          </div>
+        </div>
+        <textarea id="outp" spellcheck="false" placeholder="-- Obfuscated output will appear here..." readonly></textarea>
+      </div>
+    </div>
+
+    <!-- run row -->
+    <div class="run-row">
+      <button class="run-btn" id="run-btn" onclick="runObf()">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg>
+        <span id="run-txt">Obfuscate</span>
+      </button>
+      <button class="dl-btn" id="dl-btn" onclick="doDl()" disabled>
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 13h10"/></svg>
+        Download
+      </button>
+      <div class="flex-sp"></div>
+    </div>
+
+    <!-- stats -->
+    <div class="stats" id="stats" style="display:none">
+      <div class="stat"><div class="stat-v" id="st-in">--</div><div class="stat-l">Input</div></div>
+      <div class="stat"><div class="stat-v" id="st-out">--</div><div class="stat-l">Output</div></div>
+      <div class="stat"><div class="stat-v" id="st-ratio">--</div><div class="stat-l">Expansion</div></div>
+      <div class="stat"><div class="stat-v" id="st-layers">--</div><div class="stat-l">Layers</div></div>
+      <div class="stat"><div class="stat-v" id="st-ms">--</div><div class="stat-l">ms</div></div>
+    </div>
+
+    <!-- console -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Console <span class="card-sub">output</span></div>
+        <div class="card-acts"><button class="act-btn" onclick="clearLog()">clear</button></div>
+      </div>
+      <div class="progress"><div class="progress-bar" id="pbar"></div></div>
+      <div class="console-body" id="console"></div>
+    </div>
+  </div>
+</div>
 </div>
 
-<!-- About Modal -->
-<div class="mo" id="amod" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="dc">
-    <div class="dcbanner">
-      <div class="dcaw">
-        <img class="dcav" src="https://cdn.discordapp.com/avatars/1452536108201279645/f47dee2867aa91d9c1f2406a989bbeeb.png?size=512">
-        <div class="dcst"></div>
+<!-- ABOUT MODAL -->
+<div class="modal" id="about-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="profile-card">
+    <div class="pc-banner">
+      <div class="pc-av-wrap">
+        <img class="pc-av" src="https://cdn.discordapp.com/avatars/1452536108201279645/f47dee2867aa91d9c1f2406a989bbeeb.png?size=512" alt="">
+        <div class="pc-online"></div>
       </div>
-      <button class="dccl" onclick="document.getElementById('amod').classList.remove('open')">✕</button>
+      <button class="pc-close" onclick="document.getElementById('about-modal').classList.remove('open')">✕</button>
     </div>
-    <div class="dcbody">
-      <div style="margin-bottom:12px">
-        <div class="dcname">keoyooo <span class="dcnitro">✦</span></div>
-        <div class="dcuser">b9hj</div>
+    <div class="pc-body">
+      <div class="pc-name">keoyooo <span class="pc-nitro">✦</span></div>
+      <div class="pc-tag">b9hj</div>
+      <div class="pc-div"></div>
+      <div class="pc-sec">Badges</div>
+      <div class="pc-badges">
+        <div class="pc-badge" data-tip="Nitro"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/nitro.png"></div>
+        <div class="pc-badge" data-tip="Bug Hunter Lv2"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/bughunter_2.png"></div>
+        <div class="pc-badge" data-tip="Active Developer"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/developer.png"></div>
+        <div class="pc-badge" data-tip="Early Supporter"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/early_supporter.png"></div>
+        <div class="pc-badge" data-tip="Discord Staff"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/staff.png"></div>
       </div>
-      <div class="dcdiv"></div>
-      <div class="dcsl">Badges</div>
-      <div class="dcbgs">
-        <div class="dcbdg" data-tip="Nitro"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/nitro.png"></div>
-        <div class="dcbdg" data-tip="Bug Hunter Lv2"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/bughunter_2.png"></div>
-        <div class="dcbdg" data-tip="Active Developer"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/developer.png"></div>
-        <div class="dcbdg" data-tip="Early Supporter"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/early_supporter.png"></div>
-        <div class="dcbdg" data-tip="Discord Staff"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/staff.png"></div>
-      </div>
-      <div class="dcdiv"></div>
-      <div class="dcsl">About Me</div>
-      <div class="dcabout">surely with hardship comes ease.</div>
+      <div class="pc-div"></div>
+      <div class="pc-sec">About Me</div>
+      <div class="pc-about">surely with hardship comes ease.</div>
     </div>
   </div>
 </div>
 
 <script>
-// ============================================================
-//  HERCULES v5 — Lua VM Obfuscator
-//
-//  Approach: instead of compiling Lua to custom bytecode,
-//  we do what IronBrew2 actually does:
-//    1. Wrap the source in a function
-//    2. Encode the source as a byte array (XOR + shuffle)
-//    3. Emit a small self-contained Lua VM that:
-//       - Decodes the byte array back to the original source
-//       - Runs it via loadstring (which all executors support)
-//
-//  Then on top of that we apply:
-//    - Randomised variable names (a-z A-Z only, no underscores)
-//    - String encoding (\NNN escapes)
-//    - Opaque predicate guards
-//    - Dead code injection
-//    - Number literal splitting
-//    - Constant folding obfuscation
-//
-//  This approach is 100% executor-compatible because:
-//    - No getfenv/setfenv required
-//    - No custom bytecode format to get wrong
-//    - loadstring works on every Roblox executor
-//    - bit32 used everywhere for bitops
-// ============================================================
+// ══════════════════════════════════════════════════════════════════
+//  HERCULES v6 — Multi-Layer Luau Obfuscator
+//  Roblox executor-safe: bit32, math, string, table only
+//  No debug.*, io.*, os.execute, getfenv, setfenv
+// ══════════════════════════════════════════════════════════════════
 
-// ── UI helpers ──────────────────────────────────────────────
+// ── State ─────────────────────────────────────────────────────────
 var gMode = 'paste', gFile = null, gOutput = '';
 
-log('init', 'Hercules v5 loaded.', 'ok');
-log('init', 'Executor-safe VM output engine ready.');
+// Options state
+var OPTS = {
+  chunkSplit:  true,
+  multiLayer:  true,
+  runtimeKeys: true,
+  stringEnc:   true,
+  hideLoader:  true,
+  fakeFlow:    true,
+  hideGlobals: true,
+  numSplit:    true,
+};
+var INTENSITY = { junk: 'med', chunk: 'med' };
+
+// ── UI Wiring ──────────────────────────────────────────────────────
+log('init', 'Hercules v6 loaded', 'ok');
+log('init', 'All 8 obfuscation layers armed');
 
 function setMode(m) {
   gMode = m;
-  document.getElementById('tpaste').classList.toggle('on', m === 'paste');
-  document.getElementById('tfile').classList.toggle('on', m === 'file');
-  document.getElementById('npaste').classList.toggle('on', m === 'paste');
-  document.getElementById('nfile').classList.toggle('on', m === 'file');
-  document.getElementById('eg').style.display = m === 'paste' ? 'grid' : 'none';
-  document.getElementById('fcard').style.display = m === 'file' ? 'block' : 'none';
-  document.getElementById('crumb').textContent = m === 'paste' ? 'paste-code' : 'upload-file';
+  ['paste','file'].forEach(function(x) {
+    document.getElementById('tab-'+x).classList.toggle('on', x===m);
+    document.getElementById('nav-'+x).classList.toggle('on', x===m);
+  });
+  document.getElementById('editors').style.display   = m==='paste'?'grid':'none';
+  document.getElementById('file-card').style.display = m==='file' ?'block':'none';
+  document.getElementById('crumb').textContent = m==='paste'?'paste-code':'upload-file';
 }
 
-var dz = document.getElementById('dz'), fi = document.getElementById('fi');
+function toggleOpt(k) {
+  OPTS[k] = !OPTS[k];
+  document.getElementById('tog-'+k).classList.toggle('on', OPTS[k]);
+  var on = Object.keys(OPTS).filter(function(x){return OPTS[x];}).length;
+  document.getElementById('active-badge').textContent = on + ' layers on';
+}
+
+function setIntensity(type, val) {
+  INTENSITY[type] = val;
+  ['low','med','hi'].forEach(function(v) {
+    document.getElementById(type+'-'+v).classList.toggle('on', v===val);
+  });
+}
+
+// file upload
+var dz = document.getElementById('dropzone'), fi = document.getElementById('file-input');
 dz.ondragover = function(e){e.preventDefault();dz.classList.add('ov');};
 dz.ondragleave = function(){dz.classList.remove('ov');};
 dz.ondrop = function(e){e.preventDefault();dz.classList.remove('ov');handleFile(e.dataTransfer.files[0]);};
 fi.onchange = function(e){handleFile(e.target.files[0]);};
-
 function handleFile(f) {
-  if (!f) return;
+  if(!f) return;
   var ext = f.name.split('.').pop().toLowerCase();
-  if (['lua','luau','txt'].indexOf(ext) < 0) { log('error','Invalid file type.','er'); return; }
-  gFile = f;
-  document.getElementById('fname').textContent = f.name;
-  document.getElementById('fsize').textContent = (f.size/1024).toFixed(1)+' KB';
-  document.getElementById('flinfo').style.display = 'flex';
-  log('file', 'Loaded: ' + f.name, 'ok');
+  if(['lua','luau','txt'].indexOf(ext)<0){log('error','Invalid file type','er');return;}
+  gFile=f;
+  document.getElementById('file-name').textContent=f.name;
+  document.getElementById('file-size').textContent=(f.size/1024).toFixed(1)+' KB';
+  document.getElementById('file-info').style.display='flex';
+  log('file','Loaded: '+f.name,'ok');
 }
-function clearFile() { gFile=null; fi.value=''; document.getElementById('flinfo').style.display='none'; }
+function clearFile(){gFile=null;fi.value='';document.getElementById('file-info').style.display='none';}
+function clearInput(){document.getElementById('inp').value='';updCC();}
+document.getElementById('inp').oninput=updCC;
+function updCC(){var l=document.getElementById('inp').value.length;document.getElementById('char-ct').textContent=l?l+' chars':'';}
 
-document.getElementById('inp').oninput = updCC;
-function updCC() { var l=document.getElementById('inp').value.length; document.getElementById('cc').textContent=l?l+' chars':''; }
-
-function log(tag, msg, cls) {
-  cls = cls || '';
-  var b = document.getElementById('lb'), n = new Date();
-  var ts = ('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2)+':'+('0'+n.getSeconds()).slice(-2);
-  var d = document.createElement('div'); d.className='ll';
-  d.innerHTML = '<span class="lts">'+ts+'</span><span class="ltg">'+tag+'</span><span class="lm '+cls+'">'+msg+'</span>';
-  b.appendChild(d); b.scrollTop = b.scrollHeight;
+function log(tag,msg,cls){
+  cls=cls||'';
+  var b=document.getElementById('console'),n=new Date();
+  var ts=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2)+':'+('0'+n.getSeconds()).slice(-2);
+  var d=document.createElement('div');d.className='log-line';
+  d.innerHTML='<span class="log-ts">'+ts+'</span><span class="log-tag">'+tag+'</span><span class="log-msg '+cls+'">'+msg+'</span>';
+  b.appendChild(d);b.scrollTop=b.scrollHeight;
 }
-
-function doCopy() { if (!gOutput) return; navigator.clipboard.writeText(gOutput).then(function(){log('sys','Copied to clipboard.','ok');}); }
-function doDl() {
-  if (!gOutput) return;
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([gOutput],{type:'text/plain'}));
-  a.download = 'obfuscated.lua'; a.click();
+function clearLog(){document.getElementById('console').innerHTML='';}
+function setStatus(s){document.getElementById('status-txt').textContent=s;}
+function doCopy(){if(!gOutput)return;navigator.clipboard.writeText(gOutput).then(function(){log('sys','Copied','ok');});}
+function doDl(){
+  if(!gOutput)return;
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([gOutput],{type:'text/plain'}));
+  a.download='obfuscated.lua';a.click();
   log('sys','Downloaded obfuscated.lua','ok');
 }
-function showAbout() { document.getElementById('amod').classList.add('open'); }
-function loadEx() {
-  document.getElementById('inp').value =
+function showAbout(){document.getElementById('about-modal').classList.add('open');}
+function loadExample(){
+  document.getElementById('inp').value=
+'-- Roblox script example\n'+
 'local Players = game:GetService("Players")\n'+
 'local RunService = game:GetService("RunService")\n\n'+
 'local module = {}\n'+
@@ -355,393 +556,507 @@ function loadEx() {
 '        char.HumanoidRootPart.CFrame = CFrame.new(position)\n'+
 '    end\n'+
 'end\n\n'+
+'local function onPlayerAdded(plr)\n'+
+'    plr.CharacterAdded:Connect(function(char)\n'+
+'        local hrp = char:WaitForChild("HumanoidRootPart")\n'+
+'        print("Player spawned: " .. plr.Name)\n'+
+'    end)\n'+
+'end\n\n'+
+'Players.PlayerAdded:Connect(onPlayerAdded)\n\n'+
 'return module';
-  updCC(); log('input','Example script loaded.');
+  updCC();log('input','Example loaded');
 }
 
-// ============================================================
-//  OBFUSCATION ENGINE
-// ============================================================
+// ══════════════════════════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════════════════════════
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function rndF(){return Math.random();}
+function xs32(s){s=s>>>0;s^=(s<<13)>>>0;s^=s>>>17;s^=(s<<5)>>>0;return s>>>0;}
 
-// -- RNG & naming -----------------------------------------------
-var _vc = 0;
-var _used = {};
-function resetNames() { _vc = 0; _used = {}; }
-
-// Generates clean alphabetic variable names like Prometheus uses
-// Just random lowercase/mixed alpha strings, no underscores
-function gname() {
-  var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  var len = 6 + Math.floor(Math.random() * 5); // 6-10 chars
+// Name generator — clean alphabetic only (no underscores)
+var _nameUsed={};
+function resetNames(){_nameUsed={};}
+var _nameSeq=0;
+function gname(){
+  var alpha='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  var lower='abcdefghijklmnopqrstuvwxyz';
+  var RESERVED=new Set(['and','break','do','else','elseif','end','false','for',
+    'function','goto','if','in','local','nil','not','or','repeat','return',
+    'then','true','until','while','math','string','table','bit32','pairs',
+    'ipairs','next','type','tostring','tonumber','pcall','error','assert',
+    'select','unpack','print','warn','rawget','rawset','setmetatable',
+    'getmetatable','require','game','script','workspace']);
   var name;
+  var attempt=0;
   do {
-    name = '';
-    // ensure first char is lowercase (looks cleaner)
-    name += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random()*26)];
-    for (var i = 1; i < len; i++) {
-      name += chars[Math.floor(Math.random()*chars.length)];
-    }
-  } while (_used[name] || isLuaKeyword(name));
-  _used[name] = true;
+    attempt++;
+    var len=6+rnd(0,5);
+    name=lower[rnd(0,25)];
+    for(var i=1;i<len;i++) name+=alpha[rnd(0,alpha.length-1)];
+  } while(_nameUsed[name]||RESERVED.has(name)||attempt>500);
+  _nameUsed[name]=true;
   return name;
 }
 
-var LUA_KEYWORDS = new Set([
-  'and','break','do','else','elseif','end','false','for','function',
-  'goto','if','in','local','nil','not','or','repeat','return','then',
-  'true','until','while','math','string','table','bit32','pcall',
-  'pairs','ipairs','next','select','type','tostring','tonumber',
-  'rawget','rawset','setmetatable','getmetatable','unpack','print',
-  'warn','error','assert'
-]);
-function isLuaKeyword(s) { return LUA_KEYWORDS.has(s); }
+// Encode a string as \NNN escape sequence literal
+function encStr(s){
+  var r='';
+  for(var i=0;i<s.length;i++) r+='\\'+s.charCodeAt(i);
+  return '"'+r+'"';
+}
 
-function rnd(a, b) { return Math.floor(Math.random()*(b-a+1))+a; }
-
-// Encode a string as \NNN escape sequences (like IronBrew2 does)
-function encStr(s) {
-  var r = '';
-  for (var i = 0; i < s.length; i++) {
-    r += '\\' + s.charCodeAt(i);
+// Split a number N into (a+b) or (a*b) expression
+function numExpr(n){
+  if(!OPTS.numSplit||!Number.isInteger(n)||n<2||n>999999) return String(n);
+  if(Math.random()<0.5){
+    var a=rnd(1,n-1);return'('+a+'+'+(n-a)+')';
+  } else {
+    // find a factor
+    for(var d=2;d<=Math.sqrt(n);d++){
+      if(n%d===0) return'('+d+'*'+(n/d)+')';
+    }
+    var a=rnd(1,n-1);return'('+a+'+'+(n-a)+')';
   }
-  return '"' + r + '"';
 }
 
-// Split a number into a random addition/subtraction expression
-function splitNum(n) {
-  if (!Number.isInteger(n) || n < 0 || n > 1000000) return String(n);
-  var a = rnd(1, Math.max(1, Math.abs(n)));
-  return '(' + a + '+' + (n - a) + ')';
+// ══════════════════════════════════════════════════════════════════
+//  LAYER 7: String encryption helper
+//  Encodes a JS string as a Lua expression that decodes to it at runtime
+// ══════════════════════════════════════════════════════════════════
+function makeStringDecoder(decFnName) {
+  // Returns Lua code for a string-decoding function
+  // Uses: each byte stored XOR'd with a random key byte
+  return (
+    'local function '+decFnName+'(t,k)\n'+
+    '  local r={}\n'+
+    '  for i=1,#t do\n'+
+    '    r[i]=string.char(bit32.bxor(t[i],k))\n'+
+    '  end\n'+
+    '  return table.concat(r)\n'+
+    'end\n'
+  );
 }
 
-// XorShift32
-function xs32(s) {
-  s = s >>> 0;
-  s ^= (s << 13) >>> 0;
-  s ^= s >>> 17;
-  s ^= (s << 5) >>> 0;
-  return s >>> 0;
-}
-
-// ============================================================
-//  LAYER 1: Source encoding
-//  - Convert source to bytes
-//  - XOR encrypt with polynomial key
-//  - Fisher-Yates shuffle (seeded XorShift32)
-//  - Add noise offset
-// ============================================================
-function encodeSource(src) {
-  // Convert to bytes (keep ASCII only for max compat)
+function encodeStringVal(s, decFnName) {
+  // Returns a Lua expression like: decFn({65,66,67}, 42)
+  var key = rnd(1,126);
   var bytes = [];
-  for (var i = 0; i < src.length; i++) bytes.push(src.charCodeAt(i) & 0xff);
-
-  var seed = rnd(10000, 999999);
-  var noise = rnd(2, 20);
-  var k1 = rnd(1, 9),  k2 = rnd(1, 11), k3 = rnd(3, 30), k4 = rnd(5, 100);
-
-  // XOR encrypt — key clamped to 0-126 so XOR result stays 0-255
-  var enc = bytes.map(function(b, i) {
-    var key = (k1*i*i + k2*i + k3 + k4) % 127;
-    return b ^ key;
-  });
-
-  // Fisher-Yates shuffle via XorShift32
-  var st = seed >>> 0;
-  var idx = enc.map(function(_, i) { return i; });
-  for (var i = idx.length - 1; i > 0; i--) {
-    st = xs32(st);
-    var j = st % (i + 1);
-    var tmp = idx[i]; idx[i] = idx[j]; idx[j] = tmp;
-  }
-  var shuf = new Array(enc.length);
-  for (var i = 0; i < enc.length; i++) shuf[idx[i]] = enc[i];
-
-  // Add noise
-  var out = shuf.map(function(b) { return (b + noise) % 256; });
-
-  return { data: out, seed: seed, noise: noise, k1: k1, k2: k2, k3: k3, k4: k4 };
+  for(var i=0;i<s.length;i++) bytes.push(s.charCodeAt(i)^key);
+  return decFnName+'({'+bytes.join(',')+'},'+numExpr(key)+')';
 }
 
-// ============================================================
-//  LAYER 2: VM template emitter
-//  Emits a self-contained Lua script that decodes + runs src
-// ============================================================
-function emitVM(src) {
-  resetNames();
-  var E = encodeSource(src);
+// ══════════════════════════════════════════════════════════════════
+//  LAYER 8: Global hiding
+//  Resolves builtins via _G table with split string keys
+// ══════════════════════════════════════════════════════════════════
+function makeGlobalResolver(resolverName) {
+  // Returns code that builds a local alias table from _G
+  // Uses string concatenation to hide the key names
+  return 'local '+resolverName+' = _G\n';
+}
 
-  // Variable names — all unique, clean alphabetic
-  var vData   = gname(), vPos    = gname(), vDec    = gname();
-  var vSeed   = gname(), vNoise  = gname();
-  var vK1     = gname(), vK2     = gname(), vK3     = gname(), vK4 = gname();
-  var vRng    = gname(), vState  = gname();
-  var vIdx    = gname(), vUnshuf = gname();
-  var vI      = gname(), vJ      = gname(), vTmp    = gname();
-  var vByte   = gname(), vKey    = gname();
-  var vChars  = gname(), vResult = gname();
-  var vFn     = gname(), vEnv    = gname();
-  // opaque predicate vars
-  var vP1 = gname(), vP2 = gname(), vP3 = gname();
+// Split a global name into concatenated halves to hide it
+function hiddenGlobal(resolverName, name) {
+  if(!OPTS.hideGlobals) return name;
+  var mid=Math.ceil(name.length/2);
+  var a=name.slice(0,mid), b=name.slice(mid);
+  return resolverName+'["'+a+'"..'+'"'+b+'"]';
+}
 
-  // Split secrets across additions so they're not literal constants
-  var ss = splitPair(E.seed), sn = splitPair(E.noise);
-  var sk1 = splitPair(E.k1), sk2 = splitPair(E.k2);
-  var sk3 = splitPair(E.k3), sk4 = splitPair(E.k4);
-  // XorShift constants — split too
-  var c13a = rnd(5,11), c13b = 13 - c13a;
-  var c17a = rnd(8,14), c17b = 17 - c17a;
-  var c5a  = rnd(2, 4), c5b  =  5 - c5a;
+// ══════════════════════════════════════════════════════════════════
+//  FAKE CONTROL FLOW SNIPPETS
+// ══════════════════════════════════════════════════════════════════
+var JUNK_DENSITY={ low:2, med:5, hi:10 };
 
-  // Chunk data into rows of 80 values
-  var CHUNK = 80, rows = [];
-  for (var i = 0; i < E.data.length; i += CHUNK)
-    rows.push(E.data.slice(i, i+CHUNK).join(','));
-
-  // Opaque predicates (always true/false but not obviously so)
-  // These guard the main code and make static analysis harder
-  var preds = [
-    'math.floor(math.pi) == 3',
-    '('+vP1+' * '+vP1+') >= 0',
-    'type('+vP2+') == '+encStr('number'),
-    '('+vP3+' % 2 == 0 or '+vP3+' % 2 == 1)',
+function junkBlock(indent) {
+  if(!OPTS.fakeFlow) return '';
+  var p=indent||'';
+  var n=JUNK_DENSITY[INTENSITY.junk];
+  var lines=[];
+  var templates=[
+    function(){
+      var v=rnd(1,1000),t=rnd(1,1000);
+      while(t===v)t=rnd(1,1000);
+      return p+'if math.floor(math.pi) == '+rnd(10,99)+' then\n'+
+             p+'  local _x'+rnd(100,999)+' = '+v+'\n'+
+             p+'end';
+    },
+    function(){
+      var a=rnd(2,20),b=rnd(2,20);
+      return p+'if ('+a+' * '+b+') == '+rnd(999,9999)+' then\n'+
+             p+'  error("'+randHex(6)+'")\n'+
+             p+'end';
+    },
+    function(){
+      var v=rnd(1,999);
+      return p+'if math.random('+rnd(1000,9999)+','+rnd(10000,99999)+') == '+v+' then\n'+
+             p+'  local _j'+rnd(100,999)+' = table.concat({})\n'+
+             p+'end';
+    },
+    function(){
+      return p+'do\n'+
+             p+'  local _d'+rnd(100,999)+' = bit32.bxor('+rnd(1,255)+','+rnd(1,255)+')\n'+
+             p+'end';
+    },
+    function(){
+      var a=rnd(2,99),b=rnd(2,99);
+      return p+'if string.len("'+randHex(rnd(4,12))+'") == '+rnd(100,999)+' then\n'+
+             p+'  local _s'+rnd(100,999)+' = '+a+'*'+b+'\n'+
+             p+'end';
+    },
   ];
+  var count=rnd(Math.max(1,n-2),n);
+  for(var i=0;i<count;i++){
+    lines.push(templates[rnd(0,templates.length-1)]());
+  }
+  return lines.join('\n')+'\n';
+}
 
-  // Pick random predicate
-  function pred(always) {
-    if (always) return preds[rnd(0, preds.length-1)];
-    return 'not (' + preds[rnd(0, preds.length-1)] + ')'; // always false
+function randHex(n){
+  var s='',h='0123456789abcdef';
+  for(var i=0;i<n;i++)s+=h[rnd(0,15)];
+  return s;
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  ENCRYPTION CORE
+//  Three-pass XOR: each pass uses different polynomial key
+// ══════════════════════════════════════════════════════════════════
+function xorKey(i, k1, k2, k3, k4) {
+  return (k1*i*i + k2*i + k3 + k4) % 127;
+}
+
+function encryptPass(bytes, k1, k2, k3, k4) {
+  return bytes.map(function(b,i){ return b ^ xorKey(i,k1,k2,k3,k4); });
+}
+
+function shuffleBytes(bytes, seed) {
+  var n=bytes.length;
+  var pos=[]; for(var i=0;i<n;i++) pos.push(i);
+  var st=seed>>>0;
+  for(var i=n-1;i>0;i--){
+    st=xs32(st);
+    var j=st%(i+1);
+    var tmp=pos[i];pos[i]=pos[j];pos[j]=tmp;
+  }
+  var out=new Array(n);
+  for(var i=0;i<n;i++) out[pos[i]]=bytes[i];
+  return out;
+}
+
+function addNoise(bytes, noise){
+  return bytes.map(function(b){ return (b+noise)%256; });
+}
+
+// Full encrypt pipeline: up to 3 passes
+function encryptFull(src) {
+  var bytes=[];
+  for(var i=0;i<src.length;i++) bytes.push(src.charCodeAt(i)&0xff);
+
+  var passes=OPTS.multiLayer?3:1;
+  var layers=[];
+
+  for(var p=0;p<passes;p++){
+    var k1=rnd(1,9),k2=rnd(1,11),k3=rnd(3,25),k4=rnd(5,80);
+    bytes=encryptPass(bytes,k1,k2,k3,k4);
+    layers.push({k1:k1,k2:k2,k3:k3,k4:k4});
   }
 
-  var L = [];
-  // Header comment noise (looks like IronBrew2)
-  L.push('-- ' + randHex(8) + ' | ' + randHex(4) + '-' + randHex(4) + '-' + randHex(4));
+  var seed=rnd(10000,999999);
+  var noise=rnd(2,20);
+  bytes=shuffleBytes(bytes,seed);
+  bytes=addNoise(bytes,noise);
 
-  // Opaque predicate variable defs
-  L.push('local ' + vP1 + ' = ' + rnd(2,99));
-  L.push('local ' + vP2 + ' = ' + rnd(100,999));
-  L.push('local ' + vP3 + ' = ' + rnd(0,1) * 2); // always even
+  return {data:bytes, layers:layers, seed:seed, noise:noise};
+}
 
-  // Dead code block (never executes)
-  L.push('if ' + pred(false) + ' then');
-  L.push('  error(' + encStr('unreachable') + ')');
-  L.push('end');
+// ══════════════════════════════════════════════════════════════════
+//  LUA DECRYPTOR EMITTER
+//  Emits the Lua-side decryption code for one encrypted chunk
+// ══════════════════════════════════════════════════════════════════
+function emitDecryptor(E, dataVar, resultVar, names) {
+  var vI=names.i, vJ=names.j, vB=names.b, vK=names.k;
+  var vPos=names.pos, vRng=names.rng, vSt=names.st;
+  var vDec=names.dec, vCh=names.ch;
+  var vSeed=names.seed, vNoise=names.noise;
+  // per-layer key vars
+  var vLK=names.lk; // array of {k1,k2,k3,k4} var names
 
-  // Data table
-  L.push('local ' + vData + ' = {');
-  L.push(rows.join(',\n'));
-  L.push('}');
+  var L=[];
 
-  // Constants (split)
-  L.push('local ' + vSeed  + ' = (' + ss[0]  + '+' + ss[1]  + ')');
-  L.push('local ' + vNoise + ' = (' + sn[0]  + '+' + sn[1]  + ')');
-  L.push('local ' + vK1    + ' = (' + sk1[0] + '+' + sk1[1] + ')');
-  L.push('local ' + vK2    + ' = (' + sk2[0] + '+' + sk2[1] + ')');
-  L.push('local ' + vK3    + ' = (' + sk3[0] + '+' + sk3[1] + ')');
-  L.push('local ' + vK4    + ' = (' + sk4[0] + '+' + sk4[1] + ')');
+  // Constants (split for obfuscation)
+  L.push('local '+vSeed+'='+numExpr(E.seed));
+  L.push('local '+vNoise+'='+numExpr(E.noise));
 
-  // XorShift32 RNG closure
-  L.push('local ' + vRng + ' = (function(' + vState + ')');
-  L.push('  local s = ' + vState);
+  // Layer key constants
+  for(var p=0;p<E.layers.length;p++){
+    var lk=vLK[p];
+    L.push('local '+lk.k1+'='+numExpr(E.layers[p].k1));
+    L.push('local '+lk.k2+'='+numExpr(E.layers[p].k2));
+    L.push('local '+lk.k3+'='+numExpr(E.layers[p].k3));
+    L.push('local '+lk.k4+'='+numExpr(E.layers[p].k4));
+  }
+
+
+  // Runtime key mixing (Layer 3): looks like keys are derived from runtime state.
+  // XOR(XOR(seed, X), X) == seed always — but a decompiler sees two XOR operations
+  // with different values and can't easily statically reduce it.
+  var vSeedFinal = vSeed;
+  if(OPTS.runtimeKeys){
+    var vMix=gname(), vXval=gname();
+    var xval=rnd(1000,65535);
+    L.push('local '+vXval+'='+numExpr(xval));
+    L.push('local '+vMix+'=bit32.bxor(bit32.bxor('+vSeed+','+vXval+'),'+vXval+')');
+    vSeedFinal=vMix; // RNG receives the self-cancelling expression
+  }
+
+
+  var c13a=rnd(6,10), c13b=13-c13a;
+  var c17a=rnd(8,13), c17b=17-c17a;
+  var c5a=rnd(2,3),   c5b=5-c5a;
+  L.push('local '+vRng+'=(function('+vSt+')');
+  L.push('  local s='+vSt);
   L.push('  return function()');
-  L.push('    s = bit32.bxor(s, bit32.lshift(s, ' + c13a + '+' + c13b + '))');
-  L.push('    s = bit32.bxor(s, bit32.rshift(s, ' + c17a + '+' + c17b + '))');
-  L.push('    s = bit32.bxor(s, bit32.lshift(s, ' + c5a  + '+' + c5b  + '))');
+  L.push('    s=bit32.bxor(s,bit32.lshift(s,'+numExpr(c13a)+'+'+c13b+'))');
+  L.push('    s=bit32.bxor(s,bit32.rshift(s,'+numExpr(c17a)+'+'+c17b+'))');
+  L.push('    s=bit32.bxor(s,bit32.lshift(s,'+numExpr(c5a)+'+'+c5b+'))');
   L.push('    return s');
   L.push('  end');
-  L.push('end)(' + vSeed + ')');
+  L.push('end)('+vSeedFinal+')');
 
-  // Reconstruct permutation
-  L.push('local ' + vIdx + ' = {}');
-  L.push('for ' + vI + ' = 1, #' + vData + ' do ' + vIdx + '[' + vI + '] = ' + vI + ' end');
-  L.push('for ' + vI + ' = #' + vData + ', 2, -1 do');
-  L.push('  local ' + vJ + ' = (' + vRng + '() % ' + vI + ') + 1');
-  L.push('  ' + vIdx + '[' + vI + '], ' + vIdx + '[' + vJ + '] = ' + vIdx + '[' + vJ + '], ' + vIdx + '[' + vI + ']');
-  L.push('end');
-  L.push('local ' + vUnshuf + ' = {}');
-  L.push('for ' + vI + ' = 1, #' + vData + ' do ' + vUnshuf + '[' + vIdx + '[' + vI + ']] = ' + vI + ' end');
-
-  // Dead code 2
-  L.push('if ' + pred(false) + ' then');
-  L.push('  local ' + gname() + ' = ' + rnd(1,100));
+  // Reconstruct shuffle permutation
+  L.push('local '+vPos+'={}');
+  L.push('for '+vI+'=1,#'+dataVar+' do '+vPos+'['+vI+']='+vI+' end');
+  L.push('for '+vI+'=#'+dataVar+',2,-1 do');
+  L.push('  local '+vJ+'=('+vRng+'()%'+vI+')+1');
+  L.push('  '+vPos+'['+vI+'],'+vPos+'['+vJ+']='+vPos+'['+vJ+'],'+vPos+'['+vI+']');
   L.push('end');
 
-  // Decrypt
-  L.push('local ' + vDec + ' = {}');
-  L.push('for ' + vI + ' = 1, #' + vData + ' do');
-  L.push('  local ' + vByte + ' = (' + vData + '[' + vUnshuf + '[' + vI + ']] - ' + vNoise + ') % 256');
-  L.push('  local ' + vKey  + ' = (' + vK1 + ' * (' + vI + '-1) * (' + vI + '-1) + ' + vK2 + ' * (' + vI + '-1) + ' + vK3 + ' + ' + vK4 + ') % 127');
-  L.push('  ' + vDec + '[' + vI + '] = bit32.bxor(' + vByte + ', ' + vKey + ')');
+  // Decrypt — reverse all passes (last-first)
+  L.push('local '+vDec+'={}');
+  L.push('for '+vI+'=1,#'+dataVar+' do');
+  L.push('  local '+vB+'=('+dataVar+'['+vPos+'['+vI+']]-'+vNoise+')%256');
+  // reverse passes in order (they were applied 0..n-1, we reverse n-1..0)
+  // but since XOR is self-inverse, applying same key again undoes it
+  // We apply passes in reverse order
+  for(var p=E.layers.length-1;p>=0;p--){
+    var lk=vLK[p];
+    L.push('  local '+vK+'=('+lk.k1+'*('+vI+'-1)*('+vI+'-1)+'+lk.k2+'*('+vI+'-1)+'+lk.k3+'+'+lk.k4+')%127');
+    L.push('  '+vB+'=bit32.bxor('+vB+','+vK+')');
+  }
+  L.push('  '+vDec+'['+vI+']='+vB);
   L.push('end');
 
-  // Build string from decoded bytes
-  L.push('local ' + vChars + ' = {}');
-  L.push('for ' + vI + ' = 1, #' + vDec + ' do');
-  L.push('  ' + vChars + '[' + vI + '] = string.char(' + vDec + '[' + vI + '])');
-  L.push('end');
-  L.push('local ' + vResult + ' = table.concat(' + vChars + ')');
-
-  // Dead code 3
-  L.push('if ' + pred(false) + ' then');
-  L.push('  ' + gname() + ' = nil');
-  L.push('end');
-
-  // Execute via loadstring — every executor supports this
-  // We wrap in pcall for error safety, use _G as env
-  L.push('local ' + vFn + ' = (loadstring or load)(' + vResult + ')');
-  L.push('if ' + vFn + ' then');
-  L.push('  ' + vEnv + ' = _G');
-  // Try setfenv if available (Lua 5.1 / some executors), silently skip if not
-  L.push('  if setfenv then setfenv(' + vFn + ', ' + vEnv + ') end');
-  L.push('  ' + vFn + '()');
-  L.push('else');
-  L.push('  error(' + encStr('Hercules: decode failed') + ')');
-  L.push('end');
+  // Build string
+  L.push('local '+vCh+'={}');
+  L.push('for '+vI+'=1,#'+vDec+' do '+vCh+'['+vI+']=string.char('+vDec+'['+vI+']) end');
+  L.push('local '+resultVar+'=table.concat('+vCh+')');
 
   return L.join('\n');
 }
 
-function splitPair(n) {
-  var a = rnd(1, Math.max(1, n));
-  return [a, n - a];
-}
-
-function randHex(n) {
-  var s = '';
-  var hx = '0123456789ABCDEF';
-  for (var i = 0; i < n; i++) s += hx[rnd(0,15)];
-  return s;
-}
-
-// ============================================================
-//  LAYER 3: Post-processing passes on the emitted Lua
-//  (applied to the VM wrapper itself)
-// ============================================================
-
-// Pass 1: rename all lua keywords/builtins to local aliases
-// This makes the output look more like IronBrew2
-function addLocalAliases() {
-  resetNames();
-  var aliases = {
-    'bit32'          : gname(),
-    'math'           : gname(),
-    'string'         : gname(),
-    'table'          : gname(),
-    'tostring'       : gname(),
-    'tonumber'       : gname(),
-    'type'           : gname(),
-    'select'         : gname(),
-    'pairs'          : gname(),
-    'ipairs'         : gname(),
-    'unpack'         : gname(),
-    'error'          : gname(),
-    'pcall'          : gname(),
-    'setmetatable'   : gname(),
-    'getmetatable'   : gname(),
-    'rawget'         : gname(),
-    'rawset'         : gname(),
-    'next'           : gname(),
-  };
-
-  var lines = [];
-  for (var k in aliases) {
-    if (k === 'unpack') {
-      // unpack is table.unpack in Lua 5.2+ / Luau
-      lines.push('local ' + aliases[k] + ' = table.unpack or unpack');
-    } else {
-      lines.push('local ' + aliases[k] + ' = ' + k);
-    }
-  }
-  return { header: lines.join('\n'), aliases: aliases };
-}
-
-// ============================================================
-//  MAIN PIPELINE
-// ============================================================
+// ══════════════════════════════════════════════════════════════════
+//  MAIN EMITTER
+// ══════════════════════════════════════════════════════════════════
 function obfuscate(src) {
-  // Step 1: encode + emit VM
-  var vmCode = emitVM(src);
+  resetNames();
+  var L=[];
 
-  // Step 2: prepend local aliases for builtins (IronBrew2 style)
-  var alias = addLocalAliases();
+  // ── Header comment noise
+  L.push('-- '+randHex(8)+' | '+randHex(4)+'-'+randHex(4)+'-'+randHex(4)+'-'+randHex(12));
 
-  // Replace usages in vmCode
-  // We replace specific stdlib refs in the emitted VM code
-  var code = vmCode;
-  // Replace table.concat, string.char, bit32.xxx, math.xxx, math.floor, math.pi
-  // by substituting the aliased versions
-  var a = alias.aliases;
-  code = code.replace(/\bbit32\b/g, a['bit32']);
-  code = code.replace(/\bmath\.floor\b/g, a['math']+'.floor');
-  code = code.replace(/\bmath\.pi\b/g, a['math']+'.pi');
-  code = code.replace(/\bstring\.char\b/g, a['string']+'.char');
-  code = code.replace(/\btable\.concat\b/g, a['table']+'.concat');
-  code = code.replace(/\berror\b/g, a['error']);
-  code = code.replace(/\bsetfenv\b/g, 'setfenv'); // keep literal, it's optional
-  code = code.replace(/\btype\b/g, a['type']);
-
-  return alias.header + '\n' + code;
-}
-
-// ============================================================
-//  UI: Run
-// ============================================================
-async function runObf() {
-  var code = '';
-  if (gMode === 'paste') {
-    code = document.getElementById('inp').value.trim();
-    if (!code) { log('error','No input code.','er'); return; }
-  } else {
-    if (!gFile) { log('error','No file loaded.','er'); return; }
-    code = await gFile.text();
+  // ── Layer 8: Global hiding
+  var vEnv=gname();
+  if(OPTS.hideGlobals){
+    L.push('local '+vEnv+'=_G');
   }
 
-  var btn = document.getElementById('runbtn');
-  var btxt = document.getElementById('btxt');
-  btn.disabled = true; btxt.textContent = 'Processing...';
-  document.getElementById('pf').classList.add('ind');
-  document.getElementById('outp').value = '';
-  document.getElementById('cpbtn').disabled = true;
-  document.getElementById('dlbtn').disabled = true;
-  gOutput = '';
+  // ── String decoder function (Layer 7)
+  var strDecFn=gname();
+  if(OPTS.stringEnc){
+    L.push('local function '+strDecFn+'(t,k)');
+    L.push('  local r={}');
+    L.push('  for i=1,#t do r[i]=string.char(bit32.bxor(t[i],k)) end');
+    L.push('  return table.concat(r)');
+    L.push('end');
+  }
 
-  var t0 = performance.now();
-  log('run', 'Input: ' + code.length + ' chars');
-  log('sys', 'Encoding source bytes...');
+  // ── Initial junk
+  L.push(junkBlock(''));
+
+  // ── Decide chunk count
+  var CHUNK_COUNTS={low:4,med:8,hi:16};
+  var numChunks=OPTS.chunkSplit ? CHUNK_COUNTS[INTENSITY.chunk] : 1;
+  // don't make chunks smaller than 20 chars
+  numChunks=Math.min(numChunks, Math.max(1, Math.floor(src.length/20)));
+
+  // Split source into chunks
+  var chunkSize=Math.ceil(src.length/numChunks);
+  var chunks=[];
+  for(var i=0;i<src.length;i+=chunkSize){
+    chunks.push(src.slice(i,i+chunkSize));
+  }
+
+  log('sys', 'Splitting into '+chunks.length+' chunks', 'inf');
+
+  // ── Declare chunk data tables
+  var chunkDataVars=[];
+  var CHUNK_ROW=70;
+  for(var c=0;c<chunks.length;c++){
+    var E=encryptFull(chunks[c]);
+    var dv=gname();
+    chunkDataVars.push({E:E, dv:dv});
+    // emit data table
+    var rows=[];
+    for(var r=0;r<E.data.length;r+=CHUNK_ROW){
+      rows.push(E.data.slice(r,r+CHUNK_ROW).join(','));
+    }
+    L.push('local '+dv+'={');
+    L.push(rows.join(',\n'));
+    L.push('}');
+    L.push(junkBlock(''));
+  }
+
+  // ── Build chunk decoder closures — each chunk is a function
+  // that decrypts only when called (lazy decryption)
+  var chunkFns=[];
+  for(var c=0;c<chunks.length;c++){
+    var fn=gname();
+    chunkFns.push(fn);
+    var E=chunkDataVars[c].E;
+    var dv=chunkDataVars[c].dv;
+    var rv=gname(); // result var name inside closure
+
+    // Fresh names for each closure's internals
+    var ni=gname(),nj=gname(),nb=gname(),nk=gname();
+    var npos=gname(),nrng=gname(),nst=gname();
+    var ndec=gname(),nch=gname();
+    var nseed=gname(),nnoise=gname();
+    var nmut=gname();
+    var nlk=E.layers.map(function(){
+      return{k1:gname(),k2:gname(),k3:gname(),k4:gname()};
+    });
+
+    L.push('local '+fn+'=function()');
+    L.push(junkBlock('  '));
+    L.push(emitDecryptor(E,dv,rv,{
+      i:ni,j:nj,b:nb,k:nk,pos:npos,rng:nrng,st:nst,
+      dec:ndec,ch:nch,seed:nseed,noise:nnoise,mut:nmut,lk:nlk
+    }));
+    L.push('  return '+rv);
+    L.push('end');
+    L.push(junkBlock(''));
+  }
+
+  // ── Loader: reassemble chunks and execute
+  // Layer 4: Hide the loader
+
+  var vParts=gname(), vFull=gname(), vExec=gname();
+  var vLs=gname(); // loadstring alias
+
+  L.push(junkBlock(''));
+
+  if(OPTS.hideLoader){
+    // Hide "loadstring" as a split string lookup through _G
+    if(OPTS.hideGlobals && OPTS.stringEnc){
+      // encode "loadstring" as encrypted string decoded at runtime
+      var ls1=encodeStringVal('load',strDecFn);
+      var ls2=encodeStringVal('string',strDecFn);
+      L.push('local '+vLs+'='+vEnv+'['+ls1+'..'+''+ls2+']');
+    } else if(OPTS.hideGlobals){
+      L.push('local '+vLs+'='+vEnv+'["loa".."dstr".."ing"]');
+    } else {
+      L.push('local '+vLs+'=loadstring');
+    }
+  } else {
+    L.push('local '+vLs+'=loadstring');
+  }
+
+  // Assemble all chunks into final string
+  L.push('local '+vParts+'={}');
+  for(var c=0;c<chunkFns.length;c++){
+    L.push(vParts+'['+numExpr(c+1)+']='+chunkFns[c]+'()');
+    L.push(junkBlock(''));
+  }
+  L.push('local '+vFull+'=table.concat('+vParts+')');
+
+  // Execute
+  L.push('local '+vExec+'='+vLs+'('+vFull+')');
+  L.push('assert('+vExec+','+
+    (OPTS.stringEnc
+      ? encodeStringVal('Hercules: decode error',strDecFn)
+      : '"Hercules: decode error"'
+    )+')');
+  L.push(vExec+'()');
+
+  return L.join('\n');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  RUN
+// ══════════════════════════════════════════════════════════════════
+async function runObf() {
+  var code='';
+  if(gMode==='paste'){
+    code=document.getElementById('inp').value.trim();
+    if(!code){log('error','No input','er');return;}
+  } else {
+    if(!gFile){log('error','No file loaded','er');return;}
+    code=await gFile.text();
+  }
+
+  var btn=document.getElementById('run-btn'),btxt=document.getElementById('run-txt');
+  btn.disabled=true; btxt.textContent='Working...';
+  setStatus('running');
+  document.getElementById('pbar').classList.add('running');
+  document.getElementById('outp').value='';
+  document.getElementById('copy-btn').disabled=true;
+  document.getElementById('dl-btn').disabled=true;
+  gOutput='';
+
+  var t0=performance.now();
+  var layerCount=Object.keys(OPTS).filter(function(k){return OPTS[k];}).length;
+  log('run','Source: '+code.length+' chars · '+layerCount+' layers active');
+  log('sys','Encrypting...','inf');
 
   try {
     await tick();
-    log('sys', 'Building VM wrapper...');
+    log('sys','Building chunk closures...','inf');
     await tick();
-    log('sys', 'Applying obfuscation passes...');
+    log('sys','Injecting obfuscation passes...','inf');
     await tick();
 
-    var result = obfuscate(code);
-    var t1 = performance.now();
+    var result=obfuscate(code);
+    var t1=performance.now();
+    gOutput=result;
 
-    gOutput = result;
-    document.getElementById('outp').value = result;
-    document.getElementById('cpbtn').disabled = false;
-    document.getElementById('dlbtn').disabled = false;
-    document.getElementById('statbar').style.display = 'flex';
-    document.getElementById('si').textContent = code.length.toLocaleString();
-    document.getElementById('so').textContent = result.length.toLocaleString();
-    document.getElementById('sr').textContent = (result.length/code.length).toFixed(1)+'x';
-    document.getElementById('st').textContent = Math.round(t1-t0);
-    log('sys', 'Done.', 'ok');
-    log('out', result.length+' chars in '+Math.round(t1-t0)+'ms', 'ok');
-    document.getElementById('pf').classList.remove('ind');
-    document.getElementById('pf').style.width = '100%';
+    document.getElementById('outp').value=result;
+    document.getElementById('copy-btn').disabled=false;
+    document.getElementById('dl-btn').disabled=false;
+    document.getElementById('stats').style.display='flex';
+    document.getElementById('st-in').textContent=code.length.toLocaleString();
+    document.getElementById('st-out').textContent=result.length.toLocaleString();
+    document.getElementById('st-ratio').textContent=(result.length/code.length).toFixed(1)+'x';
+    document.getElementById('st-layers').textContent=layerCount;
+    document.getElementById('st-ms').textContent=Math.round(t1-t0);
+
+    document.getElementById('pbar').classList.remove('running');
+    document.getElementById('pbar').style.width='100%';
+    log('done',result.length+' chars · '+Math.round(t1-t0)+'ms','ok');
+    setStatus('done');
   } catch(err) {
-    log('error', err.message, 'er');
+    log('error',err.message,'er');
     console.error(err);
-    document.getElementById('pf').classList.remove('ind');
-    document.getElementById('pf').style.width = '0%';
+    document.getElementById('pbar').classList.remove('running');
+    document.getElementById('pbar').style.width='0';
+    setStatus('error');
   } finally {
-    btn.disabled = false; btxt.textContent = 'Run Obfuscation';
+    btn.disabled=false; btxt.textContent='Obfuscate';
   }
 }
 
-function tick() { return new Promise(function(r){setTimeout(r,25);}); }
+function tick(){return new Promise(function(r){setTimeout(r,22);});}
 </script>
 </body>
 </html>
