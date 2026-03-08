@@ -3,25 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hercules — Lua Obfuscator</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Hercules — Luau Obfuscator</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:       #111214;
-    --bg2:      #18191d;
-    --bg3:      #1e2025;
-    --bg4:      #242629;
-    --border:   #2a2c31;
-    --border2:  #34363c;
-    --accent:   #5b7fa6;
-    --accent2:  #4a6a8a;
-    --text:     #c9cdd4;
-    --text2:    #7c8390;
-    --text3:    #4a4f58;
-    --success:  #5a9e6f;
-    --error:    #9e5a5a;
-    --warn:     #9e8a5a;
-    --white:    #e8eaed;
+    --bg:       #0a0b0d;
+    --bg2:      #0f1114;
+    --bg3:      #141619;
+    --bg4:      #1a1d21;
+    --bg5:      #20242a;
+    --border:   #1e2228;
+    --border2:  #272c34;
+    --accent:   #e8ff47;
+    --accent2:  #c8df30;
+    --accent-dim: rgba(232,255,71,0.08);
+    --accent-glow: rgba(232,255,71,0.15);
+    --text:     #c8cdd6;
+    --text2:    #6b7280;
+    --text3:    #343840;
+    --success:  #4ade80;
+    --error:    #f87171;
+    --warn:     #fbbf24;
+    --white:    #f0f2f5;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,27 +32,48 @@
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Syne', sans-serif;
     min-height: 100vh;
     font-size: 14px;
     line-height: 1.5;
+    overflow-x: hidden;
   }
 
-  /* Subtle noise texture */
-  body::before {
+  /* Scanline overlay */
+  body::after {
     content: '';
     position: fixed;
     inset: 0;
-    opacity: 0.025;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
     pointer-events: none;
-    z-index: 999;
+    z-index: 9998;
+  }
+
+  /* Ambient glow top */
+  .ambient {
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(232,255,71,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
   }
 
   .layout {
     display: grid;
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 200px 1fr;
     min-height: 100vh;
+    position: relative;
+    z-index: 1;
   }
 
   /* ── Sidebar ── */
@@ -58,91 +82,94 @@
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    padding: 0;
     position: sticky;
     top: 0;
     height: 100vh;
+    overflow: hidden;
+  }
+
+  .sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.4;
   }
 
   .sidebar-logo {
-    padding: 24px 20px 20px;
+    padding: 22px 18px 18px;
     border-bottom: 1px solid var(--border);
   }
 
   .logo-mark {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--white);
-    letter-spacing: 0.5px;
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    text-transform: uppercase;
+    line-height: 1;
   }
 
   .logo-sub {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text3);
-    margin-top: 3px;
-    font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 0.3px;
+    margin-top: 4px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
   }
 
   .sidebar-section {
-    padding: 16px 12px 8px;
+    padding: 14px 10px 6px;
   }
 
   .sidebar-label {
-    font-size: 10px;
-    font-weight: 500;
+    font-size: 9px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1.2px;
+    letter-spacing: 2px;
     color: var(--text3);
     padding: 0 8px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
 
   .nav-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 9px;
     padding: 8px 10px;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     color: var(--text2);
-    font-size: 13px;
-    font-weight: 400;
+    font-size: 12.5px;
+    font-weight: 500;
     transition: all 0.15s;
     border: 1px solid transparent;
     user-select: none;
+    position: relative;
   }
 
-  .nav-item:hover {
-    background: var(--bg3);
-    color: var(--text);
-  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
 
   .nav-item.active {
-    background: var(--bg3);
-    color: var(--white);
-    border-color: var(--border);
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-color: rgba(232,255,71,0.15);
   }
 
-  .nav-icon {
-    width: 16px;
-    height: 16px;
-    opacity: 0.6;
-    flex-shrink: 0;
-  }
+  .nav-item.active .nav-icon { opacity: 1; color: var(--accent); }
 
-  .nav-item.active .nav-icon { opacity: 1; }
+  .nav-icon { width: 14px; height: 14px; opacity: 0.5; flex-shrink: 0; }
 
-  .sidebar-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 8px 12px;
-  }
+  .sidebar-divider { height: 1px; background: var(--border); margin: 8px 10px; }
 
   .sidebar-footer {
     margin-top: auto;
-    padding: 16px;
+    padding: 14px;
     border-top: 1px solid var(--border);
   }
 
@@ -150,35 +177,36 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text2);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Space Mono', monospace;
   }
 
   .status-dot {
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: var(--success);
     flex-shrink: 0;
+    box-shadow: 0 0 6px var(--success);
+    animation: pulse 2s ease infinite;
   }
 
-  /* ── Main content ── */
-  .main {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
 
-  /* Top bar */
+  /* ── Main ── */
+  .main { display: flex; flex-direction: column; overflow: hidden; }
+
   .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
-    height: 52px;
+    height: 48px;
     border-bottom: 1px solid var(--border);
-    background: var(--bg);
     flex-shrink: 0;
   }
 
@@ -186,53 +214,48 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text3);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Space Mono', monospace;
   }
 
-  .breadcrumb-sep { color: var(--text3); }
+  .breadcrumb-active { color: var(--text); }
 
-  .breadcrumb-active {
-    color: var(--text);
-    font-weight: 500;
-  }
-
-  .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
 
   .chip {
     background: var(--bg3);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 4px 10px;
-    font-size: 11px;
+    border-radius: 3px;
+    padding: 3px 9px;
+    font-size: 10px;
     color: var(--text2);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Space Mono', monospace;
   }
 
-  /* Content area */
+  .chip.accent {
+    background: var(--accent-dim);
+    border-color: rgba(232,255,71,0.2);
+    color: var(--accent);
+  }
+
   .content {
     flex: 1;
-    padding: 24px;
+    padding: 20px 24px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     overflow-y: auto;
   }
 
-  .content::-webkit-scrollbar { width: 6px; }
-  .content::-webkit-scrollbar-track { background: transparent; }
-  .content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  .content::-webkit-scrollbar { width: 4px; }
+  .content::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
   /* ── Cards ── */
   .card {
     background: var(--bg2);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
   }
 
@@ -240,16 +263,18 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 11px 16px;
+    padding: 10px 14px;
     border-bottom: 1px solid var(--border);
     background: var(--bg3);
   }
 
   .card-title {
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 700;
     color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -258,101 +283,89 @@
   .card-badge {
     background: var(--bg4);
     border: 1px solid var(--border2);
-    border-radius: 3px;
+    border-radius: 2px;
     padding: 1px 6px;
-    font-size: 10px;
+    font-size: 9px;
     color: var(--text3);
     font-weight: 400;
+    text-transform: lowercase;
   }
 
-  .card-actions { display: flex; gap: 6px; }
+  .card-actions { display: flex; gap: 5px; }
 
   .btn-ghost {
     background: transparent;
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: 3px;
     color: var(--text2);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
     padding: 4px 9px;
     cursor: pointer;
     transition: all 0.15s;
-    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
-  .btn-ghost:hover:not(:disabled) {
-    background: var(--bg4);
-    color: var(--text);
-    border-color: var(--border2);
-  }
-
-  .btn-ghost:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-ghost:hover:not(:disabled) { background: var(--bg4); color: var(--text); border-color: var(--border2); }
+  .btn-ghost:disabled { opacity: 0.25; cursor: not-allowed; }
 
   /* Mode toggle */
   .mode-toggle {
     display: flex;
     background: var(--bg3);
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 5px;
     padding: 3px;
     gap: 2px;
   }
 
   .mode-btn {
-    padding: 6px 14px;
+    padding: 6px 16px;
     border: none;
-    border-radius: 4px;
+    border-radius: 3px;
     background: transparent;
     color: var(--text2);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Syne', sans-serif;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
   .mode-btn.active {
-    background: var(--bg);
-    color: var(--white);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    background: var(--accent);
+    color: #0a0b0d;
   }
 
-  /* Code areas */
-  .editor-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  @media (max-width: 900px) {
-    .layout { grid-template-columns: 1fr; }
-    .sidebar { display: none; }
-    .editor-grid { grid-template-columns: 1fr; }
-  }
+  /* Editor */
+  .editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
   textarea {
     width: 100%;
-    height: 320px;
+    height: 300px;
     background: var(--bg2);
     border: none;
     outline: none;
     resize: none;
     padding: 14px 16px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12.5px;
-    line-height: 1.7;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    line-height: 1.75;
     color: var(--text);
     caret-color: var(--accent);
     tab-size: 4;
   }
 
   textarea::placeholder { color: var(--text3); }
-  textarea::-webkit-scrollbar { width: 5px; }
+  textarea::-webkit-scrollbar { width: 4px; }
   textarea::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
   /* Drop zone */
   .drop-zone {
-    height: 160px;
+    height: 140px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -361,76 +374,71 @@
     cursor: pointer;
     transition: all 0.2s;
     margin: 12px;
-    border-radius: 6px;
+    border-radius: 5px;
     border: 1px dashed var(--border2);
   }
 
   .drop-zone:hover, .drop-zone.dragover {
     border-color: var(--accent);
-    background: rgba(91,127,166,0.04);
+    background: var(--accent-dim);
   }
 
-  .drop-svg {
-    color: var(--text3);
-    transition: color 0.2s;
-  }
   .drop-zone:hover .drop-svg { color: var(--accent); }
+  .drop-svg { color: var(--text3); transition: color 0.2s; }
 
-  .drop-text { font-size: 13px; color: var(--text2); }
-  .drop-sub { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+  .drop-text { font-size: 12.5px; color: var(--text2); font-weight: 600; }
+  .drop-sub { font-size: 10px; color: var(--text3); font-family: 'Space Mono', monospace; }
 
   .file-loaded {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 14px;
-    background: rgba(90, 158, 111, 0.06);
+    padding: 9px 14px;
+    background: rgba(74,222,128,0.05);
     border-top: 1px solid var(--border);
-    font-size: 12px;
-    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
     color: var(--success);
   }
 
-  .file-clear {
-    margin-left: auto;
-    cursor: pointer;
-    color: var(--text3);
-    font-size: 11px;
-    transition: color 0.15s;
-  }
+  .file-clear { margin-left: auto; cursor: pointer; color: var(--text3); font-size: 10px; transition: color 0.15s; }
   .file-clear:hover { color: var(--text); }
-
   #file-input { display: none; }
 
-  /* Run button */
-  .run-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
+  /* Run row */
+  .run-row { display: flex; gap: 10px; align-items: center; }
 
   .btn-primary {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px;
+    padding: 10px 22px;
     background: var(--accent);
-    border: 1px solid transparent;
-    border-radius: 6px;
-    color: #fff;
-    font-family: 'DM Sans', sans-serif;
+    border: none;
+    border-radius: 5px;
+    color: #0a0b0d;
+    font-family: 'Syne', sans-serif;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.15s;
-    letter-spacing: 0.2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
   }
 
-  .btn-primary:hover:not(:disabled) {
-    background: var(--accent2);
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15) 100%);
+    pointer-events: none;
   }
 
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+  .btn-primary:active:not(:disabled) { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
 
   .btn-secondary {
     display: flex;
@@ -438,91 +446,109 @@
     gap: 7px;
     padding: 10px 16px;
     background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 6px;
+    border: 1px solid var(--border2);
+    border-radius: 5px;
     color: var(--text2);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 400;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
   }
 
-  .btn-secondary:hover:not(:disabled) {
-    background: var(--bg4);
-    color: var(--text);
-    border-color: var(--border2);
-  }
-
-  .btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-secondary:hover:not(:disabled) { background: var(--bg4); color: var(--text); border-color: var(--border2); }
+  .btn-secondary:disabled { opacity: 0.25; cursor: not-allowed; }
 
   .spacer { flex: 1; }
 
   /* Progress */
-  .progress-track {
-    height: 2px;
-    background: var(--bg3);
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    width: 0%;
-    background: var(--accent);
-    transition: width 0.4s ease;
-  }
-
-  .progress-fill.indeterminate {
-    width: 40%;
-    animation: indeterminate 1.4s ease infinite;
-  }
+  .progress-track { height: 1px; background: var(--bg4); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.4s ease; }
+  .progress-fill.indeterminate { width: 35%; animation: indeterminate 1.2s ease infinite; }
 
   @keyframes indeterminate {
-    0% { transform: translateX(-150%); }
-    100% { transform: translateX(350%); }
+    0%   { transform: translateX(-200%); }
+    100% { transform: translateX(400%); }
   }
 
   /* Log */
   .log-body {
-    padding: 12px 16px;
-    height: 120px;
+    padding: 10px 14px;
+    height: 110px;
     overflow-y: auto;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11.5px;
-    line-height: 1.9;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    line-height: 2;
   }
 
-  .log-body::-webkit-scrollbar { width: 4px; }
-  .log-body::-webkit-scrollbar-thumb { background: var(--border); }
+  .log-body::-webkit-scrollbar { width: 3px; }
+  .log-body::-webkit-scrollbar-thumb { background: var(--border2); }
 
-  .log-line { display: flex; gap: 12px; }
+  .log-line { display: flex; gap: 14px; }
   .log-ts { color: var(--text3); flex-shrink: 0; }
-  .log-tag { flex-shrink: 0; min-width: 52px; color: var(--text3); }
+  .log-tag { flex-shrink: 0; min-width: 46px; color: var(--text3); }
   .log-msg { color: var(--text2); }
   .log-msg.ok { color: var(--success); }
   .log-msg.err { color: var(--error); }
   .log-msg.warn { color: var(--warn); }
 
-  /* Fade in */
-  .content > * {
-    animation: fadeUp 0.25s ease forwards;
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 1px;
+    overflow: hidden;
+    border-radius: 4px;
   }
 
+  .stat-pill {
+    flex: 1;
+    padding: 8px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    text-align: center;
+    border-radius: 0;
+  }
+
+  .stat-pill:first-child { border-radius: 4px 0 0 4px; }
+  .stat-pill:last-child { border-radius: 0 4px 4px 0; }
+
+  .stat-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-lbl {
+    font-size: 9px;
+    color: var(--text3);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  /* Fade in */
+  .content > * { animation: fadeUp 0.2s ease forwards; }
+
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(5px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ── Discord Profile Modal ── */
+  /* About modal */
   .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.8);
     z-index: 9999;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(6px);
   }
   .modal-overlay.open { display: flex; }
 
@@ -530,35 +556,25 @@
     width: 300px;
     border-radius: 10px;
     overflow: hidden;
-    background: #232428;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
-    font-family: 'DM Sans', sans-serif;
-    position: relative;
+    background: #1e1f22;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05);
+    font-family: 'Syne', sans-serif;
     animation: popIn 0.2s ease;
   }
 
   @keyframes popIn {
-    from { transform: scale(0.9); opacity: 0; }
-    to   { transform: scale(1);   opacity: 1; }
+    from { transform: scale(0.92) translateY(8px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
   }
 
-  .dc-banner {
-    height: 90px;
-    background: #3a3b3f;
-    position: relative;
-  }
-
-  .dc-avatar-wrap {
-    position: absolute;
-    bottom: -38px;
-    left: 16px;
-  }
+  .dc-banner { height: 88px; background: linear-gradient(135deg, #1a1d2e, #2d1f3d); position: relative; }
+  .dc-avatar-wrap { position: absolute; bottom: -38px; left: 16px; }
 
   .dc-avatar {
     width: 76px;
     height: 76px;
     border-radius: 50%;
-    border: 5px solid #232428;
+    border: 5px solid #1e1f22;
     object-fit: cover;
     display: block;
   }
@@ -568,7 +584,7 @@
     height: 16px;
     background: #23a55a;
     border-radius: 50%;
-    border: 3px solid #232428;
+    border: 3px solid #1e1f22;
     position: absolute;
     bottom: 4px;
     right: 4px;
@@ -578,71 +594,45 @@
     position: absolute;
     top: 10px;
     right: 12px;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0,0,0,0.5);
     border: none;
     color: #fff;
     border-radius: 50%;
     width: 26px;
     height: 26px;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    line-height: 1;
   }
 
-  .dc-body {
-    padding: 50px 16px 16px;
-  }
+  .dc-body { padding: 50px 16px 16px; }
 
-  .dc-names {
-    margin-bottom: 12px;
-  }
+  .dc-names { margin-bottom: 12px; }
 
   .dc-display {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 19px;
+    font-weight: 800;
     color: #fff;
     line-height: 1.2;
     display: flex;
     align-items: center;
     gap: 6px;
   }
+
   .dc-nitro-crown {
-    font-size: 14px;
+    font-size: 13px;
     background: linear-gradient(135deg, #ff73fa, #7289da);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
-  .dc-username {
-    font-size: 13px;
-    color: #b5bac1;
-    margin-top: 2px;
-  }
+  .dc-username { font-size: 13px; color: #b5bac1; margin-top: 2px; font-weight: 400; }
+  .dc-divider { height: 1px; background: #2e3035; margin: 12px 0; }
+  .dc-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #b5bac1; margin-bottom: 8px; }
 
-  .dc-divider {
-    height: 1px;
-    background: #3a3b3f;
-    margin: 12px 0;
-  }
-
-  .dc-section-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
-    color: #b5bac1;
-    margin-bottom: 8px;
-  }
-
-  .dc-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 4px;
-  }
+  .dc-badges { display: flex; flex-wrap: wrap; gap: 6px; }
 
   .dc-badge {
     width: 28px;
@@ -651,19 +641,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
     background: transparent;
     position: relative;
     cursor: default;
     transition: transform 0.15s;
   }
+
   .dc-badge:hover { transform: scale(1.15); }
-  .dc-badge img {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
-    filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
-  }
+  .dc-badge img { width: 24px; height: 24px; object-fit: contain; }
 
   .dc-badge:hover::after {
     content: attr(data-tip);
@@ -681,46 +666,40 @@
     z-index: 10;
   }
 
-  .dc-about {
-    font-size: 13px;
-    color: #dbdee1;
-    line-height: 1.6;
-    white-space: pre-line;
-    text-align: center;
-  }
+  .dc-about { font-size: 13px; color: #dbdee1; line-height: 1.6; white-space: pre-line; text-align: center; font-weight: 400; }
 
-  .dc-member-since {
-    font-size: 13px;
-    color: #dbdee1;
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .editor-grid { grid-template-columns: 1fr; }
   }
-
 </style>
 </head>
 <body>
+
+<div class="ambient"></div>
 
 <div class="layout">
 
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo">
-      <div class="logo-mark">hercules</div>
-      <div class="logo-sub">lua obfuscator</div>
+      <div class="logo-mark">Hercules</div>
+      <div class="logo-sub">lua obfuscator · v3</div>
     </div>
 
     <div class="sidebar-section">
-      <div class="sidebar-label">Tools</div>
+      <div class="sidebar-label">Input</div>
       <div class="nav-item active" onclick="setMode('paste')" id="nav-paste">
-        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M2 2h8l3 3v9H2V2zm5 0v4h4"/>
-          <rect x="4" y="8" width="6" height="1" rx="0.5"/>
-          <rect x="4" y="10" width="4" height="1" rx="0.5"/>
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="2" width="10" height="12" rx="1.5"/>
+          <path d="M6 6h4M6 9h3"/>
         </svg>
         Paste Code
       </div>
       <div class="nav-item" onclick="setMode('file')" id="nav-file">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M3 2h7l3 3v9H3V2z"/>
-          <path d="M10 2v3h3"/>
+          <path d="M3 2h7l3 3v9H3V2z"/><path d="M10 2v3h3"/>
           <path d="M8 7v5M5.5 9.5L8 7l2.5 2.5"/>
         </svg>
         Upload File
@@ -731,10 +710,9 @@
 
     <div class="sidebar-section">
       <div class="sidebar-label">Info</div>
-      <div class="nav-item" style="cursor:pointer" onclick="showAbout()">
+      <div class="nav-item" onclick="showAbout()">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="8" cy="8" r="6"/>
-          <path d="M8 7v4M8 5.5v.5"/>
+          <circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.5v.5"/>
         </svg>
         About
       </div>
@@ -754,11 +732,11 @@
     <div class="topbar">
       <div class="topbar-left">
         <span>hercules</span>
-        <span class="breadcrumb-sep">/</span>
+        <span style="color:var(--text3)">/</span>
         <span class="breadcrumb-active" id="breadcrumb">paste-code</span>
       </div>
       <div class="topbar-right">
-        <div class="chip">v2.0</div>
+        <div class="chip accent">v3.0</div>
         <div class="chip">.lua · .luau · .txt</div>
       </div>
     </div>
@@ -771,29 +749,26 @@
           <button class="mode-btn active" id="tab-paste" onclick="setMode('paste')">Paste code</button>
           <button class="mode-btn" id="tab-file" onclick="setMode('file')">Upload file</button>
         </div>
-        <span style="font-size:12px; color:var(--text3)">Select input method</span>
+        <span style="font-size:11px; color:var(--text3); font-family:'Space Mono',monospace">select input</span>
       </div>
 
       <!-- File upload card -->
       <div class="card" id="file-card" style="display:none">
         <div class="card-header">
-          <div class="card-title">
-            Input
-            <span class="card-badge">file</span>
-          </div>
+          <div class="card-title">Input <span class="card-badge">file upload</span></div>
         </div>
         <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-          <svg class="drop-svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <svg class="drop-svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
             <polyline points="17 8 12 3 7 8"/>
             <line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
-          <div class="drop-text">Drop a file here or click to browse</div>
-          <div class="drop-sub">.lua &nbsp;·&nbsp; .luau &nbsp;·&nbsp; .txt</div>
+          <div class="drop-text">Drop file or click to browse</div>
+          <div class="drop-sub">.lua · .luau · .txt</div>
         </div>
         <input type="file" id="file-input" accept=".lua,.luau,.txt">
         <div class="file-loaded" id="file-loaded" style="display:none">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 11.5L3 8l1.4-1.4 2.1 2.1 4.1-4.1L12 6l-5.5 5.5z"/></svg>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 11.5L3 8l1.4-1.4 2.1 2.1 4.1-4.1L12 6l-5.5 5.5z"/></svg>
           <span id="file-name"></span>
           <span style="color:var(--text3)">·</span>
           <span id="file-size" style="color:var(--text3)"></span>
@@ -805,24 +780,17 @@
       <div class="editor-grid" id="editor-grid">
         <div class="card">
           <div class="card-header">
-            <div class="card-title">
-              Input
-              <span class="card-badge">raw lua</span>
-            </div>
+            <div class="card-title">Input <span class="card-badge">raw luau</span></div>
             <div class="card-actions">
               <button class="btn-ghost" onclick="loadExample()">example</button>
               <button class="btn-ghost" onclick="clearInput()">clear</button>
             </div>
           </div>
-          <textarea id="input-code" spellcheck="false" placeholder="-- Paste your Lua code here..."></textarea>
+          <textarea id="input-code" spellcheck="false" placeholder="-- Paste your Luau / Lua script here..."></textarea>
         </div>
-
         <div class="card">
           <div class="card-header">
-            <div class="card-title">
-              Output
-              <span class="card-badge">obfuscated</span>
-            </div>
+            <div class="card-title">Output <span class="card-badge">obfuscated</span></div>
             <div class="card-actions">
               <button class="btn-ghost" id="copy-btn" onclick="copyOutput()" disabled>copy</button>
             </div>
@@ -834,24 +802,43 @@
       <!-- Run row -->
       <div class="run-row">
         <button class="btn-primary" id="run-btn" onclick="runObfuscate()">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg>
-          <span id="btn-text">Run obfuscation</span>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg>
+          <span id="btn-text">Run Obfuscation</span>
         </button>
         <button class="btn-secondary" id="dl-btn" onclick="downloadOutput()" disabled>
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 13h10"/></svg>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 2v8M5 7l3 3 3-3"/><path d="M3 13h10"/>
+          </svg>
           Download .lua
         </button>
         <div class="spacer"></div>
-        <span style="font-size:11px; color:var(--text3); font-family:'JetBrains Mono',monospace" id="char-count"></span>
+        <span style="font-size:10px; color:var(--text3); font-family:'Space Mono',monospace" id="char-count"></span>
       </div>
 
-      <!-- Log card -->
+      <!-- Stats bar (hidden until run) -->
+      <div class="stats-bar" id="stats-bar" style="display:none">
+        <div class="stat-pill">
+          <div class="stat-val" id="stat-in">—</div>
+          <div class="stat-lbl">Input Chars</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-val" id="stat-out">—</div>
+          <div class="stat-lbl">Output Chars</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-val" id="stat-ratio">—</div>
+          <div class="stat-lbl">Expansion</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-val" id="stat-time">—</div>
+          <div class="stat-lbl">Time (ms)</div>
+        </div>
+      </div>
+
+      <!-- Console card -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">
-            Console
-            <span class="card-badge">output</span>
-          </div>
+          <div class="card-title">Console <span class="card-badge">output</span></div>
           <div class="card-actions">
             <button class="btn-ghost" onclick="clearLog()">clear</button>
           </div>
@@ -864,55 +851,91 @@
   </div>
 </div>
 
+<!-- About Modal -->
+<div class="modal-overlay" id="about-modal" onclick="closeAbout(event)">
+  <div class="dc-card">
+    <div class="dc-banner">
+      <div class="dc-avatar-wrap">
+        <img class="dc-avatar" src="https://cdn.discordapp.com/avatars/1452536108201279645/f47dee2867aa91d9c1f2406a989bbeeb.png?size=512" alt="avatar">
+        <div class="dc-status"></div>
+      </div>
+      <button class="dc-close" onclick="document.getElementById('about-modal').classList.remove('open')">✕</button>
+    </div>
+    <div class="dc-body">
+      <div class="dc-names">
+        <div class="dc-display">keoyooo <span class="dc-nitro-crown">✦</span></div>
+        <div class="dc-username">b9hj</div>
+      </div>
+      <div class="dc-divider"></div>
+      <div class="dc-section-label">Badges</div>
+      <div class="dc-badges">
+        <div class="dc-badge" data-tip="Nitro"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/nitro.png" alt="Nitro"></div>
+        <div class="dc-badge" data-tip="Bug Hunter Level 2"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/bughunter_2.png" alt="Bug Hunter"></div>
+        <div class="dc-badge" data-tip="Active Developer"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/developer.png" alt="Active Developer"></div>
+        <div class="dc-badge" data-tip="Early Supporter"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/early_supporter.png" alt="Early Supporter"></div>
+        <div class="dc-badge" data-tip="Discord Staff"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/staff.png" alt="Discord Staff"></div>
+      </div>
+      <div class="dc-divider"></div>
+      <div class="dc-section-label">About Me</div>
+      <div class="dc-about"> °.✽✦✽.◦✽✦✽.°
+ surely with hardship comes ease.
+ °.✽✦✽.◦✽✦✽.°</div>
+    </div>
+  </div>
+</div>
+
 <script>
-  let currentMode = 'paste';
-  let loadedFile = null;
-  let outputText = '';
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let currentMode = 'paste';
+let loadedFile = null;
+let outputText = '';
 
-  // Init log
-  log('init', 'Hercules obfuscation engine ready.', 'ok');
-  log('init', 'Paste code or upload a file, then click Run.');
+log('init', 'Hercules v3 engine loaded.', 'ok');
+log('init', 'Executor-compatible Luau VM output.');
 
-  function setMode(mode) {
-    currentMode = mode;
-    ['paste','file'].forEach(m => {
-      document.getElementById('tab-' + m).classList.toggle('active', m === mode);
-      document.getElementById('nav-' + m).classList.toggle('active', m === mode);
-    });
-    document.getElementById('editor-grid').style.display = mode === 'paste' ? 'grid' : 'none';
-    document.getElementById('file-card').style.display = mode === 'file' ? 'block' : 'none';
-    document.getElementById('breadcrumb').textContent = mode === 'paste' ? 'paste-code' : 'upload-file';
-  }
+// ═══════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════
+function setMode(mode) {
+  currentMode = mode;
+  ['paste','file'].forEach(m => {
+    document.getElementById('tab-' + m).classList.toggle('active', m === mode);
+    document.getElementById('nav-' + m).classList.toggle('active', m === mode);
+  });
+  document.getElementById('editor-grid').style.display = mode === 'paste' ? 'grid' : 'none';
+  document.getElementById('file-card').style.display  = mode === 'file'  ? 'block' : 'none';
+  document.getElementById('breadcrumb').textContent   = mode === 'paste' ? 'paste-code' : 'upload-file';
+}
 
-  // File drag/drop
-  const dropZone = document.getElementById('drop-zone');
-  const fileInput = document.getElementById('file-input');
+const dropZone  = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-  dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
-  fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+function handleFile(file) {
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['lua','luau','txt'].includes(ext)) { log('error', 'Invalid file type. Accepted: .lua .luau .txt', 'err'); return; }
+  loadedFile = file;
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
+  document.getElementById('file-loaded').style.display = 'flex';
+  log('file', `Loaded ${file.name} (${(file.size/1024).toFixed(1)} KB)`, 'ok');
+}
 
-  function handleFile(file) {
-    if (!file) return;
-    const ext = file.name.split('.').pop().toLowerCase();
-    if (!['lua','luau','txt'].includes(ext)) { log('error', 'Invalid file type. Accepted: .lua .luau .txt', 'err'); return; }
-    loadedFile = file;
-    document.getElementById('file-name').textContent = file.name;
-    document.getElementById('file-size').textContent = (file.size / 1024).toFixed(1) + ' KB';
-    document.getElementById('file-loaded').style.display = 'flex';
-    log('file', `Loaded ${file.name} (${(file.size/1024).toFixed(1)} KB)`, 'ok');
-  }
+function clearFile() {
+  loadedFile = null;
+  fileInput.value = '';
+  document.getElementById('file-loaded').style.display = 'none';
+  log('file', 'File removed.');
+}
 
-  function clearFile() {
-    loadedFile = null;
-    fileInput.value = '';
-    document.getElementById('file-loaded').style.display = 'none';
-    log('file', 'File removed.');
-  }
-
-  function loadExample() {
-    document.getElementById('input-code').value =
+function loadExample() {
+  document.getElementById('input-code').value =
 `local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -938,171 +961,209 @@ function module.teleport(player, position)
 end
 
 return module`;
-    updateCharCount();
-    log('input', 'Example code loaded.');
-  }
+  updateCharCount();
+  log('input', 'Example loaded.');
+}
 
-  function clearInput() {
-    document.getElementById('input-code').value = '';
-    updateCharCount();
-  }
+function clearInput() { document.getElementById('input-code').value = ''; updateCharCount(); }
 
-  document.getElementById('input-code').addEventListener('input', updateCharCount);
+document.getElementById('input-code').addEventListener('input', updateCharCount);
+function updateCharCount() {
+  const len = document.getElementById('input-code').value.length;
+  document.getElementById('char-count').textContent = len > 0 ? len + ' chars' : '';
+}
 
-  function updateCharCount() {
-    const len = document.getElementById('input-code').value.length;
-    document.getElementById('char-count').textContent = len > 0 ? len + ' chars' : '';
-  }
+function log(tag, msg, type = '') {
+  const body = document.getElementById('log-body');
+  const now  = new Date();
+  const ts   = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = `<span class="log-ts">${ts}</span><span class="log-tag">${tag}</span><span class="log-msg ${type}">${msg}</span>`;
+  body.appendChild(line);
+  body.scrollTop = body.scrollHeight;
+}
 
-  function log(tag, msg, type = '') {
-    const body = document.getElementById('log-body');
-    const now = new Date();
-    const ts = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
-    const line = document.createElement('div');
-    line.className = 'log-line';
-    line.innerHTML = `<span class="log-ts">${ts}</span><span class="log-tag">${tag}</span><span class="log-msg ${type}">${msg}</span>`;
-    body.appendChild(line);
-    body.scrollTop = body.scrollHeight;
-  }
+function clearLog() { document.getElementById('log-body').innerHTML = ''; }
 
-  function clearLog() {
-    document.getElementById('log-body').innerHTML = '';
-  }
+function copyOutput() {
+  if (!outputText) return;
+  navigator.clipboard.writeText(outputText).then(() => log('sys', 'Copied to clipboard.', 'ok'));
+}
 
+function downloadOutput() {
+  if (!outputText) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([outputText], { type: 'text/plain' }));
+  a.download = 'obfuscated.lua';
+  a.click();
+  log('sys', 'Downloaded obfuscated.lua', 'ok');
+}
 
+function showAbout()  { document.getElementById('about-modal').classList.add('open'); }
+function closeAbout(e) { if (e.target === document.getElementById('about-modal')) document.getElementById('about-modal').classList.remove('open'); }
 
+// ═══════════════════════════════════════════════
+// HERCULES ENGINE v3
+// Roblox executor-safe Luau obfuscator
+// Uses: bit32, loadstring, setfenv, getfenv
+// ═══════════════════════════════════════════════
+const HRC = {
+  _cnt: 0,
+  genVar() {
+    this._cnt++;
+    // confusable unicode lookalike set — valid Luau identifiers
+    const p = ['l','I','1','i','O','0','Il','lI','I1','1l','lO','Ol'];
+    let n = '_';
+    let x = this._cnt;
+    do { n += p[x % p.length]; x = Math.floor(x / p.length); } while (x > 0);
+    return n + '_';
+  },
+  genKey(len = 8) {
+    let s = '';
+    while (s.length < len) s += Math.random().toString(36).slice(2);
+    return s.slice(0, len).toUpperCase();
+  },
+  rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; },
+};
 
+// ── Opaque predicates ──────────────────────────
+function opaque() {
+  const ops = [
+    '(math.floor(1.9)==1)',
+    '(type(nil)=="nil")',
+    '(string.byte("A")==65)',
+    '(math.abs(-1)==1)',
+    '(not false)',
+    '(1<2)',
+    '(math.max(0,1)==1)',
+    '((1+1)==2)',
+    '(#{0}==1)',
+  ];
+  return ops[HRC.rand(0, ops.length - 1)];
+}
+function opaqueF() {
+  const ops = ['(1>2)', '(false)', '(nil==1)', '(math.floor(1.9)==2)', '(type(1)=="string")'];
+  return ops[HRC.rand(0, ops.length - 1)];
+}
 
-  // ═══════════════════════════════════════════════════════════
+// ── Dead code injection ────────────────────────
+function deadCode() {
+  const v = HRC.genVar(), v2 = HRC.genVar();
+  const s = [
+    `if ${opaqueF()} then local ${v}=error("x") end`,
+    `do local ${v}=0 local ${v2}=${v}*0 end`,
+    `if ${opaque()} then else error("dead") end`,
+    `local ${v}=(function(...) return ... end)(nil)`,
+    `while ${opaqueF()} do break end`,
+    `for ${v}=1,0 do end`,
+    `local ${v}=nil if ${v} then end`,
+    `repeat until true`,
+  ];
+  return s[HRC.rand(0, s.length - 1)];
+}
 
-  // ═══════════════════════════════════════════════════════════
-  // HERCULES ENGINE v3 — Roblox/Luau Anti-dump VM
-  // ═══════════════════════════════════════════════════════════
+// ── Number obfuscation ─────────────────────────
+function obfNum(raw) {
+  const n = parseInt(raw);
+  if (isNaN(n) || n < 0 || n > 99999) return raw;
+  const a = HRC.rand(1, Math.max(1, n === 0 ? 1 : n));
+  const styles = [
+    () => `(${a}+(${n - a}))`,
+    () => `(${n + HRC.rand(1,50)}-${HRC.rand(1,50)})`,
+    () => n === 0 ? '(1-1)' : `(${Math.ceil(n/2)}+${Math.floor(n/2)})`,
+    () => `(function() return ${n} end)()`,
+    () => `(bit32.bxor(${n ^ 0xAA},${0xAA}))`,
+  ];
+  return styles[HRC.rand(0, styles.length - 1)]();
+}
 
-  const HRC = {
-    _cnt: 0,
-    genVar() {
-      this._cnt++;
-      const p = ['l','I','1','i','O','0','|'];
-      let n = '__';
-      let x = this._cnt;
-      do { n += p[x % p.length]; x = Math.floor(x / p.length); } while (x > 0);
-      return n + '_';
-    },
-    genKey(len=8) {
-      let s=''; while(s.length<len) s+=Math.random().toString(36).slice(2);
-      return s.slice(0,len).toUpperCase();
-    },
-    rand(a,b) { return Math.floor(Math.random()*(b-a+1))+a; },
+// ── String encryption ──────────────────────────
+// Uses bit32.bxor for Luau executor compatibility
+function encryptStr(raw) {
+  if (!raw || raw.length === 0) return { ref: '""', decl: null };
+  const k  = HRC.rand(10, 200);
+  const bytes = [];
+  for (let i = 0; i < raw.length; i++)
+    bytes.push(raw.charCodeAt(i) ^ ((k + i * 13 + i * i * 7) % 256));
+  const sv   = HRC.genVar();
+  const ki   = HRC.genVar(), di = HRC.genVar(), ri = HRC.genVar(), ii = HRC.genVar();
+  const decl = `local ${sv};do local ${ki}=${k} local ${di}={${bytes.join(',')}} local ${ri}={} for ${ii}=1,#${di} do ${ri}[${ii}]=string.char(bit32.bxor(${di}[${ii}],(${ki}+(${ii}-1)*13+(${ii}-1)*(${ii}-1)*7)%256)) end ${sv}=table.concat(${ri}) end`;
+  return { ref: sv, decl };
+}
+
+// ── XorShift32 RNG for shuffle ─────────────────
+function xorshift32(seed) {
+  let s = seed >>> 0;
+  return function() {
+    s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
+    return s >>> 0;
   };
+}
 
-  function opaque() {
-    const ops = [
-      '(math.floor(1.9)==1)','(type(nil)=="nil")','(#{0}==1)',
-      '(string.byte("A")==65)','(math.abs(-1)==1)','(not false)',
-      '(1<2)','(math.max(0,1)==1)','((1+1)==2)',
-    ];
-    return ops[HRC.rand(0,ops.length-1)];
+// ── Payload encoder ────────────────────────────
+function encodePayload(str) {
+  const k1 = HRC.rand(2, 15), k2 = HRC.rand(3, 20);
+  const k3 = HRC.rand(7, 50), k4 = HRC.rand(11, 200);
+  const bytes = [];
+  for (let i = 0; i < str.length; i++) {
+    const key = (k1*i*i*i + k2*i*i + k3*i + k4) % 251;
+    bytes.push(str.charCodeAt(i) ^ key);
   }
-  function opaqueF() {
-    const ops = ['(1>2)','(false)','(nil==1)','(math.floor(1.9)==2)'];
-    return ops[HRC.rand(0,ops.length-1)];
+  const shuffleSeed = HRC.rand(100000, 999999);
+  const rng     = xorshift32(shuffleSeed);
+  const indices = Array.from({ length: bytes.length }, (_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = rng() % (i + 1);
+    [indices[i], indices[j]] = [indices[j], indices[i]];
   }
-  function deadCode() {
-    const v=HRC.genVar(), v2=HRC.genVar();
-    const s=[
-      `if ${opaqueF()} then local ${v}=error("x") end`,
-      `do local ${v}=0 local ${v2}=${v}*0 end`,
-      `if ${opaque()} then else error("dead") end`,
-      `local ${v}=(function(...) return ... end)(nil)`,
-      `while ${opaqueF()} do break end`,
-      `for ${v}=1,0 do end`,
-      `task.wait(0)`,
-    ];
-    return s[HRC.rand(0,s.length-1)];
-  }
-  function obfNum(raw) {
-    const n=parseInt(raw);
-    if(isNaN(n)||n<0||n>99999) return raw;
-    const a=HRC.rand(1,Math.max(1,n));
-    const styles=[
-      ()=>`(${a}+(${n-a}))`,
-      ()=>`(${n+HRC.rand(1,50)}-${HRC.rand(1,50)})`,
-      ()=>n===0?'(1-1)':`(${Math.ceil(n/2)}+${Math.floor(n/2)})`,
-      ()=>`(function() return ${n} end)()`,
-    ];
-    return styles[HRC.rand(0,styles.length-1)]();
-  }
+  const shuffled = new Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) shuffled[indices[i]] = bytes[i];
+  const noiseKey = HRC.rand(5, 30);
+  const noised   = shuffled.map(b => (b + noiseKey) % 256);
+  return { noised, k1, k2, k3, k4, shuffleSeed, noiseKey, len: str.length };
+}
 
-  function xorshift32(seed) {
-    let s = seed >>> 0;
-    return function() {
-      s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
-      return (s >>> 0);
-    };
-  }
+// ── VM generator ───────────────────────────────
+// Emits pure Luau that runs via executor loadstring/setfenv
+function generateVM(obfCode) {
+  const enc = encodePayload(obfCode);
 
-  function encodePayload(str) {
-    const k1=HRC.rand(2,15), k2=HRC.rand(3,20);
-    const k3=HRC.rand(7,50), k4=HRC.rand(11,200);
-    const bytes=[];
-    for(let i=0;i<str.length;i++){
-      const key=(k1*i*i*i + k2*i*i + k3*i + k4)%251;
-      bytes.push(str.charCodeAt(i)^key);
-    }
-    const shuffleSeed=HRC.rand(100000,999999);
-    const rng=xorshift32(shuffleSeed);
-    const indices=Array.from({length:bytes.length},(_,i)=>i);
-    for(let i=indices.length-1;i>0;i--){
-      const j=rng()%(i+1);
-      [indices[i],indices[j]]=[indices[j],indices[i]];
-    }
-    const shuffled=new Array(bytes.length);
-    for(let i=0;i<bytes.length;i++) shuffled[indices[i]]=bytes[i];
-    const noiseKey=HRC.rand(5,30);
-    const noised=shuffled.map(b=>(b+noiseKey)%256);
-    return {noised,k1,k2,k3,k4,shuffleSeed,noiseKey,len:str.length};
-  }
+  const vData   = HRC.genVar(), vLen   = HRC.genVar(), vI     = HRC.genVar();
+  const vJ      = HRC.genVar(), vRng   = HRC.genVar(), vSeed  = HRC.genVar();
+  const vIdx    = HRC.genVar(), vShuf  = HRC.genVar(), vUnshuf= HRC.genVar();
+  const vDecoded= HRC.genVar(), vKey   = HRC.genVar(), vByte  = HRC.genVar();
+  const vResult = HRC.genVar(), vExec  = HRC.genVar(), vErr   = HRC.genVar();
+  const vK1     = HRC.genVar(), vK2    = HRC.genVar(), vK3    = HRC.genVar();
+  const vK4     = HRC.genVar(), vNoise = HRC.genVar(), vTmp   = HRC.genVar();
+  const vS      = HRC.genVar();
 
-  function generateVM(obfCode) {
-    const enc=encodePayload(obfCode);
+  // Split key constants so they're not literal in the output
+  const k1a = HRC.rand(1, enc.k1); const k1b = enc.k1 - k1a;
+  const k2a = HRC.rand(1, enc.k2); const k2b = enc.k2 - k2a;
+  const k3a = HRC.rand(1, enc.k3); const k3b = enc.k3 - k3a;
+  const k4a = HRC.rand(1, enc.k4); const k4b = enc.k4 - k4a;
+  const na  = HRC.rand(1, enc.noiseKey); const nb = enc.noiseKey - na;
+  const sa  = HRC.rand(1000, 99999);    const sb = enc.shuffleSeed - sa;
 
-    const vData=HRC.genVar(), vLen=HRC.genVar(), vI=HRC.genVar();
-    const vJ=HRC.genVar(), vRng=HRC.genVar(), vSeed=HRC.genVar();
-    const vIdx=HRC.genVar(), vShuf=HRC.genVar(), vUnshuf=HRC.genVar();
-    const vDecoded=HRC.genVar(), vKey=HRC.genVar(), vByte=HRC.genVar();
-    const vResult=HRC.genVar(), vExec=HRC.genVar(), vErr=HRC.genVar();
-    const vK1=HRC.genVar(), vK2=HRC.genVar(), vK3=HRC.genVar();
-    const vK4=HRC.genVar(), vNoise=HRC.genVar(), vTmp=HRC.genVar();
-    const vChunk=HRC.genVar(), vOut=HRC.genVar();
+  // XorShift constants split
+  const c13a = HRC.rand(5,11); const c13b = 13 - c13a;
+  const c17a = HRC.rand(8,14); const c17b = 17 - c17a;
+  const c5a  = HRC.rand(2, 4); const c5b  =  5 - c5a;
+  const c13  = `(${c13a}+${c13b})`;
+  const c17  = `(${c17a}+${c17b})`;
+  const c5   = `(${c5a}+${c5b})`;
 
-    const k1a=HRC.rand(1,enc.k1-1)||1, k1b=enc.k1-k1a;
-    const k2a=HRC.rand(1,enc.k2-1)||1, k2b=enc.k2-k2a;
-    const k3a=HRC.rand(1,enc.k3-1)||1, k3b=enc.k3-k3a;
-    const k4a=HRC.rand(1,enc.k4-1)||1, k4b=enc.k4-k4a;
-    const na=HRC.rand(1,enc.noiseKey-1)||1, nb=enc.noiseKey-na;
-    const sa=HRC.rand(1000,99999), sb=enc.shuffleSeed-sa;
+  // Chunk data array to avoid single-line length limits in some executors
+  const CHUNK = 150;
+  let dataDecl = `local ${vData}={`;
+  const rows = [];
+  for (let i = 0; i < enc.noised.length; i += CHUNK)
+    rows.push(enc.noised.slice(i, i + CHUNK).join(','));
+  dataDecl += rows.join(',\n') + '}';
 
-    const c13=`(${HRC.rand(7,12)}+${13-HRC.rand(7,12)})`;
-    const c17=`(${HRC.rand(9,15)}+${17-HRC.rand(9,15)})`;
-    const c5=`(${HRC.rand(2,4)}+${5-HRC.rand(2,4)})`;
-
-    // chunk the data array so it's not one giant line
-    const chunkSize = 200;
-    const chunks = [];
-    for(let i=0;i<enc.noised.length;i+=chunkSize){
-      chunks.push(enc.noised.slice(i,i+chunkSize).join(','));
-    }
-    const dataLines = chunks.map((c,i)=>
-      i===0 ? `local ${vData}={${c}` : `${c}`
-    ).join(',\n') + '}';
-
-    // Roblox: use bit32.bxor instead of ~ operator (Luau supports ~ but bit32 is safer)
-    // Also use loadstring which exists in Roblox executor context
-    // Use string.gmatch trick to concat chunks to avoid string length limits
-    const vm = `
--- ${HRC.genKey()} :: ${HRC.genKey()} :: ${HRC.genKey()}
-${dataLines}
+  const vm = `-- ${HRC.genKey()} :: ${HRC.genKey()} :: ${HRC.genKey()}
+${dataDecl}
 local ${vLen}=${obfNum(String(enc.len))}
 local ${vK1}=(${k1a}+${k1b})
 local ${vK2}=(${k2a}+${k2b})
@@ -1111,18 +1172,18 @@ local ${vK4}=(${k4a}+${k4b})
 local ${vNoise}=(${na}+${nb})
 local ${vSeed}=(${sa}+${sb})
 local ${vRng}=(function(${vTmp})
-  local _s=${vTmp}
+  local ${vS}=${vTmp}
   return function()
-    _s=bit32.bxor(_s,bit32.lshift(_s,${c13}))
-    _s=bit32.bxor(_s,bit32.rshift(_s,${c17}))
-    _s=bit32.bxor(_s,bit32.lshift(_s,${c5}))
-    return _s
+    ${vS}=bit32.bxor(${vS},bit32.lshift(${vS},${c13}))
+    ${vS}=bit32.bxor(${vS},bit32.rshift(${vS},${c17}))
+    ${vS}=bit32.bxor(${vS},bit32.lshift(${vS},${c5}))
+    return ${vS}
   end
 end)(${vSeed})
 local ${vShuf}={}
 for ${vI}=1,${vLen} do ${vShuf}[${vI}]=${vI} end
 for ${vI}=${vLen},2,-1 do
-  local ${vJ}=(${vRng}()%${vI})+(1)
+  local ${vJ}=(${vRng}()%${vI})+1
   ${vShuf}[${vI}],${vShuf}[${vJ}]=${vShuf}[${vJ}],${vShuf}[${vI}]
 end
 local ${vUnshuf}={}
@@ -1137,252 +1198,199 @@ local ${vResult}=table.concat(${vDecoded})
 local ${vExec},${vErr}=loadstring(${vResult})
 if ${vExec} then
   setfenv(${vExec},getfenv())
-  return ${vExec}()
+  ${vExec}()
 else
-  warn(${vErr})
-end
-`;
-    return vm;
+  warn("[Hercules] Decode error: "..tostring(${vErr}))
+end`;
+  return vm;
+}
+
+// ── Main obfuscation pipeline ──────────────────
+function obfuscateLua(code) {
+  HRC._cnt = 0;
+
+  const KEYWORDS = new Set([
+    // Lua keywords
+    'and','break','do','else','elseif','end','false','for','function',
+    'goto','if','in','local','nil','not','or','repeat','return','then',
+    'true','until','while','self','_ENV','_G','_VERSION',
+    // Lua stdlib
+    'print','pairs','ipairs','next','type','tostring','tonumber',
+    'error','assert','pcall','xpcall','select','unpack','table',
+    'rawget','rawset','rawequal','rawlen','setmetatable','getmetatable',
+    'require','load','loadstring','loadfile','dofile','collectgarbage',
+    'coroutine','string','math','io','os','package','debug','bit32',
+    // Roblox globals
+    'game','workspace','script','wait','task','spawn','delay','warn',
+    'tick','time','Vector3','Vector2','Vector3int16','Vector2int16',
+    'CFrame','Color3','UDim','UDim2','TweenInfo','Enum','Instance',
+    'Ray','Region3','NumberRange','NumberSequence','ColorSequence',
+    'BrickColor','Axes','Faces','PhysicalProperties','Random','DateTime',
+    'RaycastParams','OverlapParams','PathfindingResult',
+    'Players','RunService','UserInputService','TweenService','Lighting',
+    'ReplicatedStorage','ReplicatedFirst','ServerStorage','ServerScriptService',
+    'StarterGui','StarterPlayer','StarterCharacterScripts','StarterPlayerScripts',
+    'HttpService','DataStoreService','MarketplaceService','BadgeService',
+    'TextService','ContentProvider','SoundService','ChatService',
+    'GuiService','ContextActionService','VirtualUser','InsertService',
+    'getfenv','setfenv','newproxy','typeof','SharedTable',
+    'WaitForChild','FindFirstChild','FindFirstChildOfClass',
+    'GetService','GetPlayers','GetChildren','GetDescendants',
+  ]);
+
+  const identMap = {};
+  function mapId(name) {
+    if (KEYWORDS.has(name) || name.startsWith('__')) return name;
+    if (!identMap[name]) identMap[name] = HRC.genVar();
+    return identMap[name];
   }
 
-  function encryptStr(raw) {
-    if(!raw||raw.length===0) return {ref:'""',decl:null};
-    const k=HRC.rand(10,200);
-    const bytes=[];
-    for(let i=0;i<raw.length;i++) bytes.push(raw.charCodeAt(i)^((k+i*13+i*i*7)%256));
-    const sv=HRC.genVar();
-    const decl=`local ${sv}=(function(_k,_d) local _r={} for _i=1,#_d do _r[_i]=string.char(bit32.bxor(_d[_i],((_k+(_i-1)*13+(_i-1)*(_i-1)*7)%256))) end return table.concat(_r) end)(${k},{${bytes.join(',')}})`;
-    return {ref:sv,decl};
+  let out = code;
+
+  // Pass 1: protect string literals and comments
+  const cslots = {}; let ci = 0;
+  out = out.replace(/--\[\[[\s\S]*?\]\]/g, c => { const k = `@@C${ci++}@@`; cslots[k] = ''; return k; });
+  out = out.replace(/--[^\n]*/g,           _ => { const k = `@@C${ci++}@@`; cslots[k] = ''; return k; });
+
+  // Pass 2: collect local & function identifiers to rename
+  let mm;
+  const re1 = /\blocal\s+(?:function\s+)?([A-Za-z_]\w*)/g;
+  const re2 = /\bfunction\s+([A-Za-z_][\w\.]*)/g;
+  while ((mm = re1.exec(out)) !== null) mapId(mm[1]);
+  while ((mm = re2.exec(out)) !== null) mapId(mm[1].split('.')[0]);
+
+  // Pass 3: encrypt string literals
+  const strDecls = [];
+  const sslots   = {}; let si = 0;
+  function replaceStr(_, s) {
+    const k   = `@@S${si++}@@`;
+    const enc = encryptStr(s);
+    if (enc.decl) strDecls.push(enc.decl);
+    sslots[k] = enc.ref;
+    return k;
+  }
+  out = out.replace(/"((?:[^"\\]|\\.)*)"/g, replaceStr);
+  out = out.replace(/'((?:[^'\\]|\\.)*)'/g, replaceStr);
+
+  // Pass 4: rename identifiers
+  for (const [orig, obf] of Object.entries(identMap)) {
+    out = out.replace(new RegExp('\\b' + orig + '\\b', 'g'), obf);
   }
 
-  function obfuscateLua(code) {
-    HRC._cnt=0;
+  // Pass 5: obfuscate numeric literals
+  out = out.replace(/\b(\d+)\b/g, (_, n) => Math.random() > 0.45 ? obfNum(n) : n);
 
-    const KEYWORDS=new Set([
-      'and','break','do','else','elseif','end','false','for','function',
-      'goto','if','in','local','nil','not','or','repeat','return','then',
-      'true','until','while','self','_ENV','_G','_VERSION',
-      // Lua stdlib
-      'print','pairs','ipairs','next','type','tostring','tonumber',
-      'error','assert','pcall','xpcall','select','unpack','table',
-      'rawget','rawset','rawequal','rawlen','setmetatable','getmetatable',
-      'require','load','loadstring','loadfile','dofile','collectgarbage',
-      'coroutine','string','math','io','os','package','debug','bit32',
-      // Roblox globals
-      'game','workspace','script','wait','task','spawn','delay','warn',
-      'tick','time','Vector3','Vector2','Vector3int16','Vector2int16',
-      'CFrame','Color3','UDim','UDim2','TweenInfo','Enum','Instance',
-      'Ray','Region3','NumberRange','NumberSequence','ColorSequence',
-      'BrickColor','Axes','Faces','PhysicalProperties','Random','DateTime',
-      'RaycastParams','OverlapParams','PathfindingResult',
-      'Players','RunService','UserInputService','TweenService','Lighting',
-      'ReplicatedStorage','ReplicatedFirst','ServerStorage','ServerScriptService',
-      'StarterGui','StarterPlayer','StarterCharacterScripts','StarterPlayerScripts',
-      'HttpService','DataStoreService','MarketplaceService','BadgeService',
-      'TextService','ContentProvider','SoundService','ChatService',
-      'GuiService','ContextActionService','VirtualUser','InsertService',
-      'getfenv','setfenv','newproxy','typeof','SharedTable',
-    ]);
-
-    const identMap={};
-    function mapId(name){
-      if(KEYWORDS.has(name)||name.startsWith('__')) return name;
-      if(!identMap[name]) identMap[name]=HRC.genVar();
-      return identMap[name];
-    }
-
-    let out=code;
-
-    // Pass 1: strip comments
-    const cslots={};let ci=0;
-    out=out.replace(/--\[\[[\s\S]*?\]\]/g,c=>{const k=`@@C${ci++}@@`;cslots[k]='';return k;});
-    out=out.replace(/--[^\n]*/g,_=>{const k=`@@C${ci++}@@`;cslots[k]='';return k;});
-
-    // Pass 2: collect identifiers
-    let mm;
-    const re1=/\blocal\s+(?:function\s+)?([A-Za-z_]\w*)/g;
-    const re2=/\bfunction\s+([A-Za-z_][\w\.]*)/g;
-    while((mm=re1.exec(out))!==null) mapId(mm[1]);
-    while((mm=re2.exec(out))!==null) mapId(mm[1].split('.')[0]);
-
-    // Pass 3: extract + encrypt strings
-    const strDecls=[];
-    const sslots={};let si=0;
-    out=out.replace(/"((?:[^"\\]|\\.)*)"/g,(_,s)=>{
-      const k=`@@S${si++}@@`;
-      const enc=encryptStr(s);
-      if(enc.decl) strDecls.push(enc.decl);
-      sslots[k]=enc.ref; return k;
-    });
-    out=out.replace(/'((?:[^'\\]|\\.)*)'/g,(_,s)=>{
-      const k=`@@S${si++}@@`;
-      const enc=encryptStr(s);
-      if(enc.decl) strDecls.push(enc.decl);
-      sslots[k]=enc.ref; return k;
-    });
-
-    // Pass 4: rename identifiers
-    for(const [orig,obf] of Object.entries(identMap)){
-      out=out.replace(new RegExp('\\b'+orig+'\\b','g'),obf);
-    }
-
-    // Pass 5: mangle numbers
-    out=out.replace(/\b(\d+)\b/g,(_,n)=>Math.random()>0.4?obfNum(n):n);
-
-    // Pass 6: proxy globals
-    const proxyDecls=[];
-    const PROXIES=['print','warn','type','tostring','tonumber','pairs','ipairs','pcall','error','select','require','task'];
-    for(const fn of PROXIES){
-      if(out.includes(fn)&&KEYWORDS.has(fn)){
-        const pv=HRC.genVar();
-        proxyDecls.push(`local ${pv};${pv}=function(...) return ${fn}(...) end`);
-        out=out.replace(new RegExp('\\b'+fn+'\\b','g'),pv);
-      }
-    }
-
-    // Pass 7: restore slots
-    for(const [k,v] of Object.entries(sslots)) out=out.replaceAll(k,v);
-    for(const [k] of Object.entries(cslots)) out=out.replaceAll(k,'');
-
-    // Pass 8: inject dead code
-    const ls=out.split('\n');
-    const wd=[];
-    for(let i=0;i<ls.length;i++){
-      wd.push(ls[i]);
-      if(i>0&&i%6===0&&Math.random()>0.4) wd.push(deadCode());
-    }
-    out=wd.join('\n');
-
-    // Pass 9: control flow flatten
-    const cfv=HRC.genVar();
-    const chunks=out.split('\n');
-    const csz=Math.max(6,Math.floor(chunks.length/4));
-    const states=[];
-    for(let i=0;i<chunks.length;i+=csz) states.push(chunks.slice(i,i+csz).join('\n'));
-    let cf=`local ${cfv}=1\nwhile true do\n`;
-    for(let i=0;i<states.length;i++) cf+=`if ${cfv}==(${i+1}) then\n${states[i]}\n${cfv}=${i+2}\n`;
-    cf+=`if ${cfv}==${states.length+1} then break end\nend\n`;
-
-    // Pass 10: assemble pre-VM
-    const prelude=[
-      `-- ${HRC.genKey()} ${HRC.genKey()}`,
-      ...proxyDecls,
-      ...strDecls,
-    ].join('\n');
-    const preVm=prelude+'\n'+cf;
-
-    // Pass 11: VM
-    return generateVM(preVm);
-  }
-
-  async function runObfuscate() {
-    let code = '';
-    if (currentMode === 'paste') {
-      code = document.getElementById('input-code').value.trim();
-      if (!code) { log('error', 'No input code provided.', 'err'); return; }
-    } else {
-      if (!loadedFile) { log('error', 'No file loaded.', 'err'); return; }
-      code = await loadedFile.text();
-    }
-
-    const btn = document.getElementById('run-btn');
-    const btnText = document.getElementById('btn-text');
-    btn.disabled = true;
-    btnText.textContent = 'Processing...';
-    document.getElementById('progress-fill').classList.add('indeterminate');
-    document.getElementById('output-code').value = '';
-    document.getElementById('copy-btn').disabled = true;
-    document.getElementById('dl-btn').disabled = true;
-    outputText = '';
-
-    log('run', `Input: ${code.length} chars.`);
-    log('sys', 'Passes 1-5: identifiers + string encryption...');
-    try {
-      await new Promise(r=>setTimeout(r,40));
-      log('sys', 'Passes 6-9: proxies, dead code, control flow...');
-      await new Promise(r=>setTimeout(r,40));
-      log('sys', 'Passes 10-11: Luau VM virtualization...');
-      await new Promise(r=>setTimeout(r,40));
-      const result = obfuscateLua(code);
-      outputText = result;
-      document.getElementById('output-code').value = result;
-      document.getElementById('copy-btn').disabled = false;
-      document.getElementById('dl-btn').disabled = false;
-      log('sys', 'Complete.', 'ok');
-      log('out', `Output: ${result.length} chars.`, 'ok');
-      document.getElementById('progress-fill').classList.remove('indeterminate');
-      document.getElementById('progress-fill').style.width = '100%';
-    } catch(err) {
-      log('error', err.message, 'err');
-      document.getElementById('progress-fill').classList.remove('indeterminate');
-      document.getElementById('progress-fill').style.width = '0%';
-    } finally {
-      btn.disabled = false;
-      btnText.textContent = 'Run obfuscation';
+  // Pass 6: proxy common globals through local indirection
+  const proxyDecls = [];
+  const PROXIES = ['print','warn','type','tostring','tonumber','pairs','ipairs','pcall','error','select','require','task','game','workspace'];
+  for (const fn of PROXIES) {
+    if (out.includes(fn) && KEYWORDS.has(fn)) {
+      const pv = HRC.genVar();
+      proxyDecls.push(`local ${pv};${pv}=function(...) return ${fn}(...) end`);
+      out = out.replace(new RegExp('\\b' + fn + '\\b', 'g'), pv);
     }
   }
 
+  // Pass 7: restore string/comment slots
+  for (const [k, v] of Object.entries(sslots)) out = out.replaceAll(k, v);
+  for (const [k]    of Object.entries(cslots)) out = out.replaceAll(k, '');
 
+  // Pass 8: inject dead code every ~5 lines
+  const ls = out.split('\n'), wd = [];
+  for (let i = 0; i < ls.length; i++) {
+    wd.push(ls[i]);
+    if (i > 0 && i % 5 === 0 && Math.random() > 0.35) wd.push(deadCode());
+  }
+  out = wd.join('\n');
 
+  // Pass 9: control flow flattening
+  const cfv   = HRC.genVar();
+  const lines  = out.split('\n');
+  const csz    = Math.max(5, Math.floor(lines.length / 5));
+  const states = [];
+  for (let i = 0; i < lines.length; i += csz)
+    states.push(lines.slice(i, i + csz).join('\n'));
 
-  function copyOutput() {
-    if (!outputText) return;
-    navigator.clipboard.writeText(outputText).then(() => log('sys', 'Copied to clipboard.', 'ok'));
+  let cf = `local ${cfv}=1\nwhile true do\n`;
+  for (let i = 0; i < states.length; i++)
+    cf += `if ${cfv}==(${i + 1}) then\n${states[i]}\n${cfv}=${i + 2}\n`;
+  cf += `if ${cfv}==${states.length + 1} then break end\nend\n`;
+
+  // Pass 10: assemble pre-VM string
+  const prelude = [
+    `-- ${HRC.genKey()} ${HRC.genKey()}`,
+    ...proxyDecls,
+    ...strDecls,
+  ].join('\n');
+
+  const preVm = prelude + '\n' + cf;
+
+  // Pass 11: wrap in VM layer
+  return generateVM(preVm);
+}
+
+// ── Run ────────────────────────────────────────
+async function runObfuscate() {
+  let code = '';
+  if (currentMode === 'paste') {
+    code = document.getElementById('input-code').value.trim();
+    if (!code) { log('error', 'No input code.', 'err'); return; }
+  } else {
+    if (!loadedFile) { log('error', 'No file loaded.', 'err'); return; }
+    code = await loadedFile.text();
   }
 
-  function downloadOutput() {
-    if (!outputText) return;
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([outputText], { type: 'text/plain' }));
-    a.download = 'obfuscated.lua';
-    a.click();
-    log('sys', 'Downloaded obfuscated.lua', 'ok');
+  const btn = document.getElementById('run-btn');
+  const btnText = document.getElementById('btn-text');
+  btn.disabled = true;
+  btnText.textContent = 'Processing…';
+  document.getElementById('progress-fill').classList.add('indeterminate');
+  document.getElementById('output-code').value = '';
+  document.getElementById('copy-btn').disabled = true;
+  document.getElementById('dl-btn').disabled = true;
+  outputText = '';
+
+  const t0 = performance.now();
+  log('run', `Input: ${code.length} chars.`);
+  log('sys', 'Pass 1–5: strip comments, rename, encrypt strings…');
+
+  try {
+    await new Promise(r => setTimeout(r, 30));
+    log('sys', 'Pass 6–9: proxies, dead code, control flow…');
+    await new Promise(r => setTimeout(r, 30));
+    log('sys', 'Pass 10–11: VM virtualization layer…');
+    await new Promise(r => setTimeout(r, 30));
+
+    const result = obfuscateLua(code);
+    const t1     = performance.now();
+
+    outputText = result;
+    document.getElementById('output-code').value = result;
+    document.getElementById('copy-btn').disabled = false;
+    document.getElementById('dl-btn').disabled   = false;
+
+    // Stats
+    const statsBar = document.getElementById('stats-bar');
+    statsBar.style.display = 'flex';
+    document.getElementById('stat-in').textContent    = code.length.toLocaleString();
+    document.getElementById('stat-out').textContent   = result.length.toLocaleString();
+    document.getElementById('stat-ratio').textContent = (result.length / code.length).toFixed(1) + 'x';
+    document.getElementById('stat-time').textContent  = Math.round(t1 - t0);
+
+    log('sys', 'Obfuscation complete.', 'ok');
+    log('out', `Output: ${result.length} chars in ${Math.round(t1-t0)}ms.`, 'ok');
+
+    document.getElementById('progress-fill').classList.remove('indeterminate');
+    document.getElementById('progress-fill').style.width = '100%';
+  } catch (err) {
+    log('error', err.message, 'err');
+    document.getElementById('progress-fill').classList.remove('indeterminate');
+    document.getElementById('progress-fill').style.width = '0%';
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = 'Run Obfuscation';
   }
+}
 </script>
-
-  <!-- Discord Profile Modal -->
-  <div class="modal-overlay" id="about-modal" onclick="closeAbout(event)">
-    <div class="dc-card">
-      <div class="dc-banner">
-        <div class="dc-avatar-wrap">
-          <img class="dc-avatar" src="https://cdn.discordapp.com/avatars/1452536108201279645/f47dee2867aa91d9c1f2406a989bbeeb.png?size=512" alt="avatar">
-          <div class="dc-status"></div>
-        </div>
-        <button class="dc-close" onclick="document.getElementById('about-modal').classList.remove('open')">✕</button>
-      </div>
-      <div class="dc-body">
-        <div class="dc-names">
-          <div class="dc-display">keoyooo <span class="dc-nitro-crown">✦</span></div>
-          <div class="dc-username">b9hj</div>
-        </div>
-        <div class="dc-divider"></div>
-        <div class="dc-section-label">Badges</div>
-        <div class="dc-badges">
-          <div class="dc-badge" data-tip="Nitro"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/nitro.png" alt="Nitro"></div>
-          <div class="dc-badge" data-tip="Bug Hunter Level 2"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/bughunter_2.png" alt="Bug Hunter"></div>
-          <div class="dc-badge" data-tip="Active Developer"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/developer.png" alt="Active Developer"></div>
-          <div class="dc-badge" data-tip="Early Supporter"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/early_supporter.png" alt="Early Supporter"></div>
-          <div class="dc-badge" data-tip="Discord Staff"><img src="https://raw.githubusercontent.com/Debuggingss/discord-badges/refs/heads/master/pngs_named/staff.png" alt="Discord Staff"></div>
-        </div>
-        <div class="dc-divider"></div>
-        <div class="dc-section-label">About Me</div>
-        <div class="dc-about"> °.✽✦✽.◦✽✦✽.°
- surely with hardship comes ease.
- °.✽✦✽.◦✽✦✽.°</div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    function showAbout() {
-      document.getElementById('about-modal').classList.add('open');
-    }
-    function closeAbout(e) {
-      if (e.target === document.getElementById('about-modal')) {
-        document.getElementById('about-modal').classList.remove('open');
-      }
-    }
-  </script>
-
 </body>
 </html>
