@@ -1012,8 +1012,8 @@ const HRC = {
   _cnt: 0,
   genVar() {
     this._cnt++;
-    // confusable unicode lookalike set — valid Luau identifiers
-    const p = ['l','I','1','i','O','0','Il','lI','I1','1l','lO','Ol'];
+    // Pure ASCII lookalike chars only — safe for all executors and UTF-8 parsers
+    const p = ['l','I','O','o','i','L','I','l','O','L'];
     let n = '_';
     let x = this._cnt;
     do { n += p[x % p.length]; x = Math.floor(x / p.length); } while (x > 0);
@@ -1073,7 +1073,7 @@ function obfNum(raw) {
     () => `(${n + HRC.rand(1,50)}-${HRC.rand(1,50)})`,
     () => n === 0 ? '(1-1)' : `(${Math.ceil(n/2)}+${Math.floor(n/2)})`,
     () => `(function() return ${n} end)()`,
-    () => `(bit32.bxor(${n ^ 0xAA},${0xAA}))`,
+    () => `(${n + HRC.rand(1,20)}-${HRC.rand(1,20)})`,
   ];
   return styles[HRC.rand(0, styles.length - 1)]();
 }
@@ -1082,13 +1082,17 @@ function obfNum(raw) {
 // Uses bit32.bxor for Luau executor compatibility
 function encryptStr(raw) {
   if (!raw || raw.length === 0) return { ref: '""', decl: null };
-  const k  = HRC.rand(10, 200);
+  const k  = HRC.rand(10, 120);
   const bytes = [];
-  for (let i = 0; i < raw.length; i++)
-    bytes.push(raw.charCodeAt(i) ^ ((k + i * 13 + i * i * 7) % 256));
+  for (let i = 0; i < raw.length; i++) {
+    // Keep key in 0-127 range so XOR of ASCII never produces values that
+    // look like a partial multi-byte UTF-8 sequence to strict parsers
+    const keyByte = (k + i * 13 + i * i * 7) % 127;
+    bytes.push(raw.charCodeAt(i) ^ keyByte);
+  }
   const sv   = HRC.genVar();
   const ki   = HRC.genVar(), di = HRC.genVar(), ri = HRC.genVar(), ii = HRC.genVar();
-  const decl = `local ${sv};do local ${ki}=${k} local ${di}={${bytes.join(',')}} local ${ri}={} for ${ii}=1,#${di} do ${ri}[${ii}]=string.char(bit32.bxor(${di}[${ii}],(${ki}+(${ii}-1)*13+(${ii}-1)*(${ii}-1)*7)%256)) end ${sv}=table.concat(${ri}) end`;
+  const decl = `local ${sv};do local ${ki}=${k} local ${di}={${bytes.join(',')}} local ${ri}={} for ${ii}=1,#${di} do ${ri}[${ii}]=string.char(bit32.bxor(${di}[${ii}],(${ki}+(${ii}-1)*13+(${ii}-1)*(${ii}-1)*7)%127)) end ${sv}=table.concat(${ri}) end`;
   return { ref: sv, decl };
 }
 
