@@ -534,37 +534,139 @@ function doDl(){
 }
 function showAbout(){document.getElementById('about-modal').classList.add('open');}
 function loadExample(){
-  document.getElementById('inp').value=
-'-- Roblox script example\n'+
-'local Players = game:GetService("Players")\n'+
-'local RunService = game:GetService("RunService")\n\n'+
-'local module = {}\n'+
-'local cache = {}\n\n'+
-'function module.getPlayer(name)\n'+
-'    if cache[name] then return cache[name] end\n'+
-'    for _, plr in pairs(Players:GetPlayers()) do\n'+
-'        if plr.Name == name then\n'+
-'            cache[name] = plr\n'+
-'            return plr\n'+
-'        end\n'+
-'    end\n'+
-'    return nil\n'+
-'end\n\n'+
-'function module.teleport(player, position)\n'+
-'    local char = player.Character\n'+
-'    if char and char:FindFirstChild("HumanoidRootPart") then\n'+
-'        char.HumanoidRootPart.CFrame = CFrame.new(position)\n'+
-'    end\n'+
-'end\n\n'+
-'local function onPlayerAdded(plr)\n'+
-'    plr.CharacterAdded:Connect(function(char)\n'+
-'        local hrp = char:WaitForChild("HumanoidRootPart")\n'+
-'        print("Player spawned: " .. plr.Name)\n'+
-'    end)\n'+
-'end\n\n'+
-'Players.PlayerAdded:Connect(onPlayerAdded)\n\n'+
-'return module';
-  updCC();log('input','Example loaded');
+  document.getElementById('inp').value = [
+'-- Hercules GUI Example',
+'-- A modern notification GUI with shield icon',
+'',
+'local Players       = game:GetService("Players")',
+'local TweenService  = game:GetService("TweenService")',
+'local localPlayer   = Players.LocalPlayer',
+'local playerGui     = localPlayer:WaitForChild("PlayerGui")',
+'',
+'-- Destroy any existing instance',
+'local old = playerGui:FindFirstChild("HerculesGui")',
+'if old then old:Destroy() end',
+'',
+'-- ScreenGui',
+'local screenGui = Instance.new("ScreenGui")',
+'screenGui.Name            = "HerculesGui"',
+'screenGui.ResetOnSpawn    = false',
+'screenGui.ZIndexBehavior  = Enum.ZIndexBehavior.Sibling',
+'screenGui.Parent          = playerGui',
+'',
+'-- Card frame',
+'local card = Instance.new("Frame")',
+'card.Name              = "Card"',
+'card.Size              = UDim2.new(0, 320, 0, 90)',
+'card.Position          = UDim2.new(0.5, -160, 0, -100)',
+'card.BackgroundColor3  = Color3.fromRGB(10, 11, 13)',
+'card.BorderSizePixel   = 0',
+'card.Parent            = screenGui',
+'',
+'-- Rounded corners',
+'local corner = Instance.new("UICorner")',
+'corner.CornerRadius = UDim.new(0, 10)',
+'corner.Parent       = card',
+'',
+'-- Accent border (1px yellow-green glow)',
+'local stroke = Instance.new("UIStroke")',
+'stroke.Color     = Color3.fromRGB(232, 255, 71)',
+'stroke.Thickness = 1',
+'stroke.Transparency = 0.55',
+'stroke.Parent    = card',
+'',
+'-- Subtle inner gradient',
+'local grad = Instance.new("UIGradient")',
+'grad.Color    = ColorSequence.new({',
+'    ColorSequenceKeypoint.new(0,   Color3.fromRGB(26, 29, 35)),',
+'    ColorSequenceKeypoint.new(1,   Color3.fromRGB(10, 11, 13)),',
+'})',
+'grad.Rotation = 95',
+'grad.Parent   = card',
+'',
+'-- Shield icon (ImageLabel)',
+'local shield = Instance.new("ImageLabel")',
+'shield.Name               = "Shield"',
+'shield.Size               = UDim2.new(0, 36, 0, 36)',
+'shield.Position           = UDim2.new(0, 18, 0.5, -18)',
+'shield.BackgroundTransparency = 1',
+'shield.Image              = "rbxassetid://10723423960"',
+'shield.ImageColor3        = Color3.fromRGB(232, 255, 71)',
+'shield.ScaleType          = Enum.ScaleType.Fit',
+'shield.Parent             = card',
+'',
+'-- Shield glow',
+'local shieldGlow = Instance.new("ImageLabel")',
+'shieldGlow.Size               = UDim2.new(0, 54, 0, 54)',
+'shieldGlow.Position           = UDim2.new(0, 9, 0.5, -27)',
+'shieldGlow.BackgroundTransparency = 1',
+'shieldGlow.Image              = "rbxassetid://5028857472"',
+'shieldGlow.ImageColor3        = Color3.fromRGB(232, 255, 71)',
+'shieldGlow.ImageTransparency  = 0.7',
+'shieldGlow.ScaleType          = Enum.ScaleType.Fit',
+'shieldGlow.Parent             = card',
+'',
+'-- Title label',
+'local title = Instance.new("TextLabel")',
+'title.Name                = "Title"',
+'title.Size                = UDim2.new(1, -76, 0, 26)',
+'title.Position            = UDim2.new(0, 66, 0, 16)',
+'title.BackgroundTransparency = 1',
+'title.Text                = "Obfuscated by Hercules"',
+'title.TextColor3          = Color3.fromRGB(232, 255, 71)',
+'title.TextSize            = 15',
+'title.Font                = Enum.Font.GothamBold',
+'title.TextXAlignment      = Enum.TextXAlignment.Left',
+'title.Parent              = card',
+'',
+'-- Subtitle label',
+'local sub = Instance.new("TextLabel")',
+'sub.Name                  = "Sub"',
+'sub.Size                  = UDim2.new(1, -76, 0, 20)',
+'sub.Position              = UDim2.new(0, 66, 0, 42)',
+'sub.BackgroundTransparency = 1',
+'sub.Text                  = "Your script is protected  \xE2\x80\x94  v6.0"',
+'sub.TextColor3            = Color3.fromRGB(107, 114, 128)',
+'sub.TextSize              = 11',
+'sub.Font                  = Enum.Font.Gotham',
+'sub.TextXAlignment        = Enum.TextXAlignment.Left',
+'sub.Parent                = card',
+'',
+'-- Thin accent bar at top',
+'local bar = Instance.new("Frame")',
+'bar.Name             = "AccentBar"',
+'bar.Size             = UDim2.new(1, 0, 0, 2)',
+'bar.Position         = UDim2.new(0, 0, 0, 0)',
+'bar.BackgroundColor3 = Color3.fromRGB(232, 255, 71)',
+'bar.BorderSizePixel  = 0',
+'bar.Parent           = card',
+'',
+'local barCorner = Instance.new("UICorner")',
+'barCorner.CornerRadius = UDim.new(0, 10)',
+'barCorner.Parent       = bar',
+'',
+'-- Slide in from top',
+'local tweenIn = TweenService:Create(card,',
+'    TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),',
+'    { Position = UDim2.new(0.5, -160, 0, 24) }',
+')',
+'',
+'-- Slide out after delay',
+'local tweenOut = TweenService:Create(card,',
+'    TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.In),',
+'    { Position = UDim2.new(0.5, -160, 0, -100) }',
+')',
+'',
+'tweenIn:Play()',
+'',
+'task.delay(3.5, function()',
+'    tweenOut:Play()',
+'    tweenOut.Completed:Connect(function()',
+'        screenGui:Destroy()',
+'    end)',
+'end)',
+  ].join('\n');
+  updCC(); log('input', 'GUI example loaded');
 }
 
 // ══════════════════════════════════════════════════════════════════
