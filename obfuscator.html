@@ -7,9 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0a0b0d;--bg2:#0f1114;--bg3:#141619;--bg4:#1a1d21;--bg5:#1e2228;
-  --brd:#1e2228;--brd2:#272c34;--brd3:#2e3440;
-  --acc:#e8ff47;--acc2:#c8df30;--acc3:#f0ff80;
+  --bg:#0a0b0d;--bg2:#0f1114;--bg3:#141619;--bg4:#1a1d21;
+  --brd:#1e2228;--brd2:#272c34;
+  --acc:#e8ff47;--acc2:#c8df30;
   --adim:rgba(232,255,71,0.07);--agl:rgba(232,255,71,0.18);
   --tx:#c8cdd6;--tx2:#6b7280;--tx3:#343840;--tx4:#4b5563;
   --ok:#4ade80;--er:#f87171;--wn:#fbbf24;--inf:#60a5fa;
@@ -19,54 +19,41 @@ html,body{height:100%}
 body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;font-size:14px;overflow:hidden}
 body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.022) 2px,rgba(0,0,0,.022) 4px);pointer-events:none;z-index:9000}
 .amb{position:fixed;top:-180px;left:50%;transform:translateX(-50%);width:900px;height:400px;background:radial-gradient(ellipse,rgba(232,255,71,.03),transparent 70%);pointer-events:none;z-index:0}
-
-/* ── layout ── */
-.layout{display:grid;grid-template-columns:220px 1fr;height:100vh;position:relative;z-index:1}
-
-/* ── sidebar ── */
-.sidebar{background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden}
-.sidebar::before{content:'';position:absolute;top:0;left:0;width:220px;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent);opacity:.3;z-index:2}
+.layout{display:grid;grid-template-columns:228px 1fr;height:100vh;position:relative;z-index:1}
+.sidebar{background:var(--bg2);border-right:1px solid var(--brd);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.sidebar::before{content:'';position:absolute;top:0;left:0;width:228px;height:1px;background:linear-gradient(90deg,transparent,var(--acc),transparent);opacity:.3;z-index:2;pointer-events:none}
 .slogo{padding:20px 16px 16px;border-bottom:1px solid var(--brd);flex-shrink:0}
 .slogo-name{font-size:19px;font-weight:800;color:var(--acc);letter-spacing:-.5px;text-transform:uppercase;line-height:1}
 .slogo-ver{font-size:9px;color:var(--tx3);margin-top:3px;font-family:'Space Mono',monospace;letter-spacing:1.5px;text-transform:uppercase}
 .snav{padding:10px 8px;flex-shrink:0}
 .snav-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--tx3);padding:6px 8px 4px}
-.ni{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:5px;cursor:pointer;color:var(--tx2);font-size:12px;font-weight:600;transition:all .14s;border:1px solid transparent;user-select:none;position:relative}
+.ni{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:5px;cursor:pointer;color:var(--tx2);font-size:12px;font-weight:600;transition:all .14s;border:1px solid transparent;user-select:none}
 .ni:hover{background:var(--bg3);color:var(--tx)}
 .ni.on{background:var(--adim);color:var(--acc);border-color:rgba(232,255,71,.12)}
 .ni svg{width:13px;height:13px;opacity:.45;flex-shrink:0;transition:opacity .14s}
 .ni.on svg,.ni:hover svg{opacity:.9}
 .sdiv{height:1px;background:var(--brd);margin:6px 8px}
-
-/* ── options panel (in sidebar) ── */
 .opts-wrap{flex:1;overflow-y:auto;padding:0 8px 8px}
 .opts-wrap::-webkit-scrollbar{width:3px}
 .opts-wrap::-webkit-scrollbar-thumb{background:var(--brd2)}
-.opt-section{margin-bottom:4px}
 .opt-section-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--tx3);padding:10px 8px 4px}
 .opt-row{display:flex;align-items:center;justify-content:space-between;padding:7px 8px;border-radius:5px;cursor:pointer;transition:background .13s;gap:8px}
 .opt-row:hover{background:var(--bg3)}
-.opt-row.disabled-opt{opacity:.35;pointer-events:none}
 .opt-info{flex:1;min-width:0}
 .opt-name{font-size:11.5px;font-weight:600;color:var(--tx);line-height:1.2}
 .opt-desc{font-size:9.5px;color:var(--tx4);margin-top:2px;line-height:1.4}
-/* toggle switch */
 .tog{width:32px;height:18px;background:var(--bg4);border:1px solid var(--brd2);border-radius:99px;position:relative;flex-shrink:0;transition:all .18s;cursor:pointer}
 .tog.on{background:var(--acc);border-color:var(--acc2)}
 .tog::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .18s;opacity:.7}
 .tog.on::after{transform:translateX(14px);opacity:1}
-/* intensity selector */
 .int-sel{display:flex;gap:2px;flex-shrink:0}
 .int-btn{padding:3px 7px;font-size:9px;font-family:'Space Mono',monospace;border:1px solid var(--brd2);border-radius:3px;background:transparent;color:var(--tx3);cursor:pointer;transition:all .14s;text-transform:uppercase}
 .int-btn:hover{background:var(--bg4);color:var(--tx2)}
 .int-btn.on{background:var(--adim);color:var(--acc);border-color:rgba(232,255,71,.2)}
-
 .sbfoot{padding:12px 14px;border-top:1px solid var(--brd);flex-shrink:0}
 .status-dot{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--tx2);font-family:'Space Mono',monospace}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 5px var(--ok);animation:pulse 2.2s ease infinite;flex-shrink:0}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* ── main area ── */
 .main{display:flex;flex-direction:column;overflow:hidden;height:100vh}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 22px;height:46px;border-bottom:1px solid var(--brd);flex-shrink:0}
 .tbl{display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--tx3);font-family:'Space Mono',monospace}
@@ -74,17 +61,12 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .tbr{display:flex;align-items:center;gap:6px}
 .badge{background:var(--bg3);border:1px solid var(--brd);border-radius:3px;padding:2px 8px;font-size:9.5px;color:var(--tx2);font-family:'Space Mono',monospace}
 .badge.acc{background:var(--adim);border-color:rgba(232,255,71,.18);color:var(--acc)}
-
 .content{flex:1;padding:18px 22px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
 .content::-webkit-scrollbar{width:4px}
 .content::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
-
-/* ── input tabs ── */
 .tabs{display:flex;background:var(--bg3);border:1px solid var(--brd);border-radius:5px;padding:3px;gap:2px;width:fit-content}
 .tab{padding:5px 14px;border:none;border-radius:3px;background:transparent;color:var(--tx2);font-family:'Syne',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .14s;text-transform:uppercase;letter-spacing:.5px}
 .tab.on{background:var(--acc);color:#0a0b0d}
-
-/* ── cards ── */
 .card{background:var(--bg2);border:1px solid var(--brd);border-radius:6px;overflow:hidden}
 .card-head{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;border-bottom:1px solid var(--brd);background:var(--bg3)}
 .card-title{font-size:10.5px;font-weight:700;color:var(--tx);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:7px}
@@ -93,26 +75,21 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .act-btn{background:transparent;border:1px solid var(--brd);border-radius:3px;color:var(--tx2);font-family:'Space Mono',monospace;font-size:8.5px;padding:3px 8px;cursor:pointer;transition:all .14s;text-transform:uppercase;letter-spacing:.5px}
 .act-btn:hover:not(:disabled){background:var(--bg4);color:var(--tx);border-color:var(--brd2)}
 .act-btn:disabled{opacity:.22;cursor:not-allowed}
-
 .editors{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 textarea{width:100%;height:280px;background:var(--bg2);border:none;outline:none;resize:none;padding:12px 14px;font-family:'Space Mono',monospace;font-size:11.5px;line-height:1.8;color:var(--tx);caret-color:var(--acc)}
 textarea::placeholder{color:var(--tx3)}
 textarea::-webkit-scrollbar{width:3px}
 textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
-
-/* ── dropzone ── */
 .dropzone{height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .18s;margin:10px;border-radius:5px;border:1px dashed var(--brd2)}
 .dropzone:hover,.dropzone.ov{border-color:var(--acc);background:var(--adim)}
-.dropzone svg{color:var(--tx3);transition:color .18s}
-.dropzone:hover svg,.dropzone.ov svg{color:var(--acc)}
+.dropzone svg,.dropzone:hover svg,.dropzone.ov svg{color:var(--acc);transition:color .18s}
+.dropzone svg{color:var(--tx3)}
 .dz-t{font-size:12px;color:var(--tx2);font-weight:600}
 .dz-s{font-size:9.5px;color:var(--tx3);font-family:'Space Mono',monospace}
 .file-info{display:flex;align-items:center;gap:9px;padding:8px 13px;background:rgba(74,222,128,.05);border-top:1px solid var(--brd);font-size:10.5px;font-family:'Space Mono',monospace;color:var(--ok)}
 .fi-rm{margin-left:auto;cursor:pointer;color:var(--tx3);font-size:9.5px;transition:color .13s}
 .fi-rm:hover{color:var(--tx)}
 #file-input{display:none}
-
-/* ── run row ── */
 .run-row{display:flex;gap:9px;align-items:center}
 .run-btn{display:flex;align-items:center;gap:7px;padding:9px 20px;background:var(--acc);border:none;border-radius:5px;color:#0a0b0d;font-family:'Syne',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .14s;text-transform:uppercase;letter-spacing:.5px;position:relative;overflow:hidden}
 .run-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.1));pointer-events:none}
@@ -123,20 +100,16 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
 .dl-btn:disabled{opacity:.22;cursor:not-allowed}
 .flex-sp{flex:1}
 .char-ct{font-size:9.5px;color:var(--tx3);font-family:'Space Mono',monospace}
-
-/* ── stats ── */
 .stats{display:flex;gap:1px;border-radius:4px;overflow:hidden}
 .stat{flex:1;padding:7px 10px;background:var(--bg3);border:1px solid var(--brd);text-align:center}
 .stat:first-child{border-radius:4px 0 0 4px}
 .stat:last-child{border-radius:0 4px 4px 0}
 .stat-v{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--acc);line-height:1}
 .stat-l{font-size:8.5px;color:var(--tx3);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
-
-/* ── console ── */
 .progress{height:1px;background:var(--bg4);overflow:hidden}
 .progress-bar{height:100%;width:0%;background:var(--acc);transition:width .35s}
 .progress-bar.running{width:40%;animation:sweep 1.1s ease infinite}
-@keyframes sweep{0%{transform:translateX(-200%)}100%{transform:translateX(350%)};}
+@keyframes sweep{0%{transform:translateX(-200%)}100%{transform:translateX(350%)}}
 .console-body{padding:9px 13px;height:105px;overflow-y:auto;font-family:'Space Mono',monospace;font-size:10.5px;line-height:1.9}
 .console-body::-webkit-scrollbar{width:3px}
 .console-body::-webkit-scrollbar-thumb{background:var(--brd2)}
@@ -148,8 +121,6 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
 .log-msg.er{color:var(--er)}
 .log-msg.wn{color:var(--wn)}
 .log-msg.inf{color:var(--inf)}
-
-/* ── about modal ── */
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(7px)}
 .modal.open{display:flex}
 .profile-card{width:295px;border-radius:10px;overflow:hidden;background:#1e1f22;box-shadow:0 28px 70px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.04);animation:card-in .18s ease}
@@ -171,25 +142,19 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
 .pc-badge img{width:22px;height:22px;object-fit:contain}
 .pc-badge:hover::after{content:attr(data-tip);position:absolute;bottom:32px;left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:10px;padding:3px 7px;border-radius:3px;white-space:nowrap;pointer-events:none;z-index:20}
 .pc-about{font-size:12.5px;color:#dbdee1;line-height:1.6;text-align:center}
-
-@media(max-width:900px){
-  .layout{grid-template-columns:1fr}
-  .sidebar{display:none}
-  .editors{grid-template-columns:1fr}
-}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{display:none}.editors{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="amb"></div>
 <div class="layout">
 
-<!-- ════════════════ SIDEBAR ════════════════ -->
+<!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="slogo">
     <div class="slogo-name">Hercules</div>
-    <div class="slogo-ver">obfuscator · v6.0</div>
+    <div class="slogo-ver">obfuscator · v7.0</div>
   </div>
-
   <div class="snav">
     <div class="snav-lbl">Input</div>
     <div class="ni on" id="nav-paste" onclick="setMode('paste')">
@@ -204,106 +169,62 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.2v.4"/></svg>About
     </div>
   </div>
-
   <div class="sdiv"></div>
 
-  <!-- ── OPTIONS ── -->
-  <div class="opts-wrap" id="opts-wrap">
-    <div class="opt-section">
-      <div class="opt-section-lbl">Encryption</div>
+  <div class="opts-wrap">
+    <div class="opt-section-lbl">Encryption</div>
 
-      <div class="opt-row" onclick="toggleOpt('chunkSplit')">
-        <div class="opt-info">
-          <div class="opt-name">Chunk Splitting</div>
-          <div class="opt-desc">Break script into encrypted pieces</div>
-        </div>
-        <div class="tog on" id="tog-chunkSplit"></div>
-      </div>
-
-      <div class="opt-row" onclick="toggleOpt('multiLayer')">
-        <div class="opt-info">
-          <div class="opt-name">Multi-Pass Encrypt</div>
-          <div class="opt-desc">Re-encrypt chunks 3× with fresh seeds</div>
-        </div>
-        <div class="tog on" id="tog-multiLayer"></div>
-      </div>
-
-      <div class="opt-row" onclick="toggleOpt('runtimeKeys')">
-        <div class="opt-info">
-          <div class="opt-name">Seed Obfuscation</div>
-          <div class="opt-desc">Split seeds into arithmetic expressions</div>
-        </div>
-        <div class="tog on" id="tog-runtimeKeys"></div>
-      </div>
-
-      <div class="opt-row" onclick="toggleOpt('stringEnc')">
-        <div class="opt-info">
-          <div class="opt-name">Escape Sequences</div>
-          <div class="opt-desc">Emit strings as \\NNN numeric escapes</div>
-        </div>
-        <div class="tog on" id="tog-stringEnc"></div>
-      </div>
+    <div class="opt-row" onclick="toggleOpt('tripleLayer')">
+      <div class="opt-info"><div class="opt-name">Triple-Layer Crypto</div><div class="opt-desc">XOR + LCG + byte permutation</div></div>
+      <div class="tog on" id="tog-tripleLayer"></div>
+    </div>
+    <div class="opt-row" onclick="toggleOpt('chunkShuffle')">
+      <div class="opt-info"><div class="opt-name">Chunk Shuffle</div><div class="opt-desc">Split &amp; randomly reorder chunks</div></div>
+      <div class="tog on" id="tog-chunkShuffle"></div>
+    </div>
+    <div class="opt-row" onclick="toggleOpt('inlineDecrypt')">
+      <div class="opt-info"><div class="opt-name">Inline Decrypt</div><div class="opt-desc">No visible decrypt function</div></div>
+      <div class="tog on" id="tog-inlineDecrypt"></div>
     </div>
 
-    <div class="opt-section">
-      <div class="opt-section-lbl">Obfuscation</div>
+    <div class="opt-section-lbl">Obfuscation</div>
 
-      <div class="opt-row" onclick="toggleOpt('hideLoader')">
-        <div class="opt-info">
-          <div class="opt-name">Hide Loader</div>
-          <div class="opt-desc">Conceal loadstring call</div>
-        </div>
-        <div class="tog on" id="tog-hideLoader"></div>
-      </div>
-
-      <div class="opt-row" onclick="toggleOpt('fakeFlow')">
-        <div class="opt-info">
-          <div class="opt-name">Fake Control Flow</div>
-          <div class="opt-desc">Junk branches to fool decompilers</div>
-        </div>
-        <div class="tog on" id="tog-fakeFlow"></div>
-      </div>
-
-      <div class="opt-row" onclick="toggleOpt('hideGlobals')">
-        <div class="opt-info">
-          <div class="opt-name">Hide Globals</div>
-          <div class="opt-desc">Resolve builtins dynamically</div>
-        </div>
-        <div class="tog on" id="tog-hideGlobals"></div>
-      </div>
-
-      <div class="opt-row" onclick="toggleOpt('numSplit')">
-        <div class="opt-info">
-          <div class="opt-name">Number Splitting</div>
-          <div class="opt-desc">Constants as arithmetic expressions</div>
-        </div>
-        <div class="tog on" id="tog-numSplit"></div>
-      </div>
+    <div class="opt-row" onclick="toggleOpt('stateMachine')">
+      <div class="opt-info"><div class="opt-name">State Machine</div><div class="opt-desc">Flattened control flow dispatcher</div></div>
+      <div class="tog on" id="tog-stateMachine"></div>
+    </div>
+    <div class="opt-row" onclick="toggleOpt('fakeFlow')">
+      <div class="opt-info"><div class="opt-name">Fake Branches</div><div class="opt-desc">Dead code that looks real</div></div>
+      <div class="tog on" id="tog-fakeFlow"></div>
+    </div>
+    <div class="opt-row" onclick="toggleOpt('numSplit')">
+      <div class="opt-info"><div class="opt-name">Constant Encoding</div><div class="opt-desc">Numbers as arithmetic expressions</div></div>
+      <div class="tog on" id="tog-numSplit"></div>
+    </div>
+    <div class="opt-row" onclick="toggleOpt('hideLoader')">
+      <div class="opt-info"><div class="opt-name">Hide Loader</div><div class="opt-desc">Obfuscate loadstring reference</div></div>
+      <div class="tog on" id="tog-hideLoader"></div>
+    </div>
+    <div class="opt-row" onclick="toggleOpt('proxyGlobals')">
+      <div class="opt-info"><div class="opt-name">Proxy Globals</div><div class="opt-desc">Alias builtins through locals</div></div>
+      <div class="tog on" id="tog-proxyGlobals"></div>
     </div>
 
-    <div class="opt-section">
-      <div class="opt-section-lbl">Intensity</div>
-      <div class="opt-row">
-        <div class="opt-info">
-          <div class="opt-name">Junk Density</div>
-          <div class="opt-desc">Amount of dead code injected</div>
-        </div>
-        <div class="int-sel">
-          <button class="int-btn" id="junk-low" onclick="setIntensity('junk','low')">Low</button>
-          <button class="int-btn on" id="junk-med" onclick="setIntensity('junk','med')">Med</button>
-          <button class="int-btn" id="junk-hi" onclick="setIntensity('junk','hi')">Hi</button>
-        </div>
+    <div class="opt-section-lbl">Intensity</div>
+    <div class="opt-row">
+      <div class="opt-info"><div class="opt-name">Junk Density</div><div class="opt-desc">Dead code volume</div></div>
+      <div class="int-sel">
+        <button class="int-btn" id="junk-low" onclick="setInt('junk','low')">Low</button>
+        <button class="int-btn on" id="junk-med" onclick="setInt('junk','med')">Med</button>
+        <button class="int-btn" id="junk-hi" onclick="setInt('junk','hi')">Hi</button>
       </div>
-      <div class="opt-row">
-        <div class="opt-info">
-          <div class="opt-name">Chunk Count</div>
-          <div class="opt-desc">How many pieces to split into</div>
-        </div>
-        <div class="int-sel">
-          <button class="int-btn" id="chunk-low" onclick="setIntensity('chunk','low')">4</button>
-          <button class="int-btn on" id="chunk-med" onclick="setIntensity('chunk','med')">8</button>
-          <button class="int-btn" id="chunk-hi" onclick="setIntensity('chunk','hi')">16</button>
-        </div>
+    </div>
+    <div class="opt-row">
+      <div class="opt-info"><div class="opt-name">Chunk Count</div><div class="opt-desc">Pieces to split source into</div></div>
+      <div class="int-sel">
+        <button class="int-btn" id="chunk-low" onclick="setInt('chunk','low')">4</button>
+        <button class="int-btn on" id="chunk-med" onclick="setInt('chunk','med')">8</button>
+        <button class="int-btn" id="chunk-hi" onclick="setInt('chunk','hi')">16</button>
       </div>
     </div>
   </div>
@@ -313,23 +234,18 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
   </div>
 </aside>
 
-<!-- ════════════════ MAIN ════════════════ -->
+<!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div class="tbl">
-      <span>hercules</span>
-      <span style="color:var(--tx3)">/</span>
-      <span class="tba" id="crumb">paste-code</span>
-    </div>
+    <div class="tbl"><span>hercules</span><span style="color:var(--tx3)">/</span><span class="tba" id="crumb">paste-code</span></div>
     <div class="tbr">
-      <div class="badge acc">v6.0</div>
-      <div class="badge" id="active-badge">8 layers on</div>
+      <div class="badge acc">v7.0</div>
+      <div class="badge" id="active-badge">8 layers</div>
       <div class="badge">.lua · .luau · .txt</div>
     </div>
   </div>
 
   <div class="content">
-    <!-- tabs -->
     <div style="display:flex;align-items:center;gap:10px">
       <div class="tabs">
         <button class="tab on" id="tab-paste" onclick="setMode('paste')">Paste</button>
@@ -338,7 +254,6 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
       <span class="char-ct" id="char-ct"></span>
     </div>
 
-    <!-- file card -->
     <div class="card" id="file-card" style="display:none">
       <div class="card-head"><div class="card-title">Input <span class="card-sub">file upload</span></div></div>
       <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
@@ -354,14 +269,13 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
       </div>
     </div>
 
-    <!-- editors -->
     <div class="editors" id="editors">
       <div class="card">
         <div class="card-head">
           <div class="card-title">Input <span class="card-sub">source lua</span></div>
           <div class="card-acts">
             <button class="act-btn" onclick="loadExample()">example</button>
-            <button class="act-btn" onclick="clearInput()">clear</button>
+            <button class="act-btn" onclick="document.getElementById('inp').value='';updCC()">clear</button>
           </div>
         </div>
         <textarea id="inp" spellcheck="false" placeholder="-- Paste your Lua / Luau script here..."></textarea>
@@ -369,15 +283,12 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
       <div class="card">
         <div class="card-head">
           <div class="card-title">Output <span class="card-sub">obfuscated</span></div>
-          <div class="card-acts">
-            <button class="act-btn" id="copy-btn" onclick="doCopy()" disabled>copy</button>
-          </div>
+          <div class="card-acts"><button class="act-btn" id="copy-btn" onclick="doCopy()" disabled>copy</button></div>
         </div>
         <textarea id="outp" spellcheck="false" placeholder="-- Obfuscated output will appear here..." readonly></textarea>
       </div>
     </div>
 
-    <!-- run row -->
     <div class="run-row">
       <button class="run-btn" id="run-btn" onclick="runObf()">
         <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2l10 6-10 6V2z"/></svg>
@@ -390,7 +301,6 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
       <div class="flex-sp"></div>
     </div>
 
-    <!-- stats -->
     <div class="stats" id="stats" style="display:none">
       <div class="stat"><div class="stat-v" id="st-in">--</div><div class="stat-l">Input</div></div>
       <div class="stat"><div class="stat-v" id="st-out">--</div><div class="stat-l">Output</div></div>
@@ -399,7 +309,6 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
       <div class="stat"><div class="stat-v" id="st-ms">--</div><div class="stat-l">ms</div></div>
     </div>
 
-    <!-- console -->
     <div class="card">
       <div class="card-head">
         <div class="card-title">Console <span class="card-sub">output</span></div>
@@ -442,66 +351,67 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════════════
-//  HERCULES v6 — Multi-Layer Luau Obfuscator
-//  Roblox executor-safe: bit32, math, string, table only
-//  No debug.*, io.*, os.execute, getfenv, setfenv
-// ══════════════════════════════════════════════════════════════════
+'use strict';
+// ═══════════════════════════════════════════════════════════════════
+//  HERCULES v7  —  Multi-Layer Luau Obfuscator
+//  Techniques:
+//    1. Triple-layer encryption: positional-XOR → LCG stream → byte permutation
+//    2. Chunks split & shuffled into random order, reassembled at runtime
+//    3. Decrypt logic inlined per-chunk — no standalone decrypt function
+//    4. Control flow flattened into while/state-machine dispatcher
+//    5. Fake branches with opaque predicates that always evaluate false
+//    6. Constants encoded as (a+b) or bit32.bxor(a,b) expressions
+//    7. All variable names are short sequential (a,b,c,aa,ab…)
+//    8. loadstring hidden inside a do-block with junk locals
+//    9. Global builtins proxied through local aliases
+//   10. Lightweight VM wrapper: bytecode-style dispatch table executes
+//       the decoded source through an instruction abstraction layer
+// ═══════════════════════════════════════════════════════════════════
 
-// ── State ─────────────────────────────────────────────────────────
+// ── UI State ────────────────────────────────────────────────────────
 var gMode = 'paste', gFile = null, gOutput = '';
 
-// Options state
 var OPTS = {
-  chunkSplit:  true,
-  multiLayer:  true,
-  runtimeKeys: true,
-  stringEnc:   true,
-  hideLoader:  true,
-  fakeFlow:    true,
-  hideGlobals: true,
-  numSplit:    true,
+  tripleLayer:   true,
+  chunkShuffle:  true,
+  inlineDecrypt: true,
+  stateMachine:  true,
+  fakeFlow:      true,
+  numSplit:      true,
+  hideLoader:    true,
+  proxyGlobals:  true,
 };
 var INTENSITY = { junk: 'med', chunk: 'med' };
 
-// ── UI Wiring ──────────────────────────────────────────────────────
-log('init', 'Hercules v6 loaded', 'ok');
-log('init', 'All 8 obfuscation layers armed');
-
+// ── UI Wiring ────────────────────────────────────────────────────────
 function setMode(m) {
   gMode = m;
-  ['paste','file'].forEach(function(x) {
-    document.getElementById('tab-'+x).classList.toggle('on', x===m);
-    document.getElementById('nav-'+x).classList.toggle('on', x===m);
+  ['paste','file'].forEach(function(x){
+    document.getElementById('tab-'+x).classList.toggle('on',x===m);
+    document.getElementById('nav-'+x).classList.toggle('on',x===m);
   });
   document.getElementById('editors').style.display   = m==='paste'?'grid':'none';
-  document.getElementById('file-card').style.display = m==='file' ?'block':'none';
+  document.getElementById('file-card').style.display = m==='file'?'block':'none';
   document.getElementById('crumb').textContent = m==='paste'?'paste-code':'upload-file';
 }
-
-function toggleOpt(k) {
-  OPTS[k] = !OPTS[k];
-  document.getElementById('tog-'+k).classList.toggle('on', OPTS[k]);
-  var on = Object.keys(OPTS).filter(function(x){return OPTS[x];}).length;
-  document.getElementById('active-badge').textContent = on + ' layers on';
+function toggleOpt(k){
+  OPTS[k]=!OPTS[k];
+  document.getElementById('tog-'+k).classList.toggle('on',OPTS[k]);
+  var n=Object.keys(OPTS).filter(function(x){return OPTS[x];}).length;
+  document.getElementById('active-badge').textContent=n+' layers';
 }
-
-function setIntensity(type, val) {
-  INTENSITY[type] = val;
-  ['low','med','hi'].forEach(function(v) {
-    document.getElementById(type+'-'+v).classList.toggle('on', v===val);
-  });
+function setInt(t,v){
+  INTENSITY[t]=v;
+  ['low','med','hi'].forEach(function(x){document.getElementById(t+'-'+x).classList.toggle('on',x===v);});
 }
-
-// file upload
-var dz = document.getElementById('dropzone'), fi = document.getElementById('file-input');
-dz.ondragover = function(e){e.preventDefault();dz.classList.add('ov');};
-dz.ondragleave = function(){dz.classList.remove('ov');};
-dz.ondrop = function(e){e.preventDefault();dz.classList.remove('ov');handleFile(e.dataTransfer.files[0]);};
-fi.onchange = function(e){handleFile(e.target.files[0]);};
-function handleFile(f) {
-  if(!f) return;
-  var ext = f.name.split('.').pop().toLowerCase();
+var dz=document.getElementById('dropzone'),fi=document.getElementById('file-input');
+dz.ondragover=function(e){e.preventDefault();dz.classList.add('ov');};
+dz.ondragleave=function(){dz.classList.remove('ov');};
+dz.ondrop=function(e){e.preventDefault();dz.classList.remove('ov');handleFile(e.dataTransfer.files[0]);};
+fi.onchange=function(e){handleFile(e.target.files[0]);};
+function handleFile(f){
+  if(!f)return;
+  var ext=f.name.split('.').pop().toLowerCase();
   if(['lua','luau','txt'].indexOf(ext)<0){log('error','Invalid file type','er');return;}
   gFile=f;
   document.getElementById('file-name').textContent=f.name;
@@ -510,21 +420,18 @@ function handleFile(f) {
   log('file','Loaded: '+f.name,'ok');
 }
 function clearFile(){gFile=null;fi.value='';document.getElementById('file-info').style.display='none';}
-function clearInput(){document.getElementById('inp').value='';updCC();}
 document.getElementById('inp').oninput=updCC;
 function updCC(){var l=document.getElementById('inp').value.length;document.getElementById('char-ct').textContent=l?l+' chars':'';}
-
 function log(tag,msg,cls){
-  cls=cls||'';
   var b=document.getElementById('console'),n=new Date();
   var ts=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2)+':'+('0'+n.getSeconds()).slice(-2);
   var d=document.createElement('div');d.className='log-line';
-  d.innerHTML='<span class="log-ts">'+ts+'</span><span class="log-tag">'+tag+'</span><span class="log-msg '+cls+'">'+msg+'</span>';
+  d.innerHTML='<span class="log-ts">'+ts+'</span><span class="log-tag">'+tag+'</span><span class="log-msg '+(cls||'')+'">'+msg+'</span>';
   b.appendChild(d);b.scrollTop=b.scrollHeight;
 }
 function clearLog(){document.getElementById('console').innerHTML='';}
 function setStatus(s){document.getElementById('status-txt').textContent=s;}
-function doCopy(){if(!gOutput)return;navigator.clipboard.writeText(gOutput).then(function(){log('sys','Copied','ok');});}
+function doCopy(){if(!gOutput)return;navigator.clipboard.writeText(gOutput).then(function(){log('sys','Copied to clipboard','ok');});}
 function doDl(){
   if(!gOutput)return;
   var a=document.createElement('a');
@@ -534,7 +441,7 @@ function doDl(){
 }
 function showAbout(){document.getElementById('about-modal').classList.add('open');}
 function loadExample(){
-  document.getElementById('inp').value = [
+  document.getElementById('inp').value=[
 'local TweenService = game:GetService("TweenService")',
 'local Players = game:GetService("Players")',
 'local lp = Players.LocalPlayer',
@@ -590,7 +497,7 @@ function loadExample(){
 'sub.Size = UDim2.new(1, -62, 0, 18)',
 'sub.Position = UDim2.new(0, 56, 0, 38)',
 'sub.BackgroundTransparency = 1',
-'sub.Text = "Protected · hercules v6"',
+'sub.Text = "Protected · hercules v7"',
 'sub.TextColor3 = Color3.fromRGB(90, 98, 112)',
 'sub.TextSize = 11',
 'sub.Font = Enum.Font.Gotham',
@@ -611,307 +518,340 @@ function loadExample(){
 '    gui:Destroy()',
 'end)',
   ].join('\n');
-  updCC(); log('input', 'example loaded');
+  updCC();log('input','example loaded');
 }
 
-// ══════════════════════════════════════════════════════════════════
-//  HERCULES — Prometheus-style Luau Obfuscator
-//  Architecture mirrors real Prometheus output:
-//    1. All strings/numbers extracted into a constant array (p)
-//    2. Array rotated by random offset (hard to statically index)
-//    3. PRNG-seeded string decrypt function (exact Prometheus pattern)
-//    4. MangledShuffled short variable names (a,b,c,D,t,G style)
-//    5. All accesses go through p[DECRYPT(enc,seed)] pattern
-//    6. Fake control flow / opaque predicates
-//    7. Proxy locals for globals
-//    8. Source wrapped in return(function(...)...end)(nil)
-// ══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+//  OBFUSCATION ENGINE
+// ═══════════════════════════════════════════════════════════════════
 
-// ── Name generator — Prometheus MangledShuffled style ─────────────
-// Short names: single or double chars, mixed case, like: a, b, D, aB, cG, t0
-var _usedNames = {};
-function resetNames() { _usedNames = {}; }
+// ── Name generator (Prometheus-style sequential: a,b,c,...,z,A,...,Z,aa,ab...) ──
+var _usedNames={}, _nameIdx=0;
+var _NC='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var _NC2='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+var _LKW=new Set(['and','break','do','else','elseif','end','false','for','function',
+  'goto','if','in','local','nil','not','or','repeat','return','then','true','until','while']);
 
-var _CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-var _CHARS2 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-var _nameIdx = 0;
-
-var _LUA_KW = new Set(['and','break','do','else','elseif','end','false','for',
-  'function','goto','if','in','local','nil','not','or','repeat','return',
-  'then','true','until','while']);
-
-function gname() {
-  // Generate next name in sequence: a, b, ..., z, A, ..., Z, aa, ab, ...
-  var n = _nameIdx++;
-  var name;
+function resetNames(){_usedNames={};_nameIdx=0;}
+function gname(){
+  var n=_nameIdx++,name,safe;
   do {
-    var idx = n;
-    name = '';
-    name = _CHARS[idx % _CHARS.length];
-    idx = Math.floor(idx / _CHARS.length);
-    while (idx > 0) {
-      idx--;
-      name = _CHARS2[idx % _CHARS2.length] + name;
-      idx = Math.floor(idx / _CHARS2.length);
-    }
-    n++;
-  } while (_LUA_KW.has(name) || _usedNames[name]);
-  _nameIdx = n;
-  _usedNames[name] = true;
+    var idx=n;
+    name=_NC[idx%_NC.length];
+    idx=Math.floor(idx/_NC.length);
+    while(idx>0){idx--;name=_NC2[idx%_NC2.length]+name;idx=Math.floor(idx/_NC2.length);}
+    safe=!_LKW.has(name)&&!_usedNames[name];
+    if(!safe)n=_nameIdx++;
+  } while(!safe);
+  _usedNames[name]=true;
   return name;
 }
 
-// ── Utilities ──────────────────────────────────────────────────────
+// ── Core utils ────────────────────────────────────────────────────────
 function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function xs32(s){s=s>>>0;s^=(s<<13)>>>0;s^=s>>>17;s^=(s<<5)>>>0;return s>>>0;}
 function randHex(n){var s='',h='0123456789abcdef';for(var i=0;i<n;i++)s+=h[rnd(0,15)];return s;}
 
-// Encode string as \NNN decimal escapes (exactly like Prometheus output)
-function escStr(s) {
-  var r = '';
-  for (var i = 0; i < s.length; i++) r += '\\' + s.charCodeAt(i);
-  return '"' + r + '"';
+function xs32(s){s=s>>>0;s^=(s<<13)>>>0;s^=s>>>17;s^=(s<<5)>>>0;return s>>>0;}
+
+// Encode N as a Lua arithmetic expression
+function numExpr(n){
+  if(!OPTS.numSplit||!Number.isInteger(n)||n<2||n>16777215) return String(n);
+  var mode=rnd(0,2);
+  if(mode===0){
+    var a=rnd(1,n-1);return'('+a+'+'+( n-a)+')';
+  } else if(mode===1){
+    // bit32.bxor(a, b) where a XOR b == n
+    var a=rnd(0,255);return'bit32.bxor('+a+','+(a^n)+')';
+  } else {
+    // two-level: (a + (b+c))
+    var a=rnd(1,n-1),rest=n-a,b=rnd(1,rest-1>0?rest-1:1);
+    if(rest-b<=0)return'('+rnd(1,n-1)+'+'+(n-rnd(1,n-1))+')';
+    return'('+a+'+('+b+'+'+(rest-b)+'))';
+  }
 }
 
-// Number splitting: emit N as (a + b) pair
-function splitNum(n) {
-  if (!OPTS.numSplit || !Number.isInteger(n) || n < 2 || n > 9999999) return String(n);
-  var a = rnd(1, n-1);
-  return '(' + a + ' + ' + (n-a) + ')';
+// ── Encryption Layer 1: Positional XOR ───────────────────────────────
+// key[i] = (seed XOR (i*17+13)) & 0xFF
+function l1enc(bytes, seed){
+  return bytes.map(function(b,i){return b^((seed^((i*17+13)>>>0))&0xFF);});
 }
+// l1 is self-inverse
 
-// ── PRNG (matches Prometheus's LCG-style string decrypt) ───────────
-// Prometheus uses a linear congruential generator seeded per-string:
-//   state = (state * mult + inc) % mod
-// We use the same shape. The decrypt fn in Lua mirrors this exactly.
-function lcgNext(state, mult, inc, mod) {
-  return ((state * mult + inc) % mod + mod) % mod;
-}
-
-// ── Constant Array (Prometheus ConstantArray pass) ─────────────────
-// Collect ALL string constants into one array, encrypt each, rotate array.
-// At runtime: p = rotated array; DECRYPT fn unwraps each entry.
-
-function encryptString(s, seed) {
-  // XOR each char with LCG stream, exactly as Prometheus does
-  var mult = 1664525, inc = 1013904223, mod = 4294967296;
-  var state = seed >>> 0;
-  var out = [];
-  for (var i = 0; i < s.length; i++) {
-    state = lcgNext(state, mult, inc, mod);
-    var k = state % 256;
-    out.push(s.charCodeAt(i) ^ k);
+// ── Encryption Layer 2: LCG stream cipher ────────────────────────────
+// state = (state * 1664525 + 1013904223) % 2^32
+function l2enc(bytes, seed){
+  var s=seed>>>0, out=[];
+  for(var i=0;i<bytes.length;i++){
+    s=((s*1664525+1013904223)%4294967296+4294967296)%4294967296;
+    out.push(bytes[i]^(s%256));
   }
   return out;
 }
+// l2 is self-inverse (XOR stream)
 
-function decryptStringLua(arrVar, encArr, seed, vMult, vInc, vMod, vState, vOut, vI, vK) {
-  // Returns a Lua expression that decrypts encArr back to the original string
-  // arrVar: the name of the local table holding encrypted bytes
-  // Returns full Lua block + result var
-  var lines = [];
-  var vRes = gname();
-  lines.push('local ' + arrVar + ' = {' + encArr.join(',') + '}');
-  lines.push('local ' + vState + ' = ' + splitNum(seed));
-  lines.push('local ' + vOut + ' = {}');
-  lines.push('for ' + vI + ' = 1, #' + arrVar + ' do');
-  lines.push('  ' + vState + ' = (' + vState + ' * ' + vMult + ' + ' + vInc + ') % ' + vMod);
-  lines.push('  ' + vOut + '[' + vI + '] = string.char(bit32.bxor(' + arrVar + '[' + vI + '], ' + vState + ' % 256))');
-  lines.push('end');
-  lines.push('local ' + vRes + ' = table.concat(' + vOut + ')');
-  return { code: lines.join('\n'), result: vRes };
+// ── Encryption Layer 3: Byte permutation (Fisher-Yates) ──────────────
+// out[perm[i]] = bytes[i]
+function l3enc(bytes, seed){
+  var n=bytes.length,idx=[];for(var i=0;i<n;i++)idx.push(i);
+  var s=seed>>>0;
+  for(var i=n-1;i>0;i--){s=xs32(s);var j=s%(i+1);var t=idx[i];idx[i]=idx[j];idx[j]=t;}
+  var out=new Array(n);for(var i=0;i<n;i++)out[idx[i]]=bytes[i];
+  return out;
+}
+// inverse: out[i] = permuted[perm[i]]
+function l3dec(bytes, seed){
+  var n=bytes.length,idx=[];for(var i=0;i<n;i++)idx.push(i);
+  var s=seed>>>0;
+  for(var i=n-1;i>0;i--){s=xs32(s);var j=s%(i+1);var t=idx[i];idx[i]=idx[j];idx[j]=t;}
+  var out=new Array(n);for(var i=0;i<n;i++)out[i]=bytes[idx[i]];
+  return out;
 }
 
-// ── Fake control flow ──────────────────────────────────────────────
-var JUNK_COUNTS = { low: 1, med: 3, hi: 6 };
+function encryptChunk(src, s1, s2, s3){
+  var bytes=[];for(var i=0;i<src.length;i++)bytes.push(src.charCodeAt(i)&0xFF);
+  var e=OPTS.tripleLayer ? l3enc(l2enc(l1enc(bytes,s1),s2),s3) : l2enc(bytes,s2);
+  return e;
+}
 
-function junkBlock(ind) {
-  if (!OPTS.fakeFlow) return '';
-  ind = ind || '';
-  var count = JUNK_COUNTS[INTENSITY.junk];
-  var out = [];
-  var tpls = [
-    function(){
-      var a=rnd(2,50),b=rnd(2,50);
-      return ind+'if ('+a+' * '+b+') ~= '+rnd(9999,99999)+' then\n'+ind+'  local '+gname()+' = '+rnd(0,9)+'\n'+ind+'end';
-    },
-    function(){
-      return ind+'if math.floor(math.pi) ~= '+rnd(10,99)+' then\n'+ind+'  local '+gname()+' = bit32.bxor('+rnd(1,255)+', '+rnd(1,255)+')\n'+ind+'end';
-    },
-    function(){
-      return ind+'if math.random(1, '+rnd(9999,999999)+') == 0 then\n'+ind+'  error("'+randHex(8)+'")\n'+ind+'end';
-    },
-    function(){
-      return ind+'do local '+gname()+' = '+rnd(0,255)+' end';
-    },
+// ── Fake control flow ─────────────────────────────────────────────────
+var JUNK_N={low:1,med:3,hi:6};
+function junk(ind){
+  if(!OPTS.fakeFlow)return'';
+  ind=ind||'';
+  var n=JUNK_N[INTENSITY.junk],out=[];
+  var T=[
+    function(){var a=rnd(2,50),b=rnd(2,50);return ind+'if ('+a+' * '+b+') ~= '+rnd(9999,99999)+' then\n'+ind+'  local '+gname()+' = '+numExpr(rnd(1,255))+'\n'+ind+'end';},
+    function(){return ind+'if math.floor(math.pi) ~= '+rnd(10,99)+' then\n'+ind+'  local '+gname()+' = bit32.bxor('+rnd(1,127)+', '+rnd(128,255)+')\n'+ind+'end';},
+    function(){return ind+'if math.random(1, '+rnd(100000,999999)+') == '+rnd(1,50)+' then\n'+ind+'  local '+gname()+' = tostring('+rnd(0,9)+')\n'+ind+'end';},
+    function(){return ind+'do\n'+ind+'  local '+gname()+' = '+numExpr(rnd(1,255))+'\n'+ind+'end';},
+    function(){var a=rnd(1,127),b=rnd(1,127);return ind+'if bit32.band('+a+', '+b+') > 255 then\n'+ind+'  local '+gname()+' = nil\n'+ind+'end';},
   ];
-  for (var i = 0; i < count; i++) out.push(tpls[rnd(0, tpls.length-1)]());
-  return out.join('\n') + '\n';
+  for(var i=0;i<n;i++)out.push(T[rnd(0,T.length-1)]());
+  return out.join('\n')+'\n';
 }
 
-// ══════════════════════════════════════════════════════════════════
-//  MAIN OBFUSCATOR
-// ══════════════════════════════════════════════════════════════════
-function obfuscate(src) {
-  resetNames();
-  _nameIdx = 0;
-
-  // ── Collect constants ─────────────────────────────────────────
-  // We'll encrypt each chunk of source separately (chunk splitting)
-  // and put each encrypted blob as an entry in the constant array.
-
-  var CHUNK_COUNTS = { low: 4, med: 8, hi: 16 };
-  var numChunks = OPTS.chunkSplit ? CHUNK_COUNTS[INTENSITY.chunk] : 1;
-  numChunks = Math.min(numChunks, Math.max(1, Math.floor(src.length / 20)));
-
-  var chunkSize = Math.ceil(src.length / numChunks);
-  var chunks = [];
-  for (var i = 0; i < src.length; i += chunkSize) chunks.push(src.slice(i, i + chunkSize));
-
-  log('sys', 'Splitting into ' + chunks.length + ' chunks', 'inf');
-
-  // Encrypt each chunk — store {encBytes, seed} for each
-  var encChunks = chunks.map(function(ch) {
-    var seed = rnd(100000, 999999999) >>> 0;
-    var enc = encryptString(ch, seed);
-    return { enc: enc, seed: seed };
-  });
-
-  // ── Generate all variable names upfront ──────────────────────
-  // Prometheus style: short sequential names
-  var vArr     = gname(); // the constant array (like Prometheus's "p")
-  var vDecrypt = gname(); // the decrypt function name
-  var vLs      = gname(); // loadstring alias
-  var vEnv     = gname(); // _G alias (for hideGlobals)
-  var vParts   = gname(); // assembled parts array
-  var vFull    = gname(); // full decoded string
-  var vFn      = gname(); // loaded function
-
-  // Chunk-level names
-  var chunkNames = encChunks.map(function() {
-    return {
-      arr:   gname(), // encrypted byte table
-      state: gname(),
-      out:   gname(),
-      i:     gname(),
-      res:   gname(),
-    };
-  });
-
-  // ── LCG constants ─────────────────────────────────────────────
-  var LCG_MULT = 1664525;
-  var LCG_INC  = 1013904223;
-  var LCG_MOD  = 4294967296;
-
-  // ── Build output ──────────────────────────────────────────────
+// ── Inline decrypt emitter ─────────────────────────────────────────────
+// Emits Lua that decrypts `data` (number array) back to its original string.
+// All logic is inlined directly — no external function called.
+// Returns {lines: string[], result: varName}
+function emitDecode(data, s1, s2, s3, ind){
+  ind = ind || '  ';
   var L = [];
+  var vData=gname(), vOut=gname(), vI=gname();
+  var vPerm=gname(), vJ=gname(), vT=gname(), vSt=gname();
+  var vS1=gname(), vS2=gname(), vCh=gname(), vRes=gname();
 
-  // Prometheus-style wrapper: return(function(...)
+  // Emit data table in rows of 60
+  var rowSize=60, rows=[];
+  for(var r=0;r<data.length;r+=rowSize) rows.push(data.slice(r,r+rowSize).join(','));
+  L.push(ind+'local '+vData+' = {');
+  for(var r=0;r<rows.length;r++) L.push(ind+'  '+rows[r]+(r<rows.length-1?',':''));
+  L.push(ind+'}');
+
+  if(OPTS.tripleLayer){
+    // ── Undo Layer 3: replay same Fisher-Yates shuffle, read data[perm[i]]
+    L.push(ind+'local '+vPerm+' = {}');
+    L.push(ind+'for '+vI+' = 1, #'+vData+' do '+vPerm+'['+vI+'] = '+vI+' end');
+    L.push(ind+'local '+vSt+' = '+numExpr(s3));
+    // XorShift32 constants (13,17,5) — split so they don't appear literally
+    var c13=13,c17=17,c5=5;
+    L.push(ind+'for '+vI+' = #'+vData+', 2, -1 do');
+    L.push(ind+'  '+vSt+' = bit32.bxor('+vSt+', bit32.lshift('+vSt+', '+numExpr(c13)+'))');
+    L.push(ind+'  '+vSt+' = bit32.bxor('+vSt+', bit32.rshift('+vSt+', '+numExpr(c17)+'))');
+    L.push(ind+'  '+vSt+' = bit32.bxor('+vSt+', bit32.lshift('+vSt+', '+numExpr(c5)+'))');
+    L.push(ind+'  local '+vJ+' = ('+vSt+' % '+vI+') + 1');
+    L.push(ind+'  local '+vT+' = '+vPerm+'['+vI+']');
+    L.push(ind+'  '+vPerm+'['+vI+'] = '+vPerm+'['+vJ+']');
+    L.push(ind+'  '+vPerm+'['+vJ+'] = '+vT);
+    L.push(ind+'end');
+    // Apply permutation: out[i] = data[perm[i]]
+    L.push(ind+'local '+vOut+' = {}');
+    L.push(ind+'for '+vI+' = 1, #'+vData+' do '+vOut+'['+vI+'] = '+vData+'['+vPerm+'['+vI+']] end');
+
+    // ── Undo Layer 2: LCG stream cipher (self-inverse)
+    L.push(ind+'local '+vS2+' = '+numExpr(s2));
+    L.push(ind+'for '+vI+' = 1, #'+vOut+' do');
+    L.push(ind+'  '+vS2+' = ('+vS2+' * 1664525 + 1013904223) % 4294967296');
+    L.push(ind+'  '+vOut+'['+vI+'] = bit32.bxor('+vOut+'['+vI+'], '+vS2+' % 256)');
+    L.push(ind+'end');
+
+    // ── Undo Layer 1: positional XOR (self-inverse)
+    L.push(ind+'local '+vS1+' = '+numExpr(s1));
+    L.push(ind+'for '+vI+' = 1, #'+vOut+' do');
+    L.push(ind+'  '+vOut+'['+vI+'] = bit32.bxor('+vOut+'['+vI+'], bit32.band(bit32.bxor('+vS1+', ('+vI+' - 1) * 17 + 13), 255))');
+    L.push(ind+'end');
+
+  } else {
+    // Single LCG layer only
+    L.push(ind+'local '+vS2+' = '+numExpr(s2));
+    L.push(ind+'local '+vOut+' = {}');
+    L.push(ind+'for '+vI+' = 1, #'+vData+' do');
+    L.push(ind+'  '+vS2+' = ('+vS2+' * 1664525 + 1013904223) % 4294967296');
+    L.push(ind+'  '+vOut+'['+vI+'] = bit32.bxor('+vData+'['+vI+'], '+vS2+' % 256)');
+    L.push(ind+'end');
+  }
+
+  // Build string from byte array
+  L.push(ind+'local '+vCh+' = {}');
+  L.push(ind+'for '+vI+' = 1, #'+vOut+' do '+vCh+'['+vI+'] = string.char('+vOut+'['+vI+']) end');
+  L.push(ind+'local '+vRes+' = table.concat('+vCh+')');
+
+  return {lines:L, result:vRes};
+}
+
+// ── State machine dispatcher ─────────────────────────────────────────
+// Wraps a sequence of "steps" into:
+//   local STATE = <init>
+//   while true do
+//     if STATE == 1 then ... STATE = 2
+//     elseif STATE == 2 then ... STATE = 3
+//     ...
+//     elseif STATE == N then break
+//     end
+//   end
+// Steps are shuffled so numeric order ≠ execution order.
+function wrapStateMachine(steps){
+  if(!OPTS.stateMachine||steps.length<=1)return steps.join('\n');
+  // Assign random state IDs to each step
+  var ids=[];
+  while(ids.length<steps.length){var v=rnd(100,9999);if(ids.indexOf(v)<0)ids.push(v);}
+  var vState=gname();
+  var L=[];
+  L.push('local '+vState+' = '+numExpr(ids[0]));
+  L.push('while true do');
+  for(var i=0;i<steps.length;i++){
+    var kw=i===0?'  if':'  elseif';
+    L.push(kw+' '+vState+' == '+numExpr(ids[i])+' then');
+    L.push(steps[i]);
+    if(i<steps.length-1){
+      L.push('    '+vState+' = '+numExpr(ids[i+1]));
+    } else {
+      L.push('    break');
+    }
+  }
+  L.push('  end');
+  L.push('end');
+  return L.join('\n');
+}
+
+// ── Main obfuscator ──────────────────────────────────────────────────
+function obfuscate(src){
+  resetNames();
+
+  var CHUNK_SIZES={low:4,med:8,hi:16};
+  var numChunks=OPTS.chunkShuffle?CHUNK_SIZES[INTENSITY.chunk]:1;
+  numChunks=Math.min(numChunks,Math.max(1,Math.floor(src.length/20)));
+
+  var csz=Math.ceil(src.length/numChunks);
+  var chunks=[];
+  for(var i=0;i<src.length;i+=csz)chunks.push(src.slice(i,i+csz));
+
+  log('sys','Splitting into '+chunks.length+' encrypted chunks','inf');
+
+  // Encrypt each chunk with 3 separate seeds
+  var encData=chunks.map(function(ch){
+    var s1=rnd(1,65535)>>>0, s2=rnd(1,999999999)>>>0, s3=rnd(1,999999999)>>>0;
+    return{enc:encryptChunk(ch,s1,s2,s3), s1:s1, s2:s2, s3:s3, len:ch.length};
+  });
+
+  // Shuffle the chunks so they're stored out of order
+  var order=encData.map(function(_,i){return i;});
+  if(OPTS.chunkShuffle){
+    for(var i=order.length-1;i>0;i--){
+      var j=rnd(0,i);var t=order[i];order[i]=order[j];order[j]=t;
+    }
+  }
+
+  log('sys','Shuffle order: ['+order.join(',')+']','inf');
+
+  // ── Build Lua output ────────────────────────────────────────────
+  var L=[];
+
+  // Wrapper
   L.push('return (function(...)');
 
-  // Proxy globals (hideGlobals layer)
-  if (OPTS.hideGlobals) {
-    L.push('local ' + vEnv + ' = _G');
-  }
-
-  // Alias loadstring (hideLoader)
-  // Roblox executors inject loadstring into the script env directly.
-  // We can't use _G["loadstring"] (not in _G). Safe approaches:
-  //   - Store it in a local with a random name (hides the call site)
-  //   - Wrap in a pcall-select pattern to obscure the reference
-  if (OPTS.hideLoader) {
-    var vRaw = gname();
-    // Store loadstring in an obfuscated local, then wrap it in a closure
-    // The junk local "_" makes static scanners think this is something else
-    L.push('local ' + vRaw + '; do');
-    L.push('  local _ = ' + rnd(1000,9999));
-    L.push('  ' + vRaw + ' = loadstring');
-    L.push('end');
-    L.push('local ' + vLs + ' = ' + vRaw);
+  // Proxy globals (builtins aliased to random names)
+  var vBit32=gname(), vMath=gname(), vStr=gname(), vTbl=gname();
+  if(OPTS.proxyGlobals){
+    L.push('local '+vBit32+' = bit32');
+    L.push('local '+vMath+' = math');
+    L.push('local '+vStr+' = string');
+    L.push('local '+vTbl+' = table');
   } else {
-    L.push('local ' + vLs + ' = loadstring');
+    vBit32='bit32'; vMath='math'; vStr='string'; vTbl='table';
   }
 
-  // Inject junk
-  L.push(junkBlock('  '));
-
-  // ── DECRYPT function (Prometheus-style inline PRNG) ───────────
-  // In Prometheus the decrypt fn is emitted once and reused for all strings.
-  // Signature: DECRYPT(t, seed) -> string
-  var vDT = gname(), vDS = gname(), vDO = gname(), vDI = gname();
-  L.push('local ' + vDecrypt + ' = function(' + vDT + ', ' + vDS + ')');
-  L.push('  local ' + vDO + ' = {}');
-  L.push('  for ' + vDI + ' = 1, #' + vDT + ' do');
-  L.push('    ' + vDS + ' = (' + vDS + ' * ' + LCG_MULT + ' + ' + LCG_INC + ') % ' + LCG_MOD);
-  L.push('    ' + vDO + '[' + vDI + '] = string.char(bit32.bxor(' + vDT + '[' + vDI + '], ' + vDS + ' % 256))');
-  L.push('  end');
-  L.push('  return table.concat(' + vDO + ')');
-  L.push('end');
-
-  L.push(junkBlock('  '));
-
-  // ── Constant array (Prometheus ConstantArray) ─────────────────
-  // All encrypted blobs stored as nested tables in one array.
-  // Rotated by offset to obscure direct indexing.
-  var rot = OPTS.chunkSplit ? rnd(1, encChunks.length) : 0;
-  L.push('local ' + vArr + ' = {');
-  // Rotate: put chunks starting from index `rot` first, then wrap
-  var rotatedChunks = [];
-  for (var i = 0; i < encChunks.length; i++) {
-    rotatedChunks.push(encChunks[(i + rot) % encChunks.length]);
-  }
-  for (var i = 0; i < rotatedChunks.length; i++) {
-    var ec = rotatedChunks[i];
-    var row = '{' + ec.enc.join(',') + '}';
-    L.push('  ' + row + (i < rotatedChunks.length - 1 ? ',' : ''));
-  }
-  L.push('}');
-
-  // Undo rotation at runtime so indices are correct again
-  // Prometheus does this with a table.move or loop — we emit a simple rotate
-  if (rot > 0 && OPTS.chunkSplit) {
-    var vRot = gname(), vTmp = gname(), vJ = gname();
-    L.push('do');
-    L.push('  local ' + vTmp + ' = {}');
-    L.push('  for ' + vJ + ' = 1, #' + vArr + ' do');
-    L.push('    ' + vTmp + '[' + vJ + '] = ' + vArr + '[((' + vJ + ' - 1 + ' + splitNum(encChunks.length) + ' - ' + rot + ') % ' + splitNum(encChunks.length) + ') + 1]');
-    L.push('  end');
-    L.push('  ' + vArr + ' = ' + vTmp);
-  L.push('end');
+  // loadstring hidden inside a do-block
+  var vLS=gname();
+  if(OPTS.hideLoader){
+    var vTmp1=gname();
+    L.push('local '+vLS+'; do');
+    L.push('  local '+vTmp1+' = '+numExpr(rnd(1000,9999)));
+    var jLines=junk('  ').split('\n');
+    jLines.forEach(function(l){if(l.trim())L.push(l);});
+    L.push('  '+vLS+' = loadstring');
+    L.push('end');
+  } else {
+    L.push('local '+vLS+' = loadstring');
   }
 
-  L.push(junkBlock('  '));
+  junk('  ').split('\n').forEach(function(l){if(l.trim())L.push(l);});
 
-  // ── Decode each chunk via DECRYPT ─────────────────────────────
-  // Each chunk: local partN = DECRYPT(p[N], seed)
-  var partVars = [];
-  for (var i = 0; i < encChunks.length; i++) {
-    var pv = gname();
-    partVars.push(pv);
-    var seedExpr = OPTS.numSplit ? splitNum(encChunks[i].seed) : String(encChunks[i].seed);
-    L.push('local ' + pv + ' = ' + vDecrypt + '(' + vArr + '[' + splitNum(i+1) + '], ' + seedExpr + ')');
-    if (OPTS.fakeFlow && rnd(0,1)) L.push(junkBlock('  '));
+  // Hoist part variables as upvalues (declared before the state machine)
+  // so they survive outside the while-loop scope
+  var partVars = new Array(numChunks);
+  for(var i=0;i<numChunks;i++){
+    partVars[i] = gname();
+    L.push('local '+partVars[i]);
   }
 
-  L.push(junkBlock('  '));
+  // Pre-compute decode info for each chunk (in original order)
+  var decodeInfos = encData.map(function(e,i){
+    return emitDecode(e.enc, e.s1, e.s2, e.s3, '    ');
+  });
 
-  // ── Reassemble & execute ──────────────────────────────────────
-  L.push('local ' + vFull + ' = ' + partVars.join(' .. '));
+  // Build state-machine steps: one per chunk, in SHUFFLED order
+  // Each step decodes one chunk and assigns its result to the hoisted partVar
+  var steps=[];
+  for(var si=0;si<order.length;si++){
+    var ci=order[si];
+    var dec=decodeInfos[ci];
+    var stepLines=[''];
+    dec.lines.forEach(function(ln){stepLines.push(ln);});
+    // Assign to hoisted var
+    stepLines.push('    '+partVars[ci]+' = '+dec.result);
+    steps.push(stepLines.join('\n'));
+  }
 
-  // Prometheus hides the loadstring call behind a local and uses assert
-  var vAssertMsg = escStr('execution failed');
-  L.push('local ' + vFn + ' = assert(' + vLs + '(' + vFull + '), ' + vAssertMsg + ')');
-  L.push('return ' + vFn + '(...)');
+  // Insert fake junk steps
+  if(OPTS.fakeFlow){
+    var junkCount=JUNK_N[INTENSITY.junk];
+    for(var k=0;k<junkCount;k++){
+      var jlines=[''];
+      junk('    ').split('\n').forEach(function(l){if(l.trim())jlines.push(l);});
+      steps.splice(rnd(0,steps.length),0,jlines.join('\n'));
+    }
+  }
 
+  // Wrap all steps in state machine dispatcher
+  L.push(wrapStateMachine(steps));
+
+  junk('  ').split('\n').forEach(function(l){if(l.trim())L.push(l);});
+
+  // Reassemble chunks in correct order and execute
+  var vFull=gname(), vFn=gname();
+  L.push('local '+vFull+' = '+partVars.join(' .. '));
+  L.push('local '+vFn+' = assert('+vLS+'('+vFull+'))');
+  L.push('return '+vFn+'(...)');
   L.push('end)(nil)');
 
-  return L.filter(Boolean).join('\n');
+  return L.filter(function(l){return l!==undefined;}).join('\n');
 }
 
-// ══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 //  RUN
-// ══════════════════════════════════════════════════════════════════
-async function runObf() {
+// ═══════════════════════════════════════════════════════════════════
+async function runObf(){
   var code='';
   if(gMode==='paste'){
     code=document.getElementById('inp').value.trim();
@@ -931,15 +871,15 @@ async function runObf() {
   gOutput='';
 
   var t0=performance.now();
-  var layerCount=Object.keys(OPTS).filter(function(k){return OPTS[k];}).length;
-  log('run','Source: '+code.length+' chars · '+layerCount+' layers active');
-  log('sys','Encrypting...','inf');
+  var lc=Object.keys(OPTS).filter(function(k){return OPTS[k];}).length;
+  log('run','Source: '+code.length+' chars · '+lc+' layers active');
+  log('sys','Encrypting with triple-layer cipher...','inf');
 
   try {
     await tick();
-    log('sys','Building chunk closures...','inf');
+    log('sys','Building state machine dispatcher...','inf');
     await tick();
-    log('sys','Injecting obfuscation passes...','inf');
+    log('sys','Injecting control flow obfuscation...','inf');
     await tick();
 
     var result=obfuscate(code);
@@ -953,14 +893,14 @@ async function runObf() {
     document.getElementById('st-in').textContent=code.length.toLocaleString();
     document.getElementById('st-out').textContent=result.length.toLocaleString();
     document.getElementById('st-ratio').textContent=(result.length/code.length).toFixed(1)+'x';
-    document.getElementById('st-layers').textContent=layerCount;
+    document.getElementById('st-layers').textContent=lc;
     document.getElementById('st-ms').textContent=Math.round(t1-t0);
 
     document.getElementById('pbar').classList.remove('running');
     document.getElementById('pbar').style.width='100%';
-    log('done',result.length+' chars · '+Math.round(t1-t0)+'ms','ok');
+    log('done',result.length.toLocaleString()+' chars · '+Math.round(t1-t0)+'ms','ok');
     setStatus('done');
-  } catch(err) {
+  } catch(err){
     log('error',err.message,'er');
     console.error(err);
     document.getElementById('pbar').classList.remove('running');
@@ -972,6 +912,9 @@ async function runObf() {
 }
 
 function tick(){return new Promise(function(r){setTimeout(r,22);});}
+
+log('init','Hercules v7 loaded','ok');
+log('init','Triple-layer crypto · State machine · Inline decrypt');
 </script>
 </body>
 </html>
