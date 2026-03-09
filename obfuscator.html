@@ -573,7 +573,7 @@ function loadExample(){
 'icon.Size = UDim2.new(0, 30, 0, 30)',
 'icon.Position = UDim2.new(0, 16, 0.5, -15)',
 'icon.BackgroundTransparency = 1',
-'icon.Image = "rbxassetid://129894720628310"',
+'icon.Image = "rbxassetid://10723423960"',
 'icon.ImageColor3 = Color3.fromRGB(232, 255, 71)',
 '',
 'local title = Instance.new("TextLabel", frame)',
@@ -815,13 +815,19 @@ function obfuscate(src) {
   }
 
   // Alias loadstring (hideLoader)
+  // Roblox executors inject loadstring into the script env directly.
+  // We can't use _G["loadstring"] (not in _G). Safe approaches:
+  //   - Store it in a local with a random name (hides the call site)
+  //   - Wrap in a pcall-select pattern to obscure the reference
   if (OPTS.hideLoader) {
-    if (OPTS.hideGlobals) {
-      // Access loadstring through _G with split key
-      L.push('local ' + vLs + ' = ' + vEnv + '["load" .. "string"]');
-    } else {
-      L.push('local ' + vLs + ' = (function() return loadstring end)()');
-    }
+    var vRaw = gname();
+    // Store loadstring in an obfuscated local, then wrap it in a closure
+    // The junk local "_" makes static scanners think this is something else
+    L.push('local ' + vRaw + '; do');
+    L.push('  local _ = ' + rnd(1000,9999));
+    L.push('  ' + vRaw + ' = loadstring');
+    L.push('end');
+    L.push('local ' + vLs + ' = ' + vRaw);
   } else {
     L.push('local ' + vLs + ' = loadstring');
   }
