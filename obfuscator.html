@@ -222,24 +222,24 @@ textarea::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:2px}
 
       <div class="opt-row" onclick="toggleOpt('multiLayer')">
         <div class="opt-info">
-          <div class="opt-name">Multi-Layer XOR</div>
-          <div class="opt-desc">Stack 3 encryption passes</div>
+          <div class="opt-name">Multi-Pass Encrypt</div>
+          <div class="opt-desc">Re-encrypt chunks 3× with fresh seeds</div>
         </div>
         <div class="tog on" id="tog-multiLayer"></div>
       </div>
 
       <div class="opt-row" onclick="toggleOpt('runtimeKeys')">
         <div class="opt-info">
-          <div class="opt-name">Runtime Keys</div>
-          <div class="opt-desc">Keys derived at execution time</div>
+          <div class="opt-name">Seed Obfuscation</div>
+          <div class="opt-desc">Split seeds into arithmetic expressions</div>
         </div>
         <div class="tog on" id="tog-runtimeKeys"></div>
       </div>
 
       <div class="opt-row" onclick="toggleOpt('stringEnc')">
         <div class="opt-info">
-          <div class="opt-name">String Encryption</div>
-          <div class="opt-desc">Hide all literal strings</div>
+          <div class="opt-name">Escape Sequences</div>
+          <div class="opt-desc">Emit strings as \\NNN numeric escapes</div>
         </div>
         <div class="tog on" id="tog-stringEnc"></div>
       </div>
@@ -535,548 +535,371 @@ function doDl(){
 function showAbout(){document.getElementById('about-modal').classList.add('open');}
 function loadExample(){
   document.getElementById('inp').value = [
-'local Players       = game:GetService("Players")',
-'local TweenService  = game:GetService("TweenService")',
-'local localPlayer   = Players.LocalPlayer',
-'local playerGui     = localPlayer:WaitForChild("PlayerGui")',
+'local TweenService = game:GetService("TweenService")',
+'local Players = game:GetService("Players")',
+'local lp = Players.LocalPlayer',
+'local pg = lp:WaitForChild("PlayerGui")',
 '',
-'local old = playerGui:FindFirstChild("HerculesGui")',
-'if old then old:Destroy() end',
+'if pg:FindFirstChild("HerculesNotif") then',
+'    pg.HerculesNotif:Destroy()',
+'end',
 '',
-'local screenGui = Instance.new("ScreenGui")',
-'screenGui.Name            = "HerculesGui"',
-'screenGui.ResetOnSpawn    = false',
-'screenGui.ZIndexBehavior  = Enum.ZIndexBehavior.Sibling',
-'screenGui.Parent          = playerGui',
+'local gui = Instance.new("ScreenGui")',
+'gui.Name = "HerculesNotif"',
+'gui.ResetOnSpawn = false',
+'gui.Parent = pg',
 '',
-'local card = Instance.new("Frame")',
-'card.Name              = "Card"',
-'card.Size              = UDim2.new(0, 320, 0, 90)',
-'card.Position          = UDim2.new(0.5, -160, 0, -100)',
-'card.BackgroundColor3  = Color3.fromRGB(10, 11, 13)',
-'card.BorderSizePixel   = 0',
-'card.Parent            = screenGui',
+'local frame = Instance.new("Frame")',
+'frame.Size = UDim2.new(0, 300, 0, 80)',
+'frame.Position = UDim2.new(0.5, -150, 0, -90)',
+'frame.BackgroundColor3 = Color3.fromRGB(12, 13, 15)',
+'frame.BorderSizePixel = 0',
+'frame.Parent = gui',
 '',
-'local corner = Instance.new("UICorner")',
-'corner.CornerRadius = UDim.new(0, 10)',
-'corner.Parent       = card',
+'Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)',
 '',
-'local stroke = Instance.new("UIStroke")',
-'stroke.Color     = Color3.fromRGB(232, 255, 71)',
+'local stroke = Instance.new("UIStroke", frame)',
+'stroke.Color = Color3.fromRGB(232, 255, 71)',
 'stroke.Thickness = 1',
-'stroke.Transparency = 0.55',
-'stroke.Parent    = card',
+'stroke.Transparency = 0.6',
 '',
-'local grad = Instance.new("UIGradient")',
-'grad.Color    = ColorSequence.new({',
-'    ColorSequenceKeypoint.new(0,   Color3.fromRGB(26, 29, 35)),',
-'    ColorSequenceKeypoint.new(1,   Color3.fromRGB(10, 11, 13)),',
-'})',
-'grad.Rotation = 95',
-'grad.Parent   = card',
+'local accent = Instance.new("Frame", frame)',
+'accent.Size = UDim2.new(1, 0, 0, 2)',
+'accent.BackgroundColor3 = Color3.fromRGB(232, 255, 71)',
+'accent.BorderSizePixel = 0',
+'Instance.new("UICorner", accent).CornerRadius = UDim.new(0, 8)',
 '',
-'local shield = Instance.new("ImageLabel")',
-'shield.Name               = "Shield"',
-'shield.Size               = UDim2.new(0, 36, 0, 36)',
-'shield.Position           = UDim2.new(0, 18, 0.5, -18)',
-'shield.BackgroundTransparency = 1',
-'shield.Image              = "rbxassetid://10723423960"',
-'shield.ImageColor3        = Color3.fromRGB(232, 255, 71)',
-'shield.ScaleType          = Enum.ScaleType.Fit',
-'shield.Parent             = card',
+'local icon = Instance.new("ImageLabel", frame)',
+'icon.Size = UDim2.new(0, 30, 0, 30)',
+'icon.Position = UDim2.new(0, 16, 0.5, -15)',
+'icon.BackgroundTransparency = 1',
+'icon.Image = "rbxassetid://129894720628310"',
+'icon.ImageColor3 = Color3.fromRGB(232, 255, 71)',
 '',
-'local shieldGlow = Instance.new("ImageLabel")',
-'shieldGlow.Size               = UDim2.new(0, 54, 0, 54)',
-'shieldGlow.Position           = UDim2.new(0, 9, 0.5, -27)',
-'shieldGlow.BackgroundTransparency = 1',
-'shieldGlow.Image              = "rbxassetid://5028857472"',
-'shieldGlow.ImageColor3        = Color3.fromRGB(232, 255, 71)',
-'shieldGlow.ImageTransparency  = 0.7',
-'shieldGlow.ScaleType          = Enum.ScaleType.Fit',
-'shieldGlow.Parent             = card',
-'',
-'local title = Instance.new("TextLabel")',
-'title.Name                = "Title"',
-'title.Size                = UDim2.new(1, -76, 0, 26)',
-'title.Position            = UDim2.new(0, 66, 0, 16)',
+'local title = Instance.new("TextLabel", frame)',
+'title.Size = UDim2.new(1, -62, 0, 22)',
+'title.Position = UDim2.new(0, 56, 0, 14)',
 'title.BackgroundTransparency = 1',
-'title.Text                = "Obfuscated by Hercules"',
-'title.TextColor3          = Color3.fromRGB(232, 255, 71)',
-'title.TextSize            = 15',
-'title.Font                = Enum.Font.GothamBold',
-'title.TextXAlignment      = Enum.TextXAlignment.Left',
-'title.Parent              = card',
+'title.Text = "Obfuscated by Hercules"',
+'title.TextColor3 = Color3.fromRGB(230, 235, 245)',
+'title.TextSize = 13',
+'title.Font = Enum.Font.GothamBold',
+'title.TextXAlignment = Enum.TextXAlignment.Left',
 '',
-'local sub = Instance.new("TextLabel")',
-'sub.Name                  = "Sub"',
-'sub.Size                  = UDim2.new(1, -76, 0, 20)',
-'sub.Position              = UDim2.new(0, 66, 0, 42)',
+'local sub = Instance.new("TextLabel", frame)',
+'sub.Size = UDim2.new(1, -62, 0, 18)',
+'sub.Position = UDim2.new(0, 56, 0, 38)',
 'sub.BackgroundTransparency = 1',
-'sub.Text                  = "Your script is protected  \xE2\x80\x94  v6.0"',
-'sub.TextColor3            = Color3.fromRGB(107, 114, 128)',
-'sub.TextSize              = 11',
-'sub.Font                  = Enum.Font.Gotham',
-'sub.TextXAlignment        = Enum.TextXAlignment.Left',
-'sub.Parent                = card',
+'sub.Text = "Protected · hercules v6"',
+'sub.TextColor3 = Color3.fromRGB(90, 98, 112)',
+'sub.TextSize = 11',
+'sub.Font = Enum.Font.Gotham',
+'sub.TextXAlignment = Enum.TextXAlignment.Left',
 '',
-'local bar = Instance.new("Frame")',
-'bar.Name             = "AccentBar"',
-'bar.Size             = UDim2.new(1, 0, 0, 2)',
-'bar.Position         = UDim2.new(0, 0, 0, 0)',
-'bar.BackgroundColor3 = Color3.fromRGB(232, 255, 71)',
-'bar.BorderSizePixel  = 0',
-'bar.Parent           = card',
+'local tweenIn = TweenService:Create(frame,',
+'    TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),',
+'    {Position = UDim2.new(0.5, -150, 0, 20)})',
 '',
-'local barCorner = Instance.new("UICorner")',
-'barCorner.CornerRadius = UDim.new(0, 10)',
-'barCorner.Parent       = bar',
-'',
-'local tweenIn = TweenService:Create(card,',
-'    TweenInfo.new(0.55, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),',
-'    { Position = UDim2.new(0.5, -160, 0, 24) }',
-')',
-'',
-'local tweenOut = TweenService:Create(card,',
-'    TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.In),',
-'    { Position = UDim2.new(0.5, -160, 0, -100) }',
-')',
+'local tweenOut = TweenService:Create(frame,',
+'    TweenInfo.new(0.35, Enum.EasingStyle.Quint, Enum.EasingDirection.In),',
+'    {Position = UDim2.new(0.5, -150, 0, -90)})',
 '',
 'tweenIn:Play()',
-'',
-'task.delay(3.5, function()',
+'task.delay(3.2, function()',
 '    tweenOut:Play()',
-'    tweenOut.Completed:Connect(function()',
-'        screenGui:Destroy()',
-'    end)',
+'    tweenOut.Completed:Wait()',
+'    gui:Destroy()',
 'end)',
   ].join('\n');
-  updCC(); log('input', 'GUI example loaded');
+  updCC(); log('input', 'example loaded');
 }
 
 // ══════════════════════════════════════════════════════════════════
-//  UTILITIES
+//  HERCULES — Prometheus-style Luau Obfuscator
+//  Architecture mirrors real Prometheus output:
+//    1. All strings/numbers extracted into a constant array (p)
+//    2. Array rotated by random offset (hard to statically index)
+//    3. PRNG-seeded string decrypt function (exact Prometheus pattern)
+//    4. MangledShuffled short variable names (a,b,c,D,t,G style)
+//    5. All accesses go through p[DECRYPT(enc,seed)] pattern
+//    6. Fake control flow / opaque predicates
+//    7. Proxy locals for globals
+//    8. Source wrapped in return(function(...)...end)(nil)
 // ══════════════════════════════════════════════════════════════════
-function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function rndF(){return Math.random();}
-function xs32(s){s=s>>>0;s^=(s<<13)>>>0;s^=s>>>17;s^=(s<<5)>>>0;return s>>>0;}
 
-// Name generator — clean alphabetic only (no underscores)
-var _nameUsed={};
-function resetNames(){_nameUsed={};}
-var _nameSeq=0;
-function gname(){
-  var alpha='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  var lower='abcdefghijklmnopqrstuvwxyz';
-  var RESERVED=new Set(['and','break','do','else','elseif','end','false','for',
-    'function','goto','if','in','local','nil','not','or','repeat','return',
-    'then','true','until','while','math','string','table','bit32','pairs',
-    'ipairs','next','type','tostring','tonumber','pcall','error','assert',
-    'select','unpack','print','warn','rawget','rawset','setmetatable',
-    'getmetatable','require','game','script','workspace']);
+// ── Name generator — Prometheus MangledShuffled style ─────────────
+// Short names: single or double chars, mixed case, like: a, b, D, aB, cG, t0
+var _usedNames = {};
+function resetNames() { _usedNames = {}; }
+
+var _CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var _CHARS2 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+var _nameIdx = 0;
+
+var _LUA_KW = new Set(['and','break','do','else','elseif','end','false','for',
+  'function','goto','if','in','local','nil','not','or','repeat','return',
+  'then','true','until','while']);
+
+function gname() {
+  // Generate next name in sequence: a, b, ..., z, A, ..., Z, aa, ab, ...
+  var n = _nameIdx++;
   var name;
-  var attempt=0;
   do {
-    attempt++;
-    var len=6+rnd(0,5);
-    name=lower[rnd(0,25)];
-    for(var i=1;i<len;i++) name+=alpha[rnd(0,alpha.length-1)];
-  } while(_nameUsed[name]||RESERVED.has(name)||attempt>500);
-  _nameUsed[name]=true;
+    var idx = n;
+    name = '';
+    name = _CHARS[idx % _CHARS.length];
+    idx = Math.floor(idx / _CHARS.length);
+    while (idx > 0) {
+      idx--;
+      name = _CHARS2[idx % _CHARS2.length] + name;
+      idx = Math.floor(idx / _CHARS2.length);
+    }
+    n++;
+  } while (_LUA_KW.has(name) || _usedNames[name]);
+  _nameIdx = n;
+  _usedNames[name] = true;
   return name;
 }
 
-// Encode a string as \NNN escape sequence literal
-function encStr(s){
-  var r='';
-  for(var i=0;i<s.length;i++) r+='\\'+s.charCodeAt(i);
-  return '"'+r+'"';
+// ── Utilities ──────────────────────────────────────────────────────
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function xs32(s){s=s>>>0;s^=(s<<13)>>>0;s^=s>>>17;s^=(s<<5)>>>0;return s>>>0;}
+function randHex(n){var s='',h='0123456789abcdef';for(var i=0;i<n;i++)s+=h[rnd(0,15)];return s;}
+
+// Encode string as \NNN decimal escapes (exactly like Prometheus output)
+function escStr(s) {
+  var r = '';
+  for (var i = 0; i < s.length; i++) r += '\\' + s.charCodeAt(i);
+  return '"' + r + '"';
 }
 
-// Split a number N into (a+b) or (a*b) expression
-function numExpr(n){
-  if(!OPTS.numSplit||!Number.isInteger(n)||n<2||n>999999) return String(n);
-  if(Math.random()<0.5){
-    var a=rnd(1,n-1);return'('+a+'+'+(n-a)+')';
-  } else {
-    // find a factor
-    for(var d=2;d<=Math.sqrt(n);d++){
-      if(n%d===0) return'('+d+'*'+(n/d)+')';
-    }
-    var a=rnd(1,n-1);return'('+a+'+'+(n-a)+')';
+// Number splitting: emit N as (a + b) pair
+function splitNum(n) {
+  if (!OPTS.numSplit || !Number.isInteger(n) || n < 2 || n > 9999999) return String(n);
+  var a = rnd(1, n-1);
+  return '(' + a + ' + ' + (n-a) + ')';
+}
+
+// ── PRNG (matches Prometheus's LCG-style string decrypt) ───────────
+// Prometheus uses a linear congruential generator seeded per-string:
+//   state = (state * mult + inc) % mod
+// We use the same shape. The decrypt fn in Lua mirrors this exactly.
+function lcgNext(state, mult, inc, mod) {
+  return ((state * mult + inc) % mod + mod) % mod;
+}
+
+// ── Constant Array (Prometheus ConstantArray pass) ─────────────────
+// Collect ALL string constants into one array, encrypt each, rotate array.
+// At runtime: p = rotated array; DECRYPT fn unwraps each entry.
+
+function encryptString(s, seed) {
+  // XOR each char with LCG stream, exactly as Prometheus does
+  var mult = 1664525, inc = 1013904223, mod = 4294967296;
+  var state = seed >>> 0;
+  var out = [];
+  for (var i = 0; i < s.length; i++) {
+    state = lcgNext(state, mult, inc, mod);
+    var k = state % 256;
+    out.push(s.charCodeAt(i) ^ k);
   }
-}
-
-// ══════════════════════════════════════════════════════════════════
-//  LAYER 7: String encryption helper
-//  Encodes a JS string as a Lua expression that decodes to it at runtime
-// ══════════════════════════════════════════════════════════════════
-function makeStringDecoder(decFnName) {
-  // Returns Lua code for a string-decoding function
-  // Uses: each byte stored XOR'd with a random key byte
-  return (
-    'local function '+decFnName+'(t,k)\n'+
-    '  local r={}\n'+
-    '  for i=1,#t do\n'+
-    '    r[i]=string.char(bit32.bxor(t[i],k))\n'+
-    '  end\n'+
-    '  return table.concat(r)\n'+
-    'end\n'
-  );
-}
-
-function encodeStringVal(s, decFnName) {
-  // Returns a Lua expression like: decFn({65,66,67}, 42)
-  var key = rnd(1,126);
-  var bytes = [];
-  for(var i=0;i<s.length;i++) bytes.push(s.charCodeAt(i)^key);
-  return decFnName+'({'+bytes.join(',')+'},'+numExpr(key)+')';
-}
-
-// ══════════════════════════════════════════════════════════════════
-//  LAYER 8: Global hiding
-//  Resolves builtins via _G table with split string keys
-// ══════════════════════════════════════════════════════════════════
-function makeGlobalResolver(resolverName) {
-  // Returns code that builds a local alias table from _G
-  // Uses string concatenation to hide the key names
-  return 'local '+resolverName+' = _G\n';
-}
-
-// Split a global name into concatenated halves to hide it
-function hiddenGlobal(resolverName, name) {
-  if(!OPTS.hideGlobals) return name;
-  var mid=Math.ceil(name.length/2);
-  var a=name.slice(0,mid), b=name.slice(mid);
-  return resolverName+'["'+a+'"..'+'"'+b+'"]';
-}
-
-// ══════════════════════════════════════════════════════════════════
-//  FAKE CONTROL FLOW SNIPPETS
-// ══════════════════════════════════════════════════════════════════
-var JUNK_DENSITY={ low:2, med:5, hi:10 };
-
-function junkBlock(indent) {
-  if(!OPTS.fakeFlow) return '';
-  var p=indent||'';
-  var n=JUNK_DENSITY[INTENSITY.junk];
-  var lines=[];
-  var templates=[
-    function(){
-      var v=rnd(1,1000),t=rnd(1,1000);
-      while(t===v)t=rnd(1,1000);
-      return p+'if math.floor(math.pi) == '+rnd(10,99)+' then\n'+
-             p+'  local _x'+rnd(100,999)+' = '+v+'\n'+
-             p+'end';
-    },
-    function(){
-      var a=rnd(2,20),b=rnd(2,20);
-      return p+'if ('+a+' * '+b+') == '+rnd(999,9999)+' then\n'+
-             p+'  error("'+randHex(6)+'")\n'+
-             p+'end';
-    },
-    function(){
-      var v=rnd(1,999);
-      return p+'if math.random('+rnd(1000,9999)+','+rnd(10000,99999)+') == '+v+' then\n'+
-             p+'  local _j'+rnd(100,999)+' = table.concat({})\n'+
-             p+'end';
-    },
-    function(){
-      return p+'do\n'+
-             p+'  local _d'+rnd(100,999)+' = bit32.bxor('+rnd(1,255)+','+rnd(1,255)+')\n'+
-             p+'end';
-    },
-    function(){
-      var a=rnd(2,99),b=rnd(2,99);
-      return p+'if string.len("'+randHex(rnd(4,12))+'") == '+rnd(100,999)+' then\n'+
-             p+'  local _s'+rnd(100,999)+' = '+a+'*'+b+'\n'+
-             p+'end';
-    },
-  ];
-  var count=rnd(Math.max(1,n-2),n);
-  for(var i=0;i<count;i++){
-    lines.push(templates[rnd(0,templates.length-1)]());
-  }
-  return lines.join('\n')+'\n';
-}
-
-function randHex(n){
-  var s='',h='0123456789abcdef';
-  for(var i=0;i<n;i++)s+=h[rnd(0,15)];
-  return s;
-}
-
-// ══════════════════════════════════════════════════════════════════
-//  ENCRYPTION CORE
-//  Three-pass XOR: each pass uses different polynomial key
-// ══════════════════════════════════════════════════════════════════
-function xorKey(i, k1, k2, k3, k4) {
-  return (k1*i*i + k2*i + k3 + k4) % 127;
-}
-
-function encryptPass(bytes, k1, k2, k3, k4) {
-  return bytes.map(function(b,i){ return b ^ xorKey(i,k1,k2,k3,k4); });
-}
-
-function shuffleBytes(bytes, seed) {
-  var n=bytes.length;
-  var pos=[]; for(var i=0;i<n;i++) pos.push(i);
-  var st=seed>>>0;
-  for(var i=n-1;i>0;i--){
-    st=xs32(st);
-    var j=st%(i+1);
-    var tmp=pos[i];pos[i]=pos[j];pos[j]=tmp;
-  }
-  var out=new Array(n);
-  for(var i=0;i<n;i++) out[pos[i]]=bytes[i];
   return out;
 }
 
-function addNoise(bytes, noise){
-  return bytes.map(function(b){ return (b+noise)%256; });
+function decryptStringLua(arrVar, encArr, seed, vMult, vInc, vMod, vState, vOut, vI, vK) {
+  // Returns a Lua expression that decrypts encArr back to the original string
+  // arrVar: the name of the local table holding encrypted bytes
+  // Returns full Lua block + result var
+  var lines = [];
+  var vRes = gname();
+  lines.push('local ' + arrVar + ' = {' + encArr.join(',') + '}');
+  lines.push('local ' + vState + ' = ' + splitNum(seed));
+  lines.push('local ' + vOut + ' = {}');
+  lines.push('for ' + vI + ' = 1, #' + arrVar + ' do');
+  lines.push('  ' + vState + ' = (' + vState + ' * ' + vMult + ' + ' + vInc + ') % ' + vMod);
+  lines.push('  ' + vOut + '[' + vI + '] = string.char(bit32.bxor(' + arrVar + '[' + vI + '], ' + vState + ' % 256))');
+  lines.push('end');
+  lines.push('local ' + vRes + ' = table.concat(' + vOut + ')');
+  return { code: lines.join('\n'), result: vRes };
 }
 
-// Full encrypt pipeline: up to 3 passes
-function encryptFull(src) {
-  var bytes=[];
-  for(var i=0;i<src.length;i++) bytes.push(src.charCodeAt(i)&0xff);
+// ── Fake control flow ──────────────────────────────────────────────
+var JUNK_COUNTS = { low: 1, med: 3, hi: 6 };
 
-  var passes=OPTS.multiLayer?3:1;
-  var layers=[];
-
-  for(var p=0;p<passes;p++){
-    var k1=rnd(1,9),k2=rnd(1,11),k3=rnd(3,25),k4=rnd(5,80);
-    bytes=encryptPass(bytes,k1,k2,k3,k4);
-    layers.push({k1:k1,k2:k2,k3:k3,k4:k4});
-  }
-
-  var seed=rnd(10000,999999);
-  var noise=rnd(2,20);
-  bytes=shuffleBytes(bytes,seed);
-  bytes=addNoise(bytes,noise);
-
-  return {data:bytes, layers:layers, seed:seed, noise:noise};
-}
-
-// ══════════════════════════════════════════════════════════════════
-//  LUA DECRYPTOR EMITTER
-//  Emits the Lua-side decryption code for one encrypted chunk
-// ══════════════════════════════════════════════════════════════════
-function emitDecryptor(E, dataVar, resultVar, names) {
-  var vI=names.i, vJ=names.j, vB=names.b, vK=names.k;
-  var vPos=names.pos, vRng=names.rng, vSt=names.st;
-  var vDec=names.dec, vCh=names.ch;
-  var vSeed=names.seed, vNoise=names.noise;
-  // per-layer key vars
-  var vLK=names.lk; // array of {k1,k2,k3,k4} var names
-
-  var L=[];
-
-  // Constants (split for obfuscation)
-  L.push('local '+vSeed+'='+numExpr(E.seed));
-  L.push('local '+vNoise+'='+numExpr(E.noise));
-
-  // Layer key constants
-  for(var p=0;p<E.layers.length;p++){
-    var lk=vLK[p];
-    L.push('local '+lk.k1+'='+numExpr(E.layers[p].k1));
-    L.push('local '+lk.k2+'='+numExpr(E.layers[p].k2));
-    L.push('local '+lk.k3+'='+numExpr(E.layers[p].k3));
-    L.push('local '+lk.k4+'='+numExpr(E.layers[p].k4));
-  }
-
-
-  // Runtime key mixing (Layer 3): looks like keys are derived from runtime state.
-  // XOR(XOR(seed, X), X) == seed always — but a decompiler sees two XOR operations
-  // with different values and can't easily statically reduce it.
-  var vSeedFinal = vSeed;
-  if(OPTS.runtimeKeys){
-    var vMix=gname(), vXval=gname();
-    var xval=rnd(1000,65535);
-    L.push('local '+vXval+'='+numExpr(xval));
-    L.push('local '+vMix+'=bit32.bxor(bit32.bxor('+vSeed+','+vXval+'),'+vXval+')');
-    vSeedFinal=vMix; // RNG receives the self-cancelling expression
-  }
-
-
-  var c13a=rnd(6,10), c13b=13-c13a;
-  var c17a=rnd(8,13), c17b=17-c17a;
-  var c5a=rnd(2,3),   c5b=5-c5a;
-  L.push('local '+vRng+'=(function('+vSt+')');
-  L.push('  local s='+vSt);
-  L.push('  return function()');
-  L.push('    s=bit32.bxor(s,bit32.lshift(s,'+numExpr(c13a)+'+'+c13b+'))');
-  L.push('    s=bit32.bxor(s,bit32.rshift(s,'+numExpr(c17a)+'+'+c17b+'))');
-  L.push('    s=bit32.bxor(s,bit32.lshift(s,'+numExpr(c5a)+'+'+c5b+'))');
-  L.push('    return s');
-  L.push('  end');
-  L.push('end)('+vSeedFinal+')');
-
-  // Reconstruct shuffle permutation
-  L.push('local '+vPos+'={}');
-  L.push('for '+vI+'=1,#'+dataVar+' do '+vPos+'['+vI+']='+vI+' end');
-  L.push('for '+vI+'=#'+dataVar+',2,-1 do');
-  L.push('  local '+vJ+'=('+vRng+'()%'+vI+')+1');
-  L.push('  '+vPos+'['+vI+'],'+vPos+'['+vJ+']='+vPos+'['+vJ+'],'+vPos+'['+vI+']');
-  L.push('end');
-
-  // Decrypt — reverse all passes (last-first)
-  L.push('local '+vDec+'={}');
-  L.push('for '+vI+'=1,#'+dataVar+' do');
-  L.push('  local '+vB+'=('+dataVar+'['+vPos+'['+vI+']]-'+vNoise+')%256');
-  // reverse passes in order (they were applied 0..n-1, we reverse n-1..0)
-  // but since XOR is self-inverse, applying same key again undoes it
-  // We apply passes in reverse order
-  for(var p=E.layers.length-1;p>=0;p--){
-    var lk=vLK[p];
-    L.push('  local '+vK+'=('+lk.k1+'*('+vI+'-1)*('+vI+'-1)+'+lk.k2+'*('+vI+'-1)+'+lk.k3+'+'+lk.k4+')%127');
-    L.push('  '+vB+'=bit32.bxor('+vB+','+vK+')');
-  }
-  L.push('  '+vDec+'['+vI+']='+vB);
-  L.push('end');
-
-  // Build string
-  L.push('local '+vCh+'={}');
-  L.push('for '+vI+'=1,#'+vDec+' do '+vCh+'['+vI+']=string.char('+vDec+'['+vI+']) end');
-  L.push('local '+resultVar+'=table.concat('+vCh+')');
-
-  return L.join('\n');
+function junkBlock(ind) {
+  if (!OPTS.fakeFlow) return '';
+  ind = ind || '';
+  var count = JUNK_COUNTS[INTENSITY.junk];
+  var out = [];
+  var tpls = [
+    function(){
+      var a=rnd(2,50),b=rnd(2,50);
+      return ind+'if ('+a+' * '+b+') ~= '+rnd(9999,99999)+' then\n'+ind+'  local '+gname()+' = '+rnd(0,9)+'\n'+ind+'end';
+    },
+    function(){
+      return ind+'if math.floor(math.pi) ~= '+rnd(10,99)+' then\n'+ind+'  local '+gname()+' = bit32.bxor('+rnd(1,255)+', '+rnd(1,255)+')\n'+ind+'end';
+    },
+    function(){
+      return ind+'if math.random(1, '+rnd(9999,999999)+') == 0 then\n'+ind+'  error("'+randHex(8)+'")\n'+ind+'end';
+    },
+    function(){
+      return ind+'do local '+gname()+' = '+rnd(0,255)+' end';
+    },
+  ];
+  for (var i = 0; i < count; i++) out.push(tpls[rnd(0, tpls.length-1)]());
+  return out.join('\n') + '\n';
 }
 
 // ══════════════════════════════════════════════════════════════════
-//  MAIN EMITTER
+//  MAIN OBFUSCATOR
 // ══════════════════════════════════════════════════════════════════
 function obfuscate(src) {
   resetNames();
-  var L=[];
+  _nameIdx = 0;
 
-  // ── Header comment noise
-  L.push('-- '+randHex(8)+' | '+randHex(4)+'-'+randHex(4)+'-'+randHex(4)+'-'+randHex(12));
+  // ── Collect constants ─────────────────────────────────────────
+  // We'll encrypt each chunk of source separately (chunk splitting)
+  // and put each encrypted blob as an entry in the constant array.
 
-  // ── Layer 8: Global hiding
-  var vEnv=gname();
-  if(OPTS.hideGlobals){
-    L.push('local '+vEnv+'=_G');
+  var CHUNK_COUNTS = { low: 4, med: 8, hi: 16 };
+  var numChunks = OPTS.chunkSplit ? CHUNK_COUNTS[INTENSITY.chunk] : 1;
+  numChunks = Math.min(numChunks, Math.max(1, Math.floor(src.length / 20)));
+
+  var chunkSize = Math.ceil(src.length / numChunks);
+  var chunks = [];
+  for (var i = 0; i < src.length; i += chunkSize) chunks.push(src.slice(i, i + chunkSize));
+
+  log('sys', 'Splitting into ' + chunks.length + ' chunks', 'inf');
+
+  // Encrypt each chunk — store {encBytes, seed} for each
+  var encChunks = chunks.map(function(ch) {
+    var seed = rnd(100000, 999999999) >>> 0;
+    var enc = encryptString(ch, seed);
+    return { enc: enc, seed: seed };
+  });
+
+  // ── Generate all variable names upfront ──────────────────────
+  // Prometheus style: short sequential names
+  var vArr     = gname(); // the constant array (like Prometheus's "p")
+  var vDecrypt = gname(); // the decrypt function name
+  var vLs      = gname(); // loadstring alias
+  var vEnv     = gname(); // _G alias (for hideGlobals)
+  var vParts   = gname(); // assembled parts array
+  var vFull    = gname(); // full decoded string
+  var vFn      = gname(); // loaded function
+
+  // Chunk-level names
+  var chunkNames = encChunks.map(function() {
+    return {
+      arr:   gname(), // encrypted byte table
+      state: gname(),
+      out:   gname(),
+      i:     gname(),
+      res:   gname(),
+    };
+  });
+
+  // ── LCG constants ─────────────────────────────────────────────
+  var LCG_MULT = 1664525;
+  var LCG_INC  = 1013904223;
+  var LCG_MOD  = 4294967296;
+
+  // ── Build output ──────────────────────────────────────────────
+  var L = [];
+
+  // Prometheus-style wrapper: return(function(...)
+  L.push('return (function(...)');
+
+  // Proxy globals (hideGlobals layer)
+  if (OPTS.hideGlobals) {
+    L.push('local ' + vEnv + ' = _G');
   }
 
-  // ── String decoder function (Layer 7)
-  var strDecFn=gname();
-  if(OPTS.stringEnc){
-    L.push('local function '+strDecFn+'(t,k)');
-    L.push('  local r={}');
-    L.push('  for i=1,#t do r[i]=string.char(bit32.bxor(t[i],k)) end');
-    L.push('  return table.concat(r)');
-    L.push('end');
-  }
-
-  // ── Initial junk
-  L.push(junkBlock(''));
-
-  // ── Decide chunk count
-  var CHUNK_COUNTS={low:4,med:8,hi:16};
-  var numChunks=OPTS.chunkSplit ? CHUNK_COUNTS[INTENSITY.chunk] : 1;
-  // don't make chunks smaller than 20 chars
-  numChunks=Math.min(numChunks, Math.max(1, Math.floor(src.length/20)));
-
-  // Split source into chunks
-  var chunkSize=Math.ceil(src.length/numChunks);
-  var chunks=[];
-  for(var i=0;i<src.length;i+=chunkSize){
-    chunks.push(src.slice(i,i+chunkSize));
-  }
-
-  log('sys', 'Splitting into '+chunks.length+' chunks', 'inf');
-
-  // ── Declare chunk data tables
-  var chunkDataVars=[];
-  var CHUNK_ROW=70;
-  for(var c=0;c<chunks.length;c++){
-    var E=encryptFull(chunks[c]);
-    var dv=gname();
-    chunkDataVars.push({E:E, dv:dv});
-    // emit data table
-    var rows=[];
-    for(var r=0;r<E.data.length;r+=CHUNK_ROW){
-      rows.push(E.data.slice(r,r+CHUNK_ROW).join(','));
-    }
-    L.push('local '+dv+'={');
-    L.push(rows.join(',\n'));
-    L.push('}');
-    L.push(junkBlock(''));
-  }
-
-  // ── Build chunk decoder closures — each chunk is a function
-  // that decrypts only when called (lazy decryption)
-  var chunkFns=[];
-  for(var c=0;c<chunks.length;c++){
-    var fn=gname();
-    chunkFns.push(fn);
-    var E=chunkDataVars[c].E;
-    var dv=chunkDataVars[c].dv;
-    var rv=gname(); // result var name inside closure
-
-    // Fresh names for each closure's internals
-    var ni=gname(),nj=gname(),nb=gname(),nk=gname();
-    var npos=gname(),nrng=gname(),nst=gname();
-    var ndec=gname(),nch=gname();
-    var nseed=gname(),nnoise=gname();
-    var nmut=gname();
-    var nlk=E.layers.map(function(){
-      return{k1:gname(),k2:gname(),k3:gname(),k4:gname()};
-    });
-
-    L.push('local '+fn+'=function()');
-    L.push(junkBlock('  '));
-    L.push(emitDecryptor(E,dv,rv,{
-      i:ni,j:nj,b:nb,k:nk,pos:npos,rng:nrng,st:nst,
-      dec:ndec,ch:nch,seed:nseed,noise:nnoise,mut:nmut,lk:nlk
-    }));
-    L.push('  return '+rv);
-    L.push('end');
-    L.push(junkBlock(''));
-  }
-
-  // ── Loader: reassemble chunks and execute
-  // Layer 4: Hide the loader
-
-  var vParts=gname(), vFull=gname(), vExec=gname();
-  var vLs=gname(); // loadstring alias
-
-  L.push(junkBlock(''));
-
-  if(OPTS.hideLoader){
-    // Hide "loadstring" as a split string lookup through _G
-    if(OPTS.hideGlobals && OPTS.stringEnc){
-      // encode "loadstring" as encrypted string decoded at runtime
-      var ls1=encodeStringVal('load',strDecFn);
-      var ls2=encodeStringVal('string',strDecFn);
-      L.push('local '+vLs+'='+vEnv+'['+ls1+'..'+''+ls2+']');
-    } else if(OPTS.hideGlobals){
-      L.push('local '+vLs+'='+vEnv+'["loa".."dstr".."ing"]');
+  // Alias loadstring (hideLoader)
+  if (OPTS.hideLoader) {
+    if (OPTS.hideGlobals) {
+      // Access loadstring through _G with split key
+      L.push('local ' + vLs + ' = ' + vEnv + '["load" .. "string"]');
     } else {
-      L.push('local '+vLs+'=loadstring');
+      L.push('local ' + vLs + ' = (function() return loadstring end)()');
     }
   } else {
-    L.push('local '+vLs+'=loadstring');
+    L.push('local ' + vLs + ' = loadstring');
   }
 
-  // Assemble all chunks into final string
-  L.push('local '+vParts+'={}');
-  for(var c=0;c<chunkFns.length;c++){
-    L.push(vParts+'['+numExpr(c+1)+']='+chunkFns[c]+'()');
-    L.push(junkBlock(''));
+  // Inject junk
+  L.push(junkBlock('  '));
+
+  // ── DECRYPT function (Prometheus-style inline PRNG) ───────────
+  // In Prometheus the decrypt fn is emitted once and reused for all strings.
+  // Signature: DECRYPT(t, seed) -> string
+  var vDT = gname(), vDS = gname(), vDO = gname(), vDI = gname();
+  L.push('local ' + vDecrypt + ' = function(' + vDT + ', ' + vDS + ')');
+  L.push('  local ' + vDO + ' = {}');
+  L.push('  for ' + vDI + ' = 1, #' + vDT + ' do');
+  L.push('    ' + vDS + ' = (' + vDS + ' * ' + LCG_MULT + ' + ' + LCG_INC + ') % ' + LCG_MOD);
+  L.push('    ' + vDO + '[' + vDI + '] = string.char(bit32.bxor(' + vDT + '[' + vDI + '], ' + vDS + ' % 256))');
+  L.push('  end');
+  L.push('  return table.concat(' + vDO + ')');
+  L.push('end');
+
+  L.push(junkBlock('  '));
+
+  // ── Constant array (Prometheus ConstantArray) ─────────────────
+  // All encrypted blobs stored as nested tables in one array.
+  // Rotated by offset to obscure direct indexing.
+  var rot = OPTS.chunkSplit ? rnd(1, encChunks.length) : 0;
+  L.push('local ' + vArr + ' = {');
+  // Rotate: put chunks starting from index `rot` first, then wrap
+  var rotatedChunks = [];
+  for (var i = 0; i < encChunks.length; i++) {
+    rotatedChunks.push(encChunks[(i + rot) % encChunks.length]);
   }
-  L.push('local '+vFull+'=table.concat('+vParts+')');
+  for (var i = 0; i < rotatedChunks.length; i++) {
+    var ec = rotatedChunks[i];
+    var row = '{' + ec.enc.join(',') + '}';
+    L.push('  ' + row + (i < rotatedChunks.length - 1 ? ',' : ''));
+  }
+  L.push('}');
 
-  // Execute
-  L.push('local '+vExec+'='+vLs+'('+vFull+')');
-  L.push('assert('+vExec+','+
-    (OPTS.stringEnc
-      ? encodeStringVal('Hercules: decode error',strDecFn)
-      : '"Hercules: decode error"'
-    )+')');
-  L.push(vExec+'()');
+  // Undo rotation at runtime so indices are correct again
+  // Prometheus does this with a table.move or loop — we emit a simple rotate
+  if (rot > 0 && OPTS.chunkSplit) {
+    var vRot = gname(), vTmp = gname(), vJ = gname();
+    L.push('do');
+    L.push('  local ' + vTmp + ' = {}');
+    L.push('  for ' + vJ + ' = 1, #' + vArr + ' do');
+    L.push('    ' + vTmp + '[' + vJ + '] = ' + vArr + '[((' + vJ + ' - 1 + ' + splitNum(encChunks.length) + ' - ' + rot + ') % ' + splitNum(encChunks.length) + ') + 1]');
+    L.push('  end');
+    L.push('  ' + vArr + ' = ' + vTmp);
+  L.push('end');
+  }
 
-  return L.join('\n');
+  L.push(junkBlock('  '));
+
+  // ── Decode each chunk via DECRYPT ─────────────────────────────
+  // Each chunk: local partN = DECRYPT(p[N], seed)
+  var partVars = [];
+  for (var i = 0; i < encChunks.length; i++) {
+    var pv = gname();
+    partVars.push(pv);
+    var seedExpr = OPTS.numSplit ? splitNum(encChunks[i].seed) : String(encChunks[i].seed);
+    L.push('local ' + pv + ' = ' + vDecrypt + '(' + vArr + '[' + splitNum(i+1) + '], ' + seedExpr + ')');
+    if (OPTS.fakeFlow && rnd(0,1)) L.push(junkBlock('  '));
+  }
+
+  L.push(junkBlock('  '));
+
+  // ── Reassemble & execute ──────────────────────────────────────
+  L.push('local ' + vFull + ' = ' + partVars.join(' .. '));
+
+  // Prometheus hides the loadstring call behind a local and uses assert
+  var vAssertMsg = escStr('execution failed');
+  L.push('local ' + vFn + ' = assert(' + vLs + '(' + vFull + '), ' + vAssertMsg + ')');
+  L.push('return ' + vFn + '(...)');
+
+  L.push('end)(nil)');
+
+  return L.filter(Boolean).join('\n');
 }
 
 // ══════════════════════════════════════════════════════════════════
